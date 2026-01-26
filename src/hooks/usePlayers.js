@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { db, isFirebaseConfigured } from '../lib/firebase';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, where, getDocs } from 'firebase/firestore';
 
 const BASE_KEY = 'ricochet_players_db';
 
@@ -18,8 +20,22 @@ export const usePlayers = () => {
             return;
         }
 
+        let unsubscribe;
+
         const fetchPlayers = async () => {
-            if (isSupabaseConfigured) {
+            if (isFirebaseConfigured) {
+                // FIREBASE
+                const q = query(collection(db, "players"), where("tournament_id", "==", activeTournamentId));
+                unsubscribe = onSnapshot(q, (snapshot) => {
+                    const loaded = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setPlayers(loaded);
+                }, (error) => {
+                    console.error("Firebase Players Error:", error);
+                });
+            } else if (isSupabaseConfigured) {
                 // SUPABASE
                 const { data, error } = await supabase
                     .from('players')
@@ -43,9 +59,9 @@ export const usePlayers = () => {
 
         fetchPlayers();
 
-        // Subscription (Supabase Only)
+        // Subscription (Supabase Only, Firebase handled above)
         let channel;
-        if (isSupabaseConfigured) {
+        if (!isFirebaseConfigured && isSupabaseConfigured) {
             channel = supabase
                 .channel(`players:${activeTournamentId}`)
                 .on('postgres_changes', {
@@ -57,7 +73,7 @@ export const usePlayers = () => {
                     fetchPlayers();
                 })
                 .subscribe();
-        } else {
+        } else if (!isFirebaseConfigured && !isSupabaseConfigured) {
             // LS Event Listener
             const handleStorage = () => fetchPlayers();
             window.addEventListener('storage', handleStorage);
@@ -65,6 +81,7 @@ export const usePlayers = () => {
         }
 
         return () => {
+            if (unsubscribe) unsubscribe();
             if (channel) supabase.removeChannel(channel);
         };
     }, [activeTournamentId, lsKey]);
@@ -81,7 +98,16 @@ export const usePlayers = () => {
             elo: playerData.elo ? parseInt(playerData.elo, 10) : 0
         };
 
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            try {
+                const docRef = await addDoc(collection(db, "players"), newPlayer);
+                // We don't manually update state because onSnapshot does it
+                return { ...newPlayer, id: docRef.id };
+            } catch (e) {
+                console.error("Error adding player (Firebase):", e);
+                return null;
+            }
+        } else if (isSupabaseConfigured) {
             const { data, error } = await supabase
                 .from('players')
                 .insert([newPlayer])
@@ -115,7 +141,14 @@ export const usePlayers = () => {
     const updatePlayer = async (id, updates) => {
         if (!isAuthenticated) return;
 
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            try {
+                const docRef = doc(db, "players", id);
+                await updateDoc(docRef, updates);
+            } catch (e) {
+                console.error("Error updating player (Firebase):", e);
+            }
+        } else if (isSupabaseConfigured) {
             const { error } = await supabase.from('players').update(updates).eq('id', id);
             if (error) console.error("Error updating player:", error);
             else setPlayers(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
@@ -133,7 +166,13 @@ export const usePlayers = () => {
     const deletePlayer = async (id) => {
         if (!isAuthenticated) return;
 
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            try {
+                await deleteDoc(doc(db, "players", id));
+            } catch (e) {
+                console.error("Error deleting player (Firebase):", e);
+            }
+        } else if (isSupabaseConfigured) {
             const { error } = await supabase.from('players').delete().eq('id', id);
             if (error) console.error("Error deleting player:", error);
             else setPlayers(prev => prev.filter(p => p.id !== id));
@@ -154,7 +193,27 @@ export const usePlayers = () => {
             elo: p.elo === '-' || !p.elo ? 0 : parseInt(p.elo, 10)
         }));
 
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            // Firestore doesn't support bulk insert simply like SQL.
+            // We do batch writes.
+            try {
+                // Note: Firestore batch limit is 500 ops.
+                const batchSize = 500;
+                let count = 0;
+                // Ideally split into chunks, but assuming small list for now
+                // Actually we can map them to promises for parallel addDoc if not using batch object strictly for ID gen reasons
+                // or use writeBatch()
+                // Let's us writeBatch for atomicity if possible, but we need IDs.
+                // Simple loop for now:
+                for (const p of newPlayersBase) {
+                    await addDoc(collection(db, "players"), p);
+                    count++;
+                }
+                return { success: true, count };
+            } catch (e) {
+                return { success: false, error: e };
+            }
+        } else if (isSupabaseConfigured) {
             const { data, error } = await supabase.from('players').upsert(newPlayersBase).select();
             if (error) return { success: false, error };
             return { success: true, count: data.length };

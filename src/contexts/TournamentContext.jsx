@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { db, isFirebaseConfigured } from '../lib/firebase';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp, getDocs } from 'firebase/firestore';
 
 const TournamentContext = createContext(null);
 const LOCAL_META_KEY = 'ricochet_tournaments_meta';
@@ -9,10 +11,28 @@ export const TournamentProvider = ({ children }) => {
     const [activeTournamentId, setActiveTournamentId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Initial Fetch (Dual Mode)
+    // Initial Fetch (Triple Mode: Firebase > Supabase > Local Storage)
     useEffect(() => {
-        const fetchTournaments = async () => {
-            if (isSupabaseConfigured) {
+        let unsubscribe;
+
+        const initData = async () => {
+            if (isFirebaseConfigured) {
+                // FIREBASE MODE (Realtime)
+                const q = query(collection(db, "tournaments"), orderBy("created_at", "desc"));
+                unsubscribe = onSnapshot(q, (snapshot) => {
+                    const loaded = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        // Convert Firestore timestamp to ISO string if needed, or keep as is
+                        date: doc.data().date || new Date().toISOString()
+                    }));
+                    setTournaments(loaded);
+                    setIsLoading(false);
+                }, (error) => {
+                    console.error("Firebase Error:", error);
+                    setIsLoading(false);
+                });
+            } else if (isSupabaseConfigured) {
                 // SUPABASE MODE
                 try {
                     const { data, error } = await supabase
@@ -67,20 +87,21 @@ export const TournamentProvider = ({ children }) => {
             }
         };
 
-        fetchTournaments();
+        initData();
 
-        // Realtime Subscription (Only Supabase)
+        // Realtime Subscription (Only Supabase Legacy, Firebase handles it in initData)
         let channel;
-        if (isSupabaseConfigured) {
+        if (!isFirebaseConfigured && isSupabaseConfigured) {
             channel = supabase
                 .channel('public:tournaments')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'tournaments' }, () => {
-                    fetchTournaments();
+                    initData(); // Re-fetch
                 })
                 .subscribe();
         }
 
         return () => {
+            if (unsubscribe) unsubscribe();
             if (channel) supabase.removeChannel(channel);
         };
     }, []);
@@ -88,11 +109,9 @@ export const TournamentProvider = ({ children }) => {
     // Handle Active ID persistence
     useEffect(() => {
         const savedId = localStorage.getItem('ricochet_active_id');
-        // If we have a saved ID and it exists in the loaded list, use it
         if (savedId && tournaments.some(t => t.id === savedId)) {
             setActiveTournamentId(savedId);
         } else if (tournaments.length > 0 && !activeTournamentId) {
-            // Default to first if none selected
             setActiveTournamentId(tournaments[0].id);
         }
     }, [tournaments]);
@@ -103,7 +122,21 @@ export const TournamentProvider = ({ children }) => {
     };
 
     const createTournament = async (name) => {
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            try {
+                const docRef = await addDoc(collection(db, "tournaments"), {
+                    name,
+                    date: new Date().toISOString(),
+                    status: 'setup',
+                    created_at: serverTimestamp()
+                });
+                selectTournament(docRef.id);
+                return docRef.id;
+            } catch (e) {
+                console.error("Error creating tournament (Firebase):", e);
+                return null;
+            }
+        } else if (isSupabaseConfigured) {
             // SUPABASE
             try {
                 const { data, error } = await supabase
@@ -145,7 +178,14 @@ export const TournamentProvider = ({ children }) => {
     };
 
     const updateTournament = async (id, updates) => {
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            try {
+                const docRef = doc(db, "tournaments", id);
+                await updateDoc(docRef, updates);
+            } catch (e) {
+                console.error("Error updating (Firebase):", e);
+            }
+        } else if (isSupabaseConfigured) {
             try {
                 const { error } = await supabase.from('tournaments').update(updates).eq('id', id);
                 if (error) throw error;
@@ -161,7 +201,13 @@ export const TournamentProvider = ({ children }) => {
     };
 
     const deleteTournament = async (id) => {
-        if (isSupabaseConfigured) {
+        if (isFirebaseConfigured) {
+            try {
+                await deleteDoc(doc(db, "tournaments", id));
+            } catch (e) {
+                console.error("Error deleting (Firebase):", e);
+            }
+        } else if (isSupabaseConfigured) {
             try {
                 const { error } = await supabase.from('tournaments').delete().eq('id', id);
                 if (error) throw error;
