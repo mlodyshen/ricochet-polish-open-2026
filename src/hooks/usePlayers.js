@@ -1,106 +1,136 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
-
-const BASE_KEY = 'ricochet_players_db';
+import { supabase } from '../lib/supabase';
 
 export const usePlayers = () => {
     const [players, setPlayers] = useState([]);
     const { isAuthenticated } = useAuth();
     const { activeTournamentId } = useTournament();
 
-    // Key depends on activeTournamentId
-    // If we have an ID: `ricochet_players_db_${id}`
-    // Backwards compat: If user migrated, everything has ID.
-    // If context is creating default, we rely on that.
-    const storageKey = activeTournamentId ? `${BASE_KEY}_${activeTournamentId}` : null;
-
-    const fetchPlayers = () => {
-        if (!storageKey) return;
-        try {
-            const stored = localStorage.getItem(storageKey);
-            setPlayers(stored ? JSON.parse(stored) : []);
-        } catch (e) {
-            console.error("LS Error", e);
-            setPlayers([]);
-        }
-    };
-
     useEffect(() => {
+        if (!activeTournamentId) {
+            setPlayers([]);
+            return;
+        }
+
+        const fetchPlayers = async () => {
+            const { data, error } = await supabase
+                .from('players')
+                .select('*')
+                .eq('tournament_id', activeTournamentId);
+
+            if (!error && data) {
+                setPlayers(data);
+            }
+        };
+
         fetchPlayers();
 
-        const handleStorage = () => fetchPlayers();
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
-    }, [storageKey]);
+        const channel = supabase
+            .channel(`players:${activeTournamentId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'players',
+                filter: `tournament_id=eq.${activeTournamentId}`
+            }, () => {
+                fetchPlayers();
+            })
+            .subscribe();
 
-    const saveToLS = (newPlayers) => {
-        if (!storageKey) return;
-        setPlayers(newPlayers);
-        localStorage.setItem(storageKey, JSON.stringify(newPlayers));
-    };
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [activeTournamentId]);
 
     const addPlayer = async (playerData) => {
-        if (!isAuthenticated) return null;
+        if (!isAuthenticated || !activeTournamentId) return null;
 
-        // Support both structures but store as snake_case for UI compatibility
         const fullName = playerData.full_name || playerData.fullName;
 
-        const newPlayerObj = {
-            id: crypto.randomUUID(),
+        const newPlayer = {
+            tournament_id: activeTournamentId,
             full_name: fullName,
             country: playerData.country || "",
             elo: playerData.elo ? parseInt(playerData.elo, 10) : 0
         };
 
-        const updatedList = [...players, newPlayerObj];
-        saveToLS(updatedList);
-        return newPlayerObj;
+        const { data, error } = await supabase
+            .from('players')
+            .insert([newPlayer])
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error adding player:", error);
+            return null;
+        }
+
+        // State update handled by subscription usually, but optimistic:
+        setPlayers(prev => [...prev, data]);
+        return data;
     };
 
     const importPlayers = async (namesList) => {
-        if (!isAuthenticated) return 0;
-        // Not really used in local mode usually, or we can implement basic import
-        // Assuming this is used for migration or bulk add
+        // Implementation for bulk import would go here
         return 0;
     };
 
     const updatePlayer = async (id, updates) => {
         if (!isAuthenticated) return;
 
-        const updated = players.map(p => {
-            if (p.id !== id) return p;
+        const { error } = await supabase
+            .from('players')
+            .update(updates)
+            .eq('id', id);
 
-            // Normalize updates
-            const newName = updates.full_name || updates.fullName;
+        if (error) {
+            console.error("Error updating player:", error);
+            return;
+        }
 
-            return {
-                ...p,
-                ...updates,
-                full_name: newName !== undefined ? newName : p.full_name
-            };
-        });
-        saveToLS(updated);
+        setPlayers(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     };
 
     const deletePlayer = async (id) => {
         if (!isAuthenticated) return;
-        saveToLS(players.filter(p => p.id !== id));
+
+        const { error } = await supabase
+            .from('players')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error deleting player:", error);
+            return;
+        }
+
+        setPlayers(prev => prev.filter(p => p.id !== id));
     };
 
     const bulkUpsertPlayers = async (playersList) => {
-        // Fallback or implementation for local bulk add
-        if (!isAuthenticated) return { success: false, error: 'Authorization required' };
+        if (!isAuthenticated || !activeTournamentId) return { success: false, error: 'Authorization required' };
 
         const newPlayers = playersList.map(p => ({
-            id: crypto.randomUUID(),
+            tournament_id: activeTournamentId,
             full_name: p.full_name || p.fullName,
             country: p.country,
             elo: p.elo === '-' || !p.elo ? 0 : parseInt(p.elo, 10)
         }));
 
-        saveToLS([...players, ...newPlayers]);
-        return { success: true, count: newPlayers.length };
+        const { data, error } = await supabase
+            .from('players')
+            .upsert(newPlayers)
+            .select();
+
+        if (error) {
+            return { success: false, error };
+        }
+
+        // Refresh happens via subscription or manual
+        // setPlayers(prev => [...prev, ...data]); // simplied
+        return { success: true, count: data.length };
     };
 
     return { players, addPlayer, importPlayers, updatePlayer, deletePlayer, bulkUpsertPlayers };

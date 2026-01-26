@@ -1,8 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const META_KEY = 'ricochet_tournaments_meta';
-const ACTIVE_KEY_ADMIN = 'ricochet_active_tournament_admin';
-const ACTIVE_KEY_GUEST = 'ricochet_active_tournament_guest';
+import { supabase } from '../lib/supabase';
 
 const TournamentContext = createContext(null);
 
@@ -11,48 +8,49 @@ export const TournamentProvider = ({ children }) => {
     const [activeTournamentId, setActiveTournamentId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load Meta
+    // Initial Fetch & Realtime
     useEffect(() => {
-        const stored = localStorage.getItem(META_KEY);
-        let parsed = [];
-        if (stored) {
+        const fetchTournaments = async () => {
             try {
-                parsed = JSON.parse(stored);
-            } catch (e) {
-                console.error("Failed to parse tournaments meta", e);
+                const { data, error } = await supabase
+                    .from('tournaments')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setTournaments(data || []);
+            } catch (err) {
+                console.error("Error loading tournaments:", err.message);
+                // If table doesn't exist or connection fails, we might end up here.
+            } finally {
+                setIsLoading(false);
             }
-        }
+        };
 
-        // Migration: If no tournaments but we have legacy data?
-        // Let's skip complex migration for now and just start fresh or manual.
-        // Or actually, let's auto-create a "Default" if empty to not lose the user's current progress.
-        if (parsed.length === 0) {
-            const legacyPlayers = localStorage.getItem('ricochet_players_db');
-            if (legacyPlayers) {
-                const defaultId = 'legacy-default';
-                parsed.push({ id: defaultId, name: 'RPO 2026 (Default)', date: new Date().toISOString() });
-                // We need to move data? Or just aliasing?
-                // For simplicity, let's keep legacy keys as fallback OR copy them.
-                // Let's copy them to be clean.
-                localStorage.setItem(`ricochet_players_db_${defaultId}`, legacyPlayers);
-                const legacyBracket = localStorage.getItem('ricochet_bracket_data');
-                if (legacyBracket) localStorage.setItem(`ricochet_bracket_data_${defaultId}`, legacyBracket);
+        fetchTournaments();
 
-                localStorage.setItem(META_KEY, JSON.stringify(parsed));
-            }
-        }
+        const channel = supabase
+            .channel('public:tournaments')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tournaments' }, () => {
+                fetchTournaments();
+            })
+            .subscribe();
 
-        setTournaments(parsed);
-        setIsLoading(false);
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
-    // Load Active ID (Session based? Or Local?)
-    // Admin and Guest might look at different things? 
-    // Actually, usually "Active" is global for the browser tab application state.
+    // Handle Active ID persistence
     useEffect(() => {
         const savedId = localStorage.getItem('ricochet_active_id');
-        if (savedId) setActiveTournamentId(savedId);
-        else if (tournaments.length > 0) setActiveTournamentId(tournaments[0].id);
+        // If we have a saved ID and it exists in the loaded list, use it
+        if (savedId && tournaments.some(t => t.id === savedId)) {
+            setActiveTournamentId(savedId);
+        } else if (tournaments.length > 0 && !activeTournamentId) {
+            // Default to first if none selected or saved is invalid
+            setActiveTournamentId(tournaments[0].id);
+        }
     }, [tournaments]);
 
     const selectTournament = (id) => {
@@ -60,44 +58,70 @@ export const TournamentProvider = ({ children }) => {
         localStorage.setItem('ricochet_active_id', id);
     };
 
-    const createTournament = (name) => {
-        const newId = crypto.randomUUID();
-        const newTournament = {
-            id: newId,
-            name: name,
-            date: new Date().toISOString(),
-            address: ''
-        };
-        const updated = [...tournaments, newTournament];
-        setTournaments(updated);
-        localStorage.setItem(META_KEY, JSON.stringify(updated));
+    const createTournament = async (name) => {
+        try {
+            const { data, error } = await supabase
+                .from('tournaments')
+                .insert([{
+                    name,
+                    date: new Date().toISOString(),
+                    status: 'setup' // Default status
+                }])
+                .select()
+                .single();
 
-        // Auto select
-        selectTournament(newId);
-        return newId;
+            if (error) throw error;
+
+            // Optimistic update or wait for subscription
+            // setTournaments(prev => [data, ...prev]); 
+            // Realtime will handle update, but let's be snappy:
+            setTournaments(prev => [data, ...prev]);
+
+            selectTournament(data.id);
+            return data.id;
+        } catch (err) {
+            console.error("Error creating tournament:", err);
+            alert("Błąd podczas tworzenia turnieju. Sprawdź połączenie.");
+            return null;
+        }
     };
 
-    const updateTournament = (id, updates) => {
-        const updated = tournaments.map(t =>
-            t.id === id ? { ...t, ...updates } : t
-        );
-        setTournaments(updated);
-        localStorage.setItem(META_KEY, JSON.stringify(updated));
+    const updateTournament = async (id, updates) => {
+        try {
+            const { error } = await supabase
+                .from('tournaments')
+                .update(updates)
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setTournaments(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+        } catch (err) {
+            console.error("Error updating tournament:", err);
+        }
     };
 
-    const deleteTournament = (id) => {
-        // Confirmation is handled by the UI component
-        const updated = tournaments.filter(t => t.id !== id);
-        setTournaments(updated);
-        localStorage.setItem(META_KEY, JSON.stringify(updated));
+    const deleteTournament = async (id) => {
+        try {
+            const { error } = await supabase
+                .from('tournaments')
+                .delete()
+                .eq('id', id);
 
-        // Items cleanup
-        localStorage.removeItem(`ricochet_players_db_${id}`);
-        localStorage.removeItem(`ricochet_bracket_data_${id}`);
+            if (error) throw error;
 
-        if (activeTournamentId === id) {
-            setActiveTournamentId(updated.length > 0 ? updated[0].id : null);
-            localStorage.removeItem('ricochet_active_id');
+            setTournaments(prev => prev.filter(t => t.id !== id));
+
+            // Cleanup active Selection
+            if (activeTournamentId === id) {
+                const remaining = tournaments.filter(t => t.id !== id);
+                const nextId = remaining.length > 0 ? remaining[0].id : null;
+                setActiveTournamentId(nextId);
+                if (nextId) localStorage.setItem('ricochet_active_id', nextId);
+                else localStorage.removeItem('ricochet_active_id');
+            }
+        } catch (err) {
+            console.error("Error deleting tournament:", err);
         }
     };
 

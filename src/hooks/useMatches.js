@@ -1,98 +1,100 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
-
-const BASE_KEY = 'ricochet_bracket_data';
+import { supabase } from '../lib/supabase';
 
 export const useMatches = () => {
     const [matches, setMatches] = useState([]);
     const { isAuthenticated } = useAuth();
     const { activeTournamentId } = useTournament();
 
-    const storageKey = activeTournamentId ? `${BASE_KEY}_${activeTournamentId}` : null;
-
-    const migrateData = (rawMatches) => {
-        let changed = false;
-        const migrated = rawMatches.map(m => {
-            const newM = { ...m };
-
-            // Normalize ID fields
-            if (m.player1?.id && !m.player1Id) {
-                newM.player1Id = m.player1.id;
-                delete newM.player1;
-                changed = true;
-            }
-            if (m.player2?.id && !m.player2Id) {
-                newM.player2Id = m.player2.id;
-                delete newM.player2;
-                changed = true;
-            }
-            // Normalize Snake Case to Camel
-            if (m.bracket_type) {
-                newM.bracket = m.bracket_type;
-                delete newM.bracket_type;
-                changed = true;
-            }
-            if (m.round_id) {
-                newM.round = m.round_id;
-                delete newM.round_id;
-                changed = true;
-            }
-            if (m.winner_id) {
-                newM.winnerId = m.winner_id;
-                delete newM.winner_id;
-                changed = true;
-            }
-            if (m.micro_points && !m.microPoints) {
-                newM.microPoints = m.micro_points;
-                delete newM.micro_points;
-                changed = true;
-            }
-            return newM;
-        });
-
-        return { migrated, changed };
-    };
-
-    const fetchMatches = () => {
-        if (!storageKey) return;
+    const mapToCamel = (m) => {
+        let mp = [];
         try {
-            const saved = localStorage.getItem(storageKey);
-            const raw = saved ? JSON.parse(saved) : [];
+            mp = typeof m.micro_points === 'string' ? JSON.parse(m.micro_points) : (m.micro_points || []);
+        } catch (e) { console.warn("MicroPoints parse error", e); }
 
-            const { migrated, changed } = migrateData(raw);
-
-            setMatches(migrated);
-            if (changed) {
-                console.log("Migrated match data to new schema.");
-                // Only save if admin? No, local storage migration is safe for local mode.
-                // But generally only admin saves. 
-                // However, if we don't save, we migrate every time.
-                // For local mode, we can auto-save migration.
-                localStorage.setItem(storageKey, JSON.stringify(migrated));
-            }
-        } catch (e) {
-            console.error("LS Error", e);
-            setMatches([]);
-        }
+        return {
+            id: m.id,
+            tournamentId: m.tournament_id,
+            bracket: m.bracket_type,
+            round: m.round_id,
+            player1Id: m.player1_id,
+            player2Id: m.player2_id,
+            score1: m.score1,
+            score2: m.score2,
+            microPoints: mp,
+            winnerId: m.winner_id,
+            status: m.status,
+            court: m.court
+        };
     };
+
+    const mapToSnake = (m) => ({
+        id: m.id,
+        tournament_id: activeTournamentId,
+        bracket_type: m.bracket,
+        round_id: m.round,
+        player1_id: m.player1Id,
+        player2_id: m.player2Id,
+        score1: m.score1,
+        score2: m.score2,
+        micro_points: JSON.stringify(m.microPoints || []),
+        winner_id: m.winnerId,
+        status: m.status,
+        court: m.court
+    });
 
     useEffect(() => {
+        if (!activeTournamentId) {
+            setMatches([]);
+            return;
+        }
+
+        const fetchMatches = async () => {
+            const { data, error } = await supabase
+                .from('matches')
+                .select('*')
+                .eq('tournament_id', activeTournamentId);
+
+            if (!error && data) {
+                setMatches(data.map(mapToCamel));
+            }
+        };
+
         fetchMatches();
 
-        const loadLS = () => fetchMatches();
-        window.addEventListener('storage', loadLS);
-        return () => window.removeEventListener('storage', loadLS);
-    }, [storageKey]);
+        const channel = supabase
+            .channel(`matches:${activeTournamentId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'matches',
+                filter: `tournament_id=eq.${activeTournamentId}`
+            }, () => {
+                fetchMatches();
+            })
+            .subscribe();
 
-    const saveMatches = (newMatches) => {
-        if (!isAuthenticated || !storageKey) return;
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [activeTournamentId]);
 
-        // Ensure we save clean data (just in case)
-        const { migrated } = migrateData(newMatches);
+    const saveMatches = async (newMatches) => {
+        if (!isAuthenticated || !activeTournamentId) return;
 
-        setMatches(migrated);
-        localStorage.setItem(storageKey, JSON.stringify(migrated));
+        setMatches(newMatches);
+
+        const payload = newMatches.map(mapToSnake);
+
+        const { error } = await supabase
+            .from('matches')
+            .upsert(payload);
+
+        if (error) {
+            console.error("Error saving matches:", error);
+        }
     };
 
     return { matches, saveMatches };
