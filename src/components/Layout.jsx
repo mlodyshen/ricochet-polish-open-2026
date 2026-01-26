@@ -30,9 +30,9 @@ const Layout = () => {
     const { isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
 
-    // Force light theme
+    // Force dark theme as per new design
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'dark');
     }, []);
 
     const handleLogout = () => {

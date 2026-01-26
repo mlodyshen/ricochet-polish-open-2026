@@ -1,50 +1,72 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Colors - Light Theme (Main) */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  /* Slightly off-white for cards */
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
+  /* Colors - Dark Neon Theme (Jersey Inspired) */
+  --bg-primary: #000000;
+  /* Pure Black foundation */
+  --bg-secondary: rgba(20, 20, 25, 0.85);
+  /* Semi-transparent dark */
 
-  /* Accents */
-  --accent-pink: #e879f9;
-  /* Fuchsia-400/500ish - Pastel/Bright but readable */
-  --accent-cyan: #22d3ee;
-  /* Cyan-400 - Bright Turquoise */
+  --text-primary: #f0f0f0;
+  /* Off-white for readability */
+  --text-secondary: #94a3b8;
+  /* Muted gray */
+  --text-tertiary: #64748b;
 
-  /* Aliases for cleaner usage if we want default primary/secondary naming */
+  /* Neon Accents extracted from Jersey */
+  --accent-pink: #ec008c;
+  /* Vibrant Neon Pink */
+  --accent-cyan: #00bced;
+  /* Vivid Turquoise/Cyan */
+
   --accent-primary: var(--accent-pink);
   --accent-secondary: var(--accent-cyan);
 
-  --border-color: #e2e8f0;
+  --border-color: #333333;
+  /* Dark gray border */
 
   /* Glass effects */
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(226, 232, 240, 0.8);
+  --glass-bg: rgba(0, 0, 0, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
 
-  /* Shadows - Clean & Subtle */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  /* Shadows - Neon Glows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 0 15px rgba(236, 0, 140, 0.2);
+  /* Pink glow hint */
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 188, 237, 0.2);
+  /* Cyan glow hint */
 
-  --card-gradient: linear-gradient(135deg, #ffffff 0%, #fcfcfc 100%);
+  --card-gradient: linear-gradient(145deg, rgba(20, 20, 25, 0.9), rgba(10, 10, 12, 0.95));
 }
 
-/* Force light theme even if dark mode preference exists for now, as requested "Dark mode: can be disabled" */
-[data-theme='dark'] {
-  /* Keeping same as light for now to enforce white theme */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --accent-primary: var(--accent-pink);
-  --accent-secondary: var(--accent-cyan);
-  --border-color: #e2e8f0;
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(226, 232, 240, 0.8);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+/* Remove forced light mode block since we are overriding root directly */
+/* [data-theme='dark'] block removed */
+
+/* Background "Flames/Glow" Effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20vh;
+  left: -20vw;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(236, 0, 140, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(50px);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -20vh;
+  right: -20vw;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(0, 188, 237, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(50px);
 }
 
 * {
