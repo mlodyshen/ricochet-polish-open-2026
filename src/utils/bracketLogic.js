@@ -49,7 +49,7 @@ const getBracketBlueprint = () => {
     // LB R2
     allMatches.filter(m => m.bracket === 'lb' && m.round === 2).forEach((m, i) => {
         m.sourceMatchId1 = `lb-r1-m${i + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `wb-r2-m${8 - i}`; m.sourceType2 = 'loser';
+        m.sourceMatchId2 = `wb-r2-m${i + 1}`; m.sourceType2 = 'loser';
     });
     // LB R3
     allMatches.filter(m => m.bracket === 'lb' && m.round === 3).forEach((m, i) => {
@@ -59,7 +59,7 @@ const getBracketBlueprint = () => {
     // LB R4
     allMatches.filter(m => m.bracket === 'lb' && m.round === 4).forEach((m, i) => {
         m.sourceMatchId1 = `lb-r3-m${i + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `wb-r3-m${4 - i}`; m.sourceType2 = 'loser';
+        m.sourceMatchId2 = `wb-r3-m${i + 1}`; m.sourceType2 = 'loser';
     });
     // LB R5
     allMatches.filter(m => m.bracket === 'lb' && m.round === 5).forEach((m, i) => {
@@ -69,7 +69,7 @@ const getBracketBlueprint = () => {
     // LB R6
     allMatches.filter(m => m.bracket === 'lb' && m.round === 6).forEach((m, i) => {
         m.sourceMatchId1 = `lb-r5-m${i + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `wb-r4-m${2 - i}`; m.sourceType2 = 'loser';
+        m.sourceMatchId2 = `wb-r4-m${i + 1}`; m.sourceType2 = 'loser';
     });
     // LB R7
     allMatches.filter(m => m.bracket === 'lb' && m.round === 7).forEach((m, i) => {
