@@ -56,10 +56,10 @@ const TournamentSelect = () => {
                         </div>
                     )}
 
-                    {tournaments.map(t => (
+                    {tournaments.map(tourn => (
                         <button
-                            key={t.id}
-                            onClick={() => handleSelect(t.id)}
+                            key={tourn.id}
+                            onClick={() => handleSelect(tourn.id)}
                             className="card hover-scale"
                             style={{
                                 padding: '1.5rem',
@@ -71,9 +71,9 @@ const TournamentSelect = () => {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.25rem' }}>{t.name}</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.25rem' }}>{tourn.name}</div>
                                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <Calendar size={12} /> {formatDate(t.date)}
+                                    <Calendar size={12} /> {formatDate(tourn.date)}
                                 </div>
                             </div>
                             <ArrowRight size={20} color="var(--text-secondary)" />

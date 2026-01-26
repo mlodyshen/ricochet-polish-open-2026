@@ -119,10 +119,10 @@ const Organizer = () => {
                         </div>
                     )}
 
-                    {tournaments.map(t => {
-                        const isActive = t.id === activeTournamentId;
+                    {tournaments.map(tourn => {
+                        const isActive = tourn.id === activeTournamentId;
                         return (
-                            <div key={t.id} style={{
+                            <div key={tourn.id} style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                 padding: '1rem',
                                 background: isActive ? 'rgba(6, 182, 212, 0.05)' : 'var(--bg-primary)',
@@ -131,16 +131,16 @@ const Organizer = () => {
                             }}>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        {t.name}
+                                        {tourn.name}
                                         {isActive && <span style={{ fontSize: '0.7rem', background: 'var(--accent-cyan)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>{t('organizer.active')}</span>}
                                     </div>
                                     <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.3rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                            <Calendar size={12} /> {formatDate(t.date)}
+                                            <Calendar size={12} /> {formatDate(tourn.date)}
                                         </div>
-                                        {t.address && (
+                                        {tourn.address && (
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                <MapPin size={12} /> {t.address}
+                                                <MapPin size={12} /> {tourn.address}
                                             </div>
                                         )}
                                     </div>
@@ -149,7 +149,7 @@ const Organizer = () => {
                                     {!isActive && (
                                         <button
                                             className="btn-secondary"
-                                            onClick={() => selectTournament(t.id)}
+                                            onClick={() => selectTournament(tourn.id)}
                                             title={t('organizer.switchTooltip')}
                                         >
                                             <Check size={16} style={{ marginRight: '0.4rem' }} /> {t('organizer.selected')}
@@ -157,7 +157,7 @@ const Organizer = () => {
                                     )}
                                     <button
                                         className="btn-secondary"
-                                        onClick={() => openEdit(t)}
+                                        onClick={() => openEdit(tourn)}
                                         title={t('organizer.editTooltip')}
                                         style={{ padding: '0.5rem' }}
                                     >
@@ -165,7 +165,7 @@ const Organizer = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => handleDelete(t.id)}
+                                        onClick={() => handleDelete(tourn.id)}
                                         title={t('organizer.deleteTooltip')}
                                         style={{
                                             padding: '0.5rem',
