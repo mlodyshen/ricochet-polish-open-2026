@@ -1,0 +1,58 @@
+{
+    "navigation": {
+        "live": "Live",
+        "matches": "Wedstrijden",
+        "standings": "Standen",
+        "brackets": "Schema's",
+        "players": "Spelers",
+        "organizer": "Organisator",
+        "settings": "Instellingen"
+    },
+    "common": {
+        "appName": "RICOCHET POLISH OPEN 2026",
+        "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
+        "confirmDelete": "Weet je zeker dat je deze speler wilt verwijderen?",
+        "cancel": "Annuleren",
+        "save": "Opslaan",
+        "actions": "Acties",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "saved": "Opgeslagen!"
+    },
+    "players": {
+        "title": "Spelersdatabase",
+        "addPlayer": "Speler toevoegen",
+        "importPlayers": "Spelers importeren (Toernooi)",
+        "importSuccess": "{{count}} nieuwe spelers succesvol toegevoegd.",
+        "searchPlaceholder": "Zoeken...",
+        "headers": {
+            "fullName": "Volledige naam",
+            "country": "Land",
+            "elo": "ELO"
+        },
+        "empty": {
+            "notFound": "Geen spelers gevonden.",
+            "start": "Database is leeg."
+        },
+        "modal": {
+            "addTitle": "Nieuwe speler toevoegen",
+            "editTitle": "Speler bewerken",
+            "labels": {
+                "fullName": "Volledige naam *",
+                "country": "Land",
+                "elo": "ELO"
+            },
+            "placeholders": {
+                "fullName": "bv. Jan Jansen",
+                "country": "Kies of typ...",
+                "elo": "bv. 1200"
+            },
+            "errors": {
+                "fullNameRequired": "Volledige naam is verplicht"
+            }
+        }
+    },
+    "pages": {
+        "content_placeholder": "Inhoud voor {{title}} komt hier."
+    }
+}

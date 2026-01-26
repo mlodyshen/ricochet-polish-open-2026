@@ -1,0 +1,195 @@
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--bg-primary);
+}
+
+/* Header */
+.top-header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.header-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-toggle {
+    padding: 0.5rem;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.theme-toggle:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Sidebar (Desktop) */
+.sidebar {
+    position: fixed;
+    top: 64px;
+    /* Below header */
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    z-index: 40;
+    transition: transform 0.3s ease;
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    /* Push footer down if inside sidebar? No, nav takes space */
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.nav-item:hover {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Default Active (fallback) */
+.nav-item.active {
+    background-color: var(--accent-primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dynamic Alternating Active Colors (overrides default) */
+.nav-item.active.accent-pink {
+    background-color: var(--accent-pink);
+    box-shadow: 0 4px 12px rgba(232, 121, 249, 0.3);
+}
+
+.nav-item.active.accent-cyan {
+    background-color: var(--accent-cyan);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+}
+
+/* Bottom Nav (Mobile) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 50;
+    display: none;
+    /* Hidden by default (Desktop first) */
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    gap: 0.25rem;
+    padding: 0.5rem;
+    flex: 1;
+    height: 100%;
+}
+
+.bottom-nav-item.active {
+    color: var(--accent-primary);
+}
+
+/* Main Content */
+.main-content {
+    margin-top: 64px;
+    /* Header height */
+    margin-left: 240px;
+    /* Sidebar width */
+    padding: 2rem;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.page-container {
+    flex: 1;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Footer */
+.app-footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    border-top: 1px solid var(--border-color);
+    padding: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        /* Hide sidebar */
+        display: none;
+        /* simple hide */
+    }
+
+    .main-content {
+        margin-left: 0;
+        margin-bottom: 64px;
+        /* Space for bottom nav */
+        padding: 1rem;
+    }
+
+    .bottom-nav {
+        display: flex;
+    }
+
+    .app-footer {
+        margin-bottom: 0px;
+        /* Below content, scrolalble */
+    }
+}

@@ -1,0 +1,58 @@
+{
+    "navigation": {
+        "live": "Live",
+        "matches": "Spiele",
+        "standings": "Tabelle",
+        "brackets": "Turnierbaum",
+        "players": "Spieler",
+        "organizer": "Organisator",
+        "settings": "Einstellungen"
+    },
+    "common": {
+        "appName": "RICOCHET POLISH OPEN 2026",
+        "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
+        "confirmDelete": "Möchten Sie diesen Spieler wirklich löschen?",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "actions": "Aktionen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "saved": "Gespeichert!"
+    },
+    "players": {
+        "title": "Spielerdatenbank",
+        "addPlayer": "Spieler hinzufügen",
+        "importPlayers": "Spieler importieren (Turnier)",
+        "importSuccess": "{{count}} neue Spieler erfolgreich hinzugefügt.",
+        "searchPlaceholder": "Suchen...",
+        "headers": {
+            "fullName": "Vollständiger Name",
+            "country": "Land",
+            "elo": "ELO"
+        },
+        "empty": {
+            "notFound": "Keine Spieler gefunden.",
+            "start": "Datenbank ist leer."
+        },
+        "modal": {
+            "addTitle": "Neuen Spieler hinzufügen",
+            "editTitle": "Spieler bearbeiten",
+            "labels": {
+                "fullName": "Vollständiger Name *",
+                "country": "Land",
+                "elo": "ELO"
+            },
+            "placeholders": {
+                "fullName": "z.B. Max Mustermann",
+                "country": "Auswählen oder eingeben...",
+                "elo": "z.B. 1200"
+            },
+            "errors": {
+                "fullNameRequired": "Vollständiger Name ist erforderlich"
+            }
+        }
+    },
+    "pages": {
+        "content_placeholder": "Inhalt für {{title}} wird hier erscheinen."
+    }
+}

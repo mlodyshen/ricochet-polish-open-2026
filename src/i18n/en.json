@@ -1,0 +1,168 @@
+{
+    "navigation": {
+        "live": "Live",
+        "matches": "Matches",
+        "standings": "Standings",
+        "brackets": "Brackets",
+        "players": "Players",
+        "organizer": "Organizer",
+        "settings": "Settings"
+    },
+    "common": {
+        "appName": "RICOCHET POLISH OPEN 2026",
+        "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
+        "confirmDelete": "Are you sure you want to delete this player?",
+        "cancel": "Cancel",
+        "save": "Save",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "saved": "Saved!",
+        "back": "Back",
+        "appName": "RICOCHET POLISH OPEN 2026"
+    },
+    "players": {
+        "title": "Players Database",
+        "addPlayer": "Add Player",
+        "importPlayers": "Import Players (Tournament)",
+        "importSuccess": "Successfully added {{count}} new players.",
+        "searchPlaceholder": "Search...",
+        "headers": {
+            "fullName": "Full Name",
+            "country": "Country",
+            "elo": "ELO"
+        },
+        "empty": {
+            "notFound": "No players found.",
+            "start": "Database is empty."
+        },
+        "modal": {
+            "addTitle": "Add New Player",
+            "editTitle": "Edit Player",
+            "labels": {
+                "fullName": "Full Name *",
+                "country": "Country",
+                "elo": "ELO"
+            },
+            "placeholders": {
+                "fullName": "e.g. John Doe",
+                "country": "Select or type...",
+                "elo": "e.g. 1200"
+            },
+            "errors": {
+                "fullNameRequired": "Full Name is required"
+            }
+        }
+    },
+    "pages": {
+        "content_placeholder": "Content for {{title}} will go here."
+    },
+    "live": {
+        "title": "LIVE",
+        "waitingMessage": "Tournament starting — waiting for matches",
+        "lastUpdate": "Last update:",
+        "justNow": "just now",
+        "secondsAgo": "s ago",
+        "refresh": "Refresh",
+        "courtPink": "Court Pink",
+        "courtCyan": "Court Turquoise",
+        "noMatch": "No match on court",
+        "autoMatchInfo": "Match will appear automatically when started in Matches tab",
+        "upcomingMatches": "Upcoming Matches",
+        "noUpcoming": "No matches scheduled",
+        "recentResults": "Recent Results",
+        "noResults": "No matches played yet.",
+        "wb": "Winners Bracket",
+        "lb": "Losers Bracket",
+        "gf": "Finals",
+        "round": "Round",
+        "liveBadge": "LIVE"
+    },
+    "organizer": {
+        "title": "Tournament Management",
+        "description": "Here you can create new tournaments and manage the active one.",
+        "createTitle": "Create New Tournament",
+        "yourTournaments": "Your Tournaments",
+        "noTournaments": "No tournaments. Create your first one!",
+        "active": "ACTIVE",
+        "select": "Select",
+        "selected": "Selected",
+        "deleteTooltip": "Delete tournament",
+        "editTooltip": "Edit",
+        "switchTooltip": "Switch to this tournament",
+        "editModalTitle": "Edit Tournament",
+        "deleteModalTitle": "Delete Tournament?",
+        "deleteModalContent": "Are you sure you want to delete this tournament?",
+        "deleteModalWarning": "This action cannot be undone.",
+        "form": {
+            "namePlaceholder": "Tournament Name (e.g. RPO 2027)",
+            "addressPlaceholder": "Address (optional)",
+            "createBtn": "Create",
+            "cancelBtn": "Cancel",
+            "saveBtn": "Save Changes",
+            "deleteBtn": "Delete",
+            "nameLabel": "Tournament Name",
+            "dateLabel": "Date & Time",
+            "addressLabel": "Address / Location"
+        }
+    },
+    "matches": {
+        "title": "Tournament Matches",
+        "filters": {
+            "all": "All",
+            "pending": "Upcoming",
+            "finished": "Finished"
+        },
+        "currentMatch": "Current Match",
+        "nextMatches": "Next Matches",
+        "played": "Played",
+        "allFinished": "All matches finished or no active matches.",
+        "noActiveMatches": "No active matches",
+        "generatePrompt": "To start the tournament, generate a bracket from the player list.",
+        "needPlayers": "You need at least 2 players!",
+        "generateConfirm": "Are you sure you want to generate a new bracket for {{count}} players? All current results will be deleted.",
+        "generateBtn": "Generate Bracket (ELO)",
+        "loginPrompt": "Log in as administrator to manage the tournament.",
+        "match": "Match {{id}}"
+    },
+    "brackets": {
+        "wb": "Winners Bracket",
+        "lb": "Losers Bracket",
+        "finals": "Grand Finals",
+        "round": "Round",
+        "clickToEdit": "(Click to edit)",
+        "finalBadge": "Final",
+        "generateNew": "Generate New",
+        "resetConfirm": "This will reset the current bracket. Continue?",
+        "editScoreTitle": "Edit Score"
+    },
+    "standings": {
+        "description": "Standings are updated after tournament participation ends."
+    },
+    "select": {
+        "title": "Select Tournament",
+        "subtitle": "Choose an event you want to follow.",
+        "noActive": "No active tournaments."
+    },
+    "welcome": {
+        "chooseMode": "Choose Access Mode",
+        "admin": "Admin",
+        "adminDesc": "Full access. Manage tournament, edit results, generate brackets.",
+        "participant": "Tournament Participant",
+        "participantDesc": "Live view. Check results, brackets, and upcoming matches."
+    },
+    "login": {
+        "title": "Admin Login",
+        "subtitle": "Sign in to manage the tournament",
+        "error": "Invalid username or password",
+        "username": "Username",
+        "usernamePlaceholder": "Enter username...",
+        "password": "Password",
+        "passwordPlaceholder": "Enter password...",
+        "signIn": "Sign In"
+    },
+    "settings": {
+        "localModeTitle": "Local Mode Active",
+        "localModeDesc": "Application is running in offline mode using Browser Storage."
+    }
+}

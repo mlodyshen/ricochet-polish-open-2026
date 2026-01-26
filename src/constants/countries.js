@@ -1,0 +1,63 @@
+export const EUROPEAN_COUNTRIES = [
+    "Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina",
+    "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland",
+    "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo",
+    "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco",
+    "Montenegro", "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal",
+    "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain",
+    "Sweden", "Switzerland", "Turkey", "Ukraine", "United Kingdom", "Vatican City"
+];
+
+export const COUNTRY_ISO_CODES = {
+    "Albania": "al",
+    "Andorra": "ad",
+    "Austria": "at",
+    "Belarus": "by",
+    "Belgium": "be",
+    "Bosnia and Herzegovina": "ba",
+    "Bulgaria": "bg",
+    "Croatia": "hr",
+    "Cyprus": "cy",
+    "Czech Republic": "cz",
+    "Denmark": "dk",
+    "Estonia": "ee",
+    "Finland": "fi",
+    "France": "fr",
+    "Germany": "de",
+    "Greece": "gr",
+    "Hungary": "hu",
+    "Iceland": "is",
+    "Ireland": "ie",
+    "Italy": "it",
+    "Kosovo": "xk",
+    "Latvia": "lv",
+    "Liechtenstein": "li",
+    "Lithuania": "lt",
+    "Luxembourg": "lu",
+    "Malta": "mt",
+    "Moldova": "md",
+    "Monaco": "mc",
+    "Montenegro": "me",
+    "Netherlands": "nl",
+    "North Macedonia": "mk",
+    "Norway": "no",
+    "Poland": "pl",
+    "Portugal": "pt",
+    "Romania": "ro",
+    "Russia": "ru",
+    "San Marino": "sm",
+    "Serbia": "rs",
+    "Slovakia": "sk",
+    "Slovenia": "si",
+    "Spain": "es",
+    "Sweden": "se",
+    "Switzerland": "ch",
+    "Turkey": "tr",
+    "Ukraine": "ua",
+    "United Kingdom": "gb",
+    "Vatican City": "va"
+};
+
+export const getCountryCode = (countryName) => {
+    return COUNTRY_ISO_CODES[countryName] || null;
+};

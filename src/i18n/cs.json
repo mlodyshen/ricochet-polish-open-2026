@@ -1,0 +1,58 @@
+{
+    "navigation": {
+        "live": "Živě",
+        "matches": "Zápasy",
+        "standings": "Tabulka",
+        "brackets": "Pavouk",
+        "players": "Hráči",
+        "organizer": "Organizátor",
+        "settings": "Nastavení"
+    },
+    "common": {
+        "appName": "RICOCHET POLISH OPEN 2026",
+        "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
+        "confirmDelete": "Opravdu chcete smazat tohoto hráče?",
+        "cancel": "Zrušit",
+        "save": "Uložit",
+        "actions": "Akce",
+        "edit": "Upravit",
+        "delete": "Smazat",
+        "saved": "Uloženo!"
+    },
+    "players": {
+        "title": "Databáze hráčů",
+        "addPlayer": "Přidat hráče",
+        "importPlayers": "Importovat hráče (Turnaj)",
+        "importSuccess": "Úspěšně přidáno {{count}} nových hráčů.",
+        "searchPlaceholder": "Hledat...",
+        "headers": {
+            "fullName": "Jméno a příjmení",
+            "country": "Země",
+            "elo": "ELO"
+        },
+        "empty": {
+            "notFound": "Nebyli nalezeni žádní hráči.",
+            "start": "Databáze je prázdná."
+        },
+        "modal": {
+            "addTitle": "Přidat nového hráče",
+            "editTitle": "Upravit hráče",
+            "labels": {
+                "fullName": "Jméno a příjmení *",
+                "country": "Země",
+                "elo": "ELO"
+            },
+            "placeholders": {
+                "fullName": "např. Jan Novák",
+                "country": "Vyberte nebo napište...",
+                "elo": "např. 1200"
+            },
+            "errors": {
+                "fullNameRequired": "Jméno a příjmení je povinné"
+            }
+        }
+    },
+    "pages": {
+        "content_placeholder": "Obsah pro {{title}} bude zde."
+    }
+}

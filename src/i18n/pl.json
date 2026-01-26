@@ -1,0 +1,168 @@
+{
+    "navigation": {
+        "live": "Live",
+        "matches": "Mecze",
+        "standings": "Końcowa klasyfikacja",
+        "brackets": "Drabinki",
+        "players": "Zawodnicy",
+        "organizer": "Organizator",
+        "settings": "Ustawienia"
+    },
+    "common": {
+        "appName": "RICOCHET POLISH OPEN 2026",
+        "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
+        "confirmDelete": "Czy na pewno chcesz usunąć tego zawodnika?",
+        "cancel": "Anuluj",
+        "save": "Zapisz",
+        "actions": "Akcje",
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "saved": "Zapisano!",
+        "back": "Powrót",
+        "appName": "RICOCHET POLISH OPEN 2026"
+    },
+    "players": {
+        "title": "Baza zawodników",
+        "addPlayer": "Dodaj zawodnika",
+        "importPlayers": "Importuj zawodników (Turniej)",
+        "importSuccess": "Pomyślnie dodano {{count}} nowych zawodników.",
+        "searchPlaceholder": "Szukaj...",
+        "headers": {
+            "fullName": "Imię i nazwisko",
+            "country": "Kraj",
+            "elo": "ELO"
+        },
+        "empty": {
+            "notFound": "Nie znaleziono zawodników.",
+            "start": "Baza jest pusta."
+        },
+        "modal": {
+            "addTitle": "Dodaj nowego zawodnika",
+            "editTitle": "Edytuj zawodnika",
+            "labels": {
+                "fullName": "Imię i nazwisko *",
+                "country": "Kraj",
+                "elo": "ELO"
+            },
+            "placeholders": {
+                "fullName": "np. Jan Kowalski",
+                "country": "Wybierz lub wpisz...",
+                "elo": "np. 1200"
+            },
+            "errors": {
+                "fullNameRequired": "Imię i nazwisko jest wymagane"
+            }
+        }
+    },
+    "pages": {
+        "content_placeholder": "Treść dla {{title}} pojawi się tutaj."
+    },
+    "live": {
+        "title": "NA ŻYWO",
+        "waitingMessage": "Turniej startuje — czekamy na pierwsze mecze",
+        "lastUpdate": "Ostatnia aktualizacja:",
+        "justNow": "przed chwilą",
+        "secondsAgo": "s temu",
+        "refresh": "Odśwież",
+        "courtPink": "Kort Różowy",
+        "courtCyan": "Kort Turkusowy",
+        "noMatch": "Brak meczu na korcie",
+        "autoMatchInfo": "Mecz pojawi się automatycznie po uruchomieniu w zakładce Mecze",
+        "upcomingMatches": "Zbliżające się mecze",
+        "noUpcoming": "Brak zaplanowanych meczów",
+        "recentResults": "Ostatnie Wyniki",
+        "noResults": "Brak rozegranych meczów.",
+        "wb": "Winners Bracket",
+        "lb": "Losers Bracket",
+        "gf": "Finals",
+        "round": "Round",
+        "liveBadge": "LIVE"
+    },
+    "organizer": {
+        "title": "Zarządzanie Turniejami",
+        "description": "Tutaj możesz tworzyć nowe turnieje oraz zarządzać aktywnym turniejem.",
+        "createTitle": "Utwórz nowy turniej",
+        "yourTournaments": "Twoje Turnieje",
+        "noTournaments": "Brak turniejów. Utwórz pierwszy!",
+        "active": "AKTYWNY",
+        "select": "Wybierz",
+        "selected": "Wybrany",
+        "deleteTooltip": "Usuń turniej",
+        "editTooltip": "Edytuj",
+        "switchTooltip": "Przełącz na ten turniej",
+        "editModalTitle": "Edytuj Turniej",
+        "deleteModalTitle": "Usuń Turniej?",
+        "deleteModalContent": "Czy na pewno chcesz usunąć ten turniej?",
+        "deleteModalWarning": "Operacji nie można cofnąć.",
+        "form": {
+            "namePlaceholder": "Nazwa turnieju (np. RPO 2027)",
+            "addressPlaceholder": "Adres (opcjonalnie)",
+            "createBtn": "Utwórz",
+            "cancelBtn": "Anuluj",
+            "saveBtn": "Zapisz Zmiany",
+            "deleteBtn": "Usuń",
+            "nameLabel": "Nazwa Turnieju",
+            "dateLabel": "Data i Czas",
+            "addressLabel": "Adres / Lokalizacja"
+        }
+    },
+    "matches": {
+        "title": "Turniej (Mecze)",
+        "filters": {
+            "all": "Wszystkie",
+            "pending": "Nadchodzące",
+            "finished": "Zakończone"
+        },
+        "currentMatch": "Aktualny mecz",
+        "nextMatches": "Następne mecze",
+        "played": "Rozegrane",
+        "allFinished": "Wszystkie mecze zakończone lub brak aktywnych.",
+        "noActiveMatches": "Brak aktywnych meczów",
+        "generatePrompt": "Aby rozpocząć turniej, wygeneruj drabinkę na podstawie listy zawodników.",
+        "needPlayers": "Potrzebujesz co najmniej 2 graczy!",
+        "generateConfirm": "Czy na pewno chcesz wygenerować nową drabinkę dla {{count}} graczy? Wszystkie obecne wyniki zostaną usunięte.",
+        "generateBtn": "Wygeneruj Drabinkę (ELO)",
+        "loginPrompt": "Zaloguj się jako administrator, aby zarządzać turniejem.",
+        "match": "Mecz {{id}}"
+    },
+    "brackets": {
+        "wb": "Drabinka Wygranych",
+        "lb": "Drabinka Przegranych",
+        "finals": "Wielki Finał",
+        "round": "Runda",
+        "clickToEdit": "(Kliknij aby edytować)",
+        "finalBadge": "Finał",
+        "generateNew": "Generuj Nową",
+        "resetConfirm": "To zresetuje obecną drabinkę. Kontynuować?",
+        "editScoreTitle": "Edytuj Wynik"
+    },
+    "standings": {
+        "description": "Klasyfikacja aktualizowana po zakończeniu udziału w turnieju."
+    },
+    "select": {
+        "title": "Wybierz Turniej",
+        "subtitle": "Wybierz wydarzenie, które chcesz obserwować.",
+        "noActive": "Brak aktywnych turniejów."
+    },
+    "welcome": {
+        "chooseMode": "Wybierz tryb dostępu",
+        "admin": "Admin",
+        "adminDesc": "Pełny dostęp. Zarządzanie turniejem, edycja wyników, generowanie drabinek.",
+        "participant": "Uczestnik Turnieju",
+        "participantDesc": "Podgląd na żywo. Sprawdzanie wyników, drabinek i nadchodzących meczów."
+    },
+    "login": {
+        "title": "Logowanie Admina",
+        "subtitle": "Zaloguj się, aby zarządzać turniejem",
+        "error": "Zły login lub hasło",
+        "username": "Nazwa użytkownika",
+        "usernamePlaceholder": "Wpisz nazwę...",
+        "password": "Hasło",
+        "passwordPlaceholder": "Wpisz hasło...",
+        "signIn": "Zaloguj się"
+    },
+    "settings": {
+        "localModeTitle": "Tryb Lokalny Aktywny",
+        "localModeDesc": "Aplikacja działa w trybie offline używając pamięci przeglądarki."
+    }
+}

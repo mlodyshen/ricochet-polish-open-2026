@@ -1,0 +1,214 @@
+/* Bracket Container */
+.bracket-container {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+    overflow: hidden;
+    /* handled by zoom/pan */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.bracket-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    display: flex;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    padding: 0.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.bracket-canvas {
+    display: flex;
+    padding: 2rem;
+    gap: 0;
+    /* No gap, borders will separate sections */
+    background-color: #f0f2f5;
+    /* Light neutral canvas */
+    min-height: 100vh;
+    width: max-content;
+}
+
+[data-theme='dark'] .bracket-canvas {
+    background-color: #0f1115;
+}
+
+/* Sections */
+.bracket-section {
+    padding: 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.section-wb {
+    background-color: rgba(236, 72, 153, 0.03);
+    /* Pink tint */
+    border-right: 1px dashed var(--border-color);
+}
+
+.section-mid {
+    background-color: rgba(59, 130, 246, 0.03);
+    /* Blue tint */
+    border-right: 1px dashed var(--border-color);
+    min-width: 300px;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-lb {
+    background-color: rgba(249, 115, 22, 0.03);
+    /* Orange tint */
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+    text-align: center;
+}
+
+.wb-title {
+    color: #ec4899;
+}
+
+.lb-title {
+    color: #f97316;
+}
+
+.mid-title {
+    color: #3b82f6;
+}
+
+/* Rounds Layout */
+.bracket-rounds-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    /* Stretch to align matches vertically */
+    gap: 4rem;
+    /* Spacing between rounds */
+}
+
+.bracket-scroll-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.round-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    /* Distribute matches evenly */
+    gap: 2rem;
+    min-width: 200px;
+}
+
+.round-header {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+/* Match Block */
+.match-block {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 220px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.match-block:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+}
+
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.match-number {
+    font-weight: 700;
+}
+
+.match-player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.match-player:first-of-type {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    /* Separator between players */
+}
+
+[data-theme='dark'] .match-player:first-of-type {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.player-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    font-weight: 500;
+}
+
+.player-name.placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.player-score {
+    font-weight: 700;
+    padding-left: 0.5rem;
+    min-width: 1.5rem;
+    text-align: right;
+}
+
+.match-player.winner {
+    background-color: rgba(34, 197, 94, 0.1);
+    /* Green tint */
+    color: #16a34a;
+    /* Green-600 */
+}
+
+.match-player.winner .player-score {
+    color: #16a34a;
+}
+
+.match-player.winner .player-name {
+    font-weight: 700;
+}
+
+/* Connectors (Pseudo-elements could be used, but keeping simple for now) */
+/* Advanced connectors would require SVG or careful CSS drawing */
+
+/* Modal Styles Reuse */
+/* Assuming usage of modal styles from Players.css or global if extracted */
