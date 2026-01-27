@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Maximize, Minimize, Trophy, Clock, Activity, X } from 'lucide-react';
 import { useMatches } from '../hooks/useMatches';
 import { usePlayers } from '../hooks/usePlayers';
-import { getBestOf } from '../utils/matchUtils';
+import { getBestOf, compareMatchIds } from '../utils/matchUtils';
 import BracketCanvas from '../components/BracketCanvas';
 import './Live.css';
 
@@ -132,6 +132,7 @@ const Live = () => {
         if (!matches || matches.length === 0) {
             return { pinkQueue: [], cyanQueue: [], finishedMatches: [] };
         }
+
         // Enrich Match Objects
         const enriched = matches.map(m => {
             const p1 = players.find(p => p.id === m.player1Id);
@@ -143,24 +144,46 @@ const Live = () => {
             };
         }).filter(m => m.player1Id && m.player2Id && !m.player1.isBye && !m.player2.isBye);
 
+        // Separate finished and active matches
+        const finished = enriched.filter(m => m.winnerId);
+
+        // Active matches: Live or Pending
+        // We want to sort them semantically by ID: WB R1 M1, WB R1 M2...
+        // This ensures M1 is visually "before" M10.
+        // Importing compareMatchIds is needed (added to top imports in next step if not present)
+        const activeMatches = enriched.filter(m => !m.winnerId)
+            .sort((a, b) => compareMatchIds(a.id, b.id));
+
         const pinkQ = [];
         const cyanQ = [];
-        const finished = [];
 
-        enriched.forEach((m, index) => {
+        // Distribute Active Matches to Courts based on sorted order.
+        // 1st match (M1) -> Pink
+        // 2nd match (M2) -> Cyan
+        // 3rd (M3) -> Pink queue
+        // 4th (M4) -> Cyan queue
+        activeMatches.forEach((m, index) => {
             const matchOrder = index + 1;
             const court = matchOrder % 2 !== 0 ? 'courtPink' : 'courtCyan';
             const matchWithCourt = { ...m, assignedCourt: court, matchOrder };
 
-            if (m.winnerId) {
-                finished.push(matchWithCourt);
-            } else {
-                if (court === 'courtPink') pinkQ.push(matchWithCourt);
-                else cyanQ.push(matchWithCourt);
-            }
+            if (court === 'courtPink') pinkQ.push(matchWithCourt);
+            else cyanQ.push(matchWithCourt);
         });
 
-        const recentFinished = finished.reverse().slice(0, 4);
+        // For finished matches, we might want to keep court info if we tracked it, 
+        // but here we just assign strictly for display if needed or leave empty.
+        // The original logic assigned courts to all. Let's replicate strict assignment logic for consistency or just return list.
+        // The display logic for recent results uses 'assignedCourt', so we should map that if possible.
+        // Since we don't store court permanently, we can't perfectly recall where M1 happened if M1 is finished.
+        // We will mock it or just use 'courtPink' default for finished to avoid errors, or try to infer.
+        // Actually best is to just properly attribute them if they were part of the sequence.
+        // Simplification: Render them without specific court color dependency if possible, or alternating.
+        const enrichedFinished = finished.map((m, i) => ({
+            ...m, assignedCourt: i % 2 === 0 ? 'courtPink' : 'courtCyan'
+        }));
+
+        const recentFinished = enrichedFinished.reverse().slice(0, 4);
         return { pinkQueue: pinkQ, cyanQueue: cyanQ, finishedMatches: recentFinished };
     }, [matches, players]);
 
