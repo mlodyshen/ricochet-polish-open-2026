@@ -8,7 +8,8 @@ const SEEDING_ORDER = [
 ];
 
 // Helper: Define static structure of match sources
-const getBracketBlueprint = () => {
+// Helper: Define static structure of match sources
+export const getBracketBlueprint = () => {
     const allMatches = [];
 
     // WB (5 Rounds)

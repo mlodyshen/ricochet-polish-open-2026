@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import '../pages/Brackets.css';
 import RacketBadge from './RacketBadge';
 import { getRacketPathConfig, getZoneConfig } from '../utils/racketPathUtils';
+import { getBracketBlueprint } from '../utils/bracketLogic';
 
 const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visibleSections = ['wb', 'mid', 'lb'] }) => {
     const { t } = useTranslation();
@@ -211,8 +212,18 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                             { id: 'p13', title: 'Places 13-16' },
                             { id: 'p9', title: 'Places 9-12' }
                         ].map(group => {
-                            const groupMatches = enrichedMatches.filter(m => m.bracket.startsWith(group.id)).sort((a, b) => a.round - b.round || byMatchId(a, b));
-                            if (groupMatches.length === 0) return null;
+                            let groupMatches = enrichedMatches.filter(m => m.bracket.startsWith(group.id));
+                            if (groupMatches.length === 0) {
+                                groupMatches = getBracketBlueprint().filter(m => m.bracket.startsWith(group.id)).map(m => ({
+                                    ...m,
+                                    player1: null,
+                                    player2: null,
+                                    score1: null,
+                                    score2: null,
+                                    status: 'scheduled'
+                                }));
+                            }
+                            groupMatches.sort((a, b) => a.round - b.round || byMatchId(a, b));
 
                             // Group by round
                             const rounds = [];
@@ -239,7 +250,12 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                         {/* Singles (5-6, 7-8) */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', justifyContent: 'center' }}>
                             {['p7', 'p5'].map(bid => {
-                                const m = enrichedMatches.find(x => x.bracket === bid);
+                                let m = enrichedMatches.find(x => x.bracket === bid);
+                                if (!m) {
+                                    const bp = getBracketBlueprint().find(x => x.bracket === bid);
+                                    if (bp) m = { ...bp, player1: null, player2: null, score1: null, score2: null, status: 'scheduled' };
+                                }
+
                                 return m ? (
                                     <div key={bid} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <div className="round-header">{bid === 'p5' ? '5th Place' : '7th Place'}</div>
