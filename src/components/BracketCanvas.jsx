@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useLayoutEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '../pages/Brackets.css';
@@ -6,28 +6,8 @@ import RacketBadge from './RacketBadge';
 import { getRacketPathConfig } from '../utils/racketPathUtils';
 import { getBracketBlueprint } from '../utils/bracketLogic';
 
-// Helper for colors
-const PATH_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
-const getMatchColor = (id, bracket, round, mNum) => {
-    // Try to get from racket config first
-    const cfg = getRacketPathConfig(id, bracket, round, mNum);
-    if (cfg && cfg.colorKey) {
-        // Map key to approx hex if needed, or use CSS var. 
-        // For distinct lines, let's use fixed hexes mapped to COLOR_KEYS order
-        const keys = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
-        const idx = keys.indexOf(cfg.colorKey);
-        if (idx >= 0) return PATH_COLORS[idx];
-    }
-    // Fallback: cycle based on seed/hash
-    const hash = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    return PATH_COLORS[hash % PATH_COLORS.length];
-};
-
 const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visibleSections = ['wb', 'mid', 'lb'] }) => {
     const { t } = useTranslation();
-    const containerRef = useRef(null);
-    const matchRefs = useRef({});
-    const [paths, setPaths] = useState([]);
 
     // --- 1. Data Preparation ---
     const enrichedMatches = useMemo(() => {
@@ -71,83 +51,6 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
         { id: '9-12', brackets: ['p9', 'p11'], title: 'Places 9-12', color: '#84cc16' }
     ];
 
-    // --- 2. Path Calculation ---
-    useLayoutEffect(() => {
-        if (!containerRef.current) return;
-        const newPaths = [];
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const scrollLeft = containerRef.current.scrollLeft;
-        const scrollTop = containerRef.current.scrollTop;
-
-        enrichedMatches.forEach(m => {
-            const srcEl = matchRefs.current[m.id];
-            if (!srcEl) return;
-            const srcRect = srcEl.getBoundingClientRect();
-
-            // Start Point: Right Middle
-            // Coordinates relative to container (accounting for scroll)
-            const startX = srcRect.right - containerRect.left + scrollLeft;
-            const startY = srcRect.top - containerRect.top + scrollTop + (srcRect.height / 2);
-
-            const color = getMatchColor(m.id, m.bracket, m.round, getMatchNumber(m.id));
-
-            // Winner Path
-            if (m.nextMatchId) {
-                const destEl = matchRefs.current[m.nextMatchId];
-                if (destEl) {
-                    const destRect = destEl.getBoundingClientRect();
-                    const endX = destRect.left - containerRect.left + scrollLeft;
-                    const endY = destRect.top - containerRect.top + scrollTop + (destRect.height / 2);
-
-                    // Sigmoid Curve
-                    const dist = endX - startX;
-                    const cp1x = startX + dist * 0.5;
-                    const cp2x = endX - dist * 0.5;
-
-                    newPaths.push({
-                        id: `${m.id}-win`,
-                        d: `M ${startX} ${startY} C ${cp1x} ${startY}, ${cp2x} ${endY}, ${endX} ${endY}`,
-                        color,
-                        type: 'winner'
-                    });
-                }
-            }
-
-            // Loser Path (Consolation)
-            if (m.consolationMatchId) {
-                const destEl = matchRefs.current[m.consolationMatchId];
-                if (destEl) {
-                    const destRect = destEl.getBoundingClientRect();
-                    const endX = destRect.left - containerRect.left + scrollLeft;
-                    const endY = destRect.top - containerRect.top + scrollTop + (destRect.height / 2);
-
-                    // Logic: Down then Right, or Dive
-                    // Start from right, curve down/up significantly
-                    const midX = (startX + endX) / 2;
-                    // If going backwards (LB is left of current?), handle gracefully
-                    // But assume horizontal flow -> destination is likely to the right or below-right.
-
-                    // Simple Curve
-                    const cp1x = startX + 20;
-                    const cp1y = startY + (endY - startY) * 0.5;
-                    const cp2x = endX - 20;
-
-                    // If destination is purely below (vertical spacing mainly), adjust CP
-                    // Let's use standard sigmoid with vertical bias
-                    newPaths.push({
-                        id: `${m.id}-loss`,
-                        d: `M ${startX} ${startY} C ${startX + 50} ${startY}, ${endX - 50} ${endY}, ${endX} ${endY}`,
-                        color,
-                        type: 'loser',
-                        dash: '4 4' // Dashed for loser? Or just solid as requested
-                    });
-                }
-            }
-        });
-        setPaths(newPaths);
-    }, [enrichedMatches, matches]); // Re-calc on data change or resize (resize not observed here but usually ok)
-
-
     // --- 3. Render Match Card ---
     const renderMatch = (match, customHeader = null, width = '240px') => {
         const p1 = match.player1;
@@ -166,7 +69,6 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
         return (
             <div
-                ref={el => matchRefs.current[match.id] = el}
                 key={match.id}
                 onClick={isClickable ? () => onMatchClick(match) : undefined}
                 style={{
@@ -215,7 +117,6 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
     return (
         <div className="bracket-scroll-container" style={{ width: '100%', height: '100%', overflowX: 'auto', background: '#0f172a', position: 'relative' }}>
             <div
-                ref={containerRef}
                 className="bracket-layout"
                 style={{
                     display: 'flex',
@@ -226,31 +127,6 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                     position: 'relative'
                 }}
             >
-                {/* SVG Layer */}
-                <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}>
-                    <defs>
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                            <feMerge>
-                                <feMergeNode in="coloredBlur" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
-                    </defs>
-                    {paths.map(p => (
-                        <path
-                            key={p.id}
-                            d={p.d}
-                            stroke={p.color}
-                            strokeWidth="2"
-                            fill="none"
-                            opacity="0.5"
-                            strokeDasharray={p.dash || 'none'}
-                            filter="url(#glow)"
-                        />
-                    ))}
-                </svg>
-
                 {/* Section: Winners Bracket */}
                 {visibleSections.includes('wb') && (
                     <div className="section-wb" style={{ display: 'flex', flexDirection: 'column' }}>
