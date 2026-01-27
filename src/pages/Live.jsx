@@ -47,16 +47,15 @@ const AutoScaledBracket = ({ matches, players, visibleSections = ['wb', 'mid', '
             window.removeEventListener('resize', calculateScale);
             clearTimeout(timer);
         };
-    };
-}, [matches, players, visibleSections]);
+    }, [matches, players, visibleSections]);
 
-return (
-    <div ref={containerRef} className="auto-bracket-wrapper">
-        <div ref={contentRef} className="scaled-content" style={{ transform: `scale(${scale})` }}>
-            <BracketCanvas matches={matches} players={players} readonly={true} visibleSections={visibleSections} />
+    return (
+        <div ref={containerRef} className="auto-bracket-wrapper">
+            <div ref={contentRef} className="scaled-content" style={{ transform: `scale(${scale})` }}>
+                <BracketCanvas matches={matches} players={players} readonly={true} visibleSections={visibleSections} />
+            </div>
         </div>
-    </div>
-);
+    );
 };
 
 const splitName = (fullName) => {
