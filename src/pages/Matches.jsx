@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMatches } from '../hooks/useMatches';
 import { useTournament } from '../contexts/TournamentContext';
 import { updateBracketMatch, clearBracketMatch, generateDoubleEliminationBracket } from '../utils/bracketLogic';
-import { getBestOf, getMatchStatus, canEditMatch } from '../utils/matchUtils';
+import { getBestOf, getMatchStatus, canEditMatch, compareMatchIds } from '../utils/matchUtils';
 import { Edit2, Trophy, Clock, Activity, CheckCircle, Save, X, Trash2 } from 'lucide-react';
 import './Matches.css';
 import { usePlayers } from '../hooks/usePlayers';
@@ -205,7 +205,8 @@ const Matches = () => {
         }).filter(m => m.player1Id && m.player2Id && !m.player1.isBye && !m.player2.isBye);
 
         const liveMatches = enriched.filter(m => m.status === 'live');
-        const pendingMatches = enriched.filter(m => m.status === 'pending');
+        // Sort pending matches by ID so they appear in logical bracket order (e.g. WB R1 M1, M2...)
+        const pendingMatches = enriched.filter(m => m.status === 'pending').sort((a, b) => compareMatchIds(a.id, b.id));
         const doneMatches = enriched.filter(m => m.status === 'finished');
 
         let current = null;
