@@ -137,7 +137,9 @@
         "finalBadge": "Finał",
         "generateNew": "Generuj Nową",
         "resetConfirm": "To zresetuje obecną drabinkę. Kontynuować?",
-        "editScoreTitle": "Edytuj Wynik"
+        "editScoreTitle": "Edytuj Wynik",
+        "sourceWinner": "Wygrany z meczu {{n}}",
+        "sourceLoser": "Przegrany z meczu {{n}}"
     },
     "standings": {
         "description": "Klasyfikacja aktualizowana po zakończeniu udziału w turnieju."
