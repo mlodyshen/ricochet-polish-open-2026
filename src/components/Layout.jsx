@@ -54,8 +54,8 @@ const Layout = () => {
         return isAuthenticated;
     });
 
-    // Check if we are in Live View Presentation Mode
-    const isLiveView = location.pathname === '/live';
+    // Check if we are in Live View Presentation Mode (TV Mode)
+    const isLiveView = location.pathname === '/live' && new URLSearchParams(location.search).get('mode') === 'tv';
 
     return (
         <div className="app-container">

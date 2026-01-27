@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Maximize, Minimize, Trophy, Clock, Activity, PauseCircle, X } from 'lucide-react';
 import { useMatches } from '../hooks/useMatches';
 import { usePlayers } from '../hooks/usePlayers';
 import { getBestOf } from '../utils/matchUtils';
-import { RefreshCw, Trophy, Clock, Activity, PauseCircle } from 'lucide-react';
 import BracketCanvas from '../components/BracketCanvas';
 import './Live.css';
 
@@ -68,6 +69,11 @@ const Live = () => {
     const { t } = useTranslation();
     const { matches } = useMatches();
     const { players } = usePlayers();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // TV Mode Detection
+    const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
 
     // State
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -105,6 +111,14 @@ const Live = () => {
 
     const handleRefresh = () => {
         window.location.reload();
+    };
+
+    const toggleTvMode = () => {
+        if (isTvMode) {
+            navigate('/live');
+        } else {
+            navigate('/live?mode=tv');
+        }
     };
 
     const handleInteraction = () => {
@@ -286,11 +300,24 @@ const Live = () => {
     const progressWidth = isPaused ? 100 : ((timeLeft / 45) * 100);
 
     return (
-        <div className="live-container" onClick={handleInteraction}>
+        <div className={`live-container ${isTvMode ? 'tv-mode' : ''}`} onClick={handleInteraction}>
             {/* Carousel Progress Bar */}
             <div className="carousel-progress-bar" style={{ width: `${progressWidth}%`, opacity: isPaused ? 0.5 : 1 }}></div>
 
-            <header className="live-header">
+            {/* TV Mode Controls */}
+            <div className="tv-controls" style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 10000 }}>
+                {isTvMode ? (
+                    <button onClick={(e) => { e.stopPropagation(); toggleTvMode(); }} className="btn-secondary" style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }}>
+                        <X size={20} style={{ marginRight: '0.5rem' }} /> Exit TV
+                    </button>
+                ) : (
+                    <button onClick={toggleTvMode} className="btn-primary">
+                        <Maximize size={18} style={{ marginRight: '0.5rem' }} /> TV Mode
+                    </button>
+                )}
+            </div>
+
+            <header className="live-header" style={{ paddingRight: isTvMode ? '120px' : '0' }}>
                 <div>
                     <h1 className="live-title">{t('live.title')}</h1>
                     {isPaused && (
@@ -309,7 +336,6 @@ const Live = () => {
                         <Activity size={14} />
                         {t('live.lastUpdate')} {secondsAgo < 5 ? t('live.justNow') : `${secondsAgo}${t('live.secondsAgo')}`}
                     </div>
-                    {/* Refresh hidden to keep clean or keep it? Keeping it. */}
                 </div>
             </header>
 
