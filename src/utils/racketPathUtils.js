@@ -72,3 +72,27 @@ export const getRacketPathConfig = (matchId, bracketType, round, matchNumber) =>
 
     return null;
 };
+
+/**
+ * Returns Zone Configuration for a given Bracket Volume (Column/Round).
+ * Specifies what place the Loser gets.
+ */
+export const getZoneConfig = (bracketType, round) => {
+    if (bracketType === 'lb') {
+        switch (round) {
+            case 1: return { label: 'Survival Stage', places: '25-32', color: '#ef4444' }; // Red - High danger
+            case 2: return { label: 'Round 2', places: '17-24', color: '#f97316' }; // Orange
+            case 3: return { label: 'Sweet 16 Qualifier', places: '13-16', color: '#eab308' }; // Yellow
+            case 4: return { label: 'Top 12 Battle', places: '9-12', color: '#84cc16' }; // Lime
+            case 5: return { label: 'Quarter-Finalist', places: '7-8', color: '#22c55e' }; // Green
+            case 6: return { label: 'Top 6', places: '5-6', color: '#06b6d4' }; // Cyan
+            case 7: return { label: 'Semi-Finalist Bubble', places: '4th', color: '#3b82f6' }; // Blue
+            case 8: return { label: 'Podium Switch', places: '3rd', color: '#a855f7' }; // Purple
+            default: return null;
+        }
+    }
+    if (bracketType === 'gf') {
+        return { label: 'Grand Final', places: '1-2', color: '#eab308' }; // Gold
+    }
+    return null;
+};

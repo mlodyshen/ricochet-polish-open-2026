@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 // We assume parent imports Brackets.css or we import it here
 import '../pages/Brackets.css';
 import RacketBadge from './RacketBadge';
-import { getRacketPathConfig } from '../utils/racketPathUtils';
+import { getRacketPathConfig, getZoneConfig } from '../utils/racketPathUtils';
 
 const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visibleSections = ['wb', 'mid', 'lb'] }) => {
     const { t } = useTranslation();
@@ -47,8 +47,12 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
         const isClickable = !readonly && onMatchClick && !match.player1?.isBye && !match.player2?.isBye;
         const style = isClickable ? { cursor: 'pointer' } : { cursor: 'default' };
         const onClick = isClickable ? () => onMatchClick(match) : undefined;
-        // If readonly (Live view), we might want a different title or none
-        const title = isClickable ? (match.id + " " + t('brackets.clickToEdit')) : match.id;
+
+        // Zone Info for Tooltip
+        const zone = getZoneConfig(match.bracket, match.round);
+        const zoneTooltip = zone ? `\n[${zone.label}]\n🏆 Win: Advances\n💀 Loss: ${zone.places} Place` : '';
+        const baseTitle = isClickable ? (match.id + " " + t('brackets.clickToEdit')) : match.id;
+        const title = baseTitle + zoneTooltip;
 
         const totalScore = (match.score1 || 0) + (match.score2 || 0);
         const showScore = match.status === 'finished' || (match.status === 'live' && totalScore > 0);
@@ -156,12 +160,39 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 <div className="bracket-section section-lb">
                     <div className="section-title lb-title">{t('brackets.lb')}</div>
                     <div className="bracket-rounds-container">
-                        {lbRounds.map((roundMatches, i) => (
-                            <div key={`lb-r${i}`} className="round-column">
-                                <div className="round-header">LB {t('brackets.round')} {i + 1}</div>
-                                {roundMatches.map(renderMatch)}
-                            </div>
-                        ))}
+                        {lbRounds.map((roundMatches, i) => {
+                            const zone = getZoneConfig('lb', i + 1);
+                            const wrapperStyle = zone ? {
+                                border: `1px dashed ${zone.color}60`,
+                                background: `linear-gradient(to bottom, ${zone.color}08, transparent)`,
+                                borderRadius: '12px',
+                                padding: '10px',
+                                position: 'relative',
+                                margin: '0 4px',
+                                minWidth: '220px'
+                            } : {};
+
+                            return (
+                                <div key={`lb-r${i}`} className="round-column" style={wrapperStyle}>
+                                    {zone && (
+                                        <div style={{
+                                            position: 'absolute', top: '-12px', right: '10px',
+                                            fontSize: '0.65rem', fontWeight: 'bold', textTransform: 'uppercase',
+                                            color: zone.color, background: 'var(--bg-card)',
+                                            padding: '2px 8px', border: `1px solid ${zone.color}`, borderRadius: '20px',
+                                            zIndex: 5, whiteSpace: 'nowrap',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                        }}>
+                                            {zone.label}
+                                        </div>
+                                    )}
+                                    <div className="round-header" style={{ marginBottom: zone ? '1rem' : '0.5rem' }}>
+                                        LB {t('brackets.round')} {i + 1}
+                                    </div>
+                                    {roundMatches.map(renderMatch)}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
