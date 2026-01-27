@@ -5,6 +5,20 @@
     font-family: 'Inter', sans-serif;
     color: var(--text-primary);
     padding-bottom: 4rem;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Progress Bar */
+.carousel-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: var(--accent-pink);
+    z-index: 9999;
+    transition: width 1s linear;
+    box-shadow: 0 0 10px var(--accent-pink);
 }
 
 .live-header {
@@ -13,6 +27,8 @@
     align-items: center;
     margin-bottom: 2rem;
     padding: 0 1rem;
+    position: relative;
+    z-index: 10;
 }
 
 .live-title {
@@ -23,6 +39,18 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* Digital Clock */
+.digital-clock {
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
 }
 
 .last-updated {
@@ -49,6 +77,40 @@
 .refresh-btn:hover {
     background: var(--bg-secondary);
     color: var(--text-primary);
+}
+
+/* View Layering for Fade Effect */
+.view-layer {
+    position: absolute;
+    top: 100px;
+    /* Offset for header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    /* min-height: calc(100vh - 100px); */
+    transition: opacity 1.5s ease-in-out;
+    background: var(--bg-primary);
+    /* Ensure background to cover other layer */
+}
+
+.view-layer.active {
+    opacity: 1;
+    z-index: 5;
+    pointer-events: auto;
+}
+
+.view-layer.inactive {
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Panel Layout */
+.panel-content {
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .courts-grid {
@@ -270,4 +332,21 @@
     border-radius: 4px;
     align-self: flex-start;
     font-weight: 700;
+}
+
+/* Bracket Auto Scale */
+.auto-bracket-wrapper {
+    width: 100%;
+    height: calc(100vh - 120px);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.scaled-content {
+    transform-origin: top center;
+    width: max-content;
+    /* transition: transform 0.5s ease-out; */
 }

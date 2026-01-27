@@ -4,10 +4,24 @@ import { usePlayers } from '../hooks/usePlayers';
 import { useMatches } from '../hooks/useMatches';
 import { generateDoubleEliminationBracket, updateBracketMatch } from '../utils/bracketLogic';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import { ZoomIn, ZoomOut, RotateCcw, Save, RefreshCw, X, Trophy } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Save, RefreshCw, X } from 'lucide-react';
 import './Brackets.css';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
+import BracketCanvas from '../components/BracketCanvas';
+
+const SCORE_MODAL_STYLES = {
+    overlay: {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000,
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+    },
+    content: {
+        backgroundColor: 'var(--bg-card)', padding: '2rem', borderRadius: '12px',
+        width: '90%', maxWidth: '400px',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+    }
+};
 
 const Brackets = () => {
     const { t } = useTranslation();
@@ -18,20 +32,6 @@ const Brackets = () => {
     const [scoreB, setScoreB] = useState('');
     const { isAuthenticated } = useAuth();
     const { activeTournamentId, updateTournament } = useTournament();
-
-    // Enrich matches for display
-    const enrichedMatches = useMemo(() => {
-        if (!matches) return [];
-        return matches.map(m => {
-            const p1 = players.find(p => p.id === m.player1Id);
-            const p2 = players.find(p => p.id === m.player2Id);
-            return {
-                ...m,
-                player1: p1 || null,
-                player2: p2 || null
-            };
-        });
-    }, [matches, players]);
 
     const handleGenerate = async () => {
         if (!isAuthenticated) return;
@@ -53,7 +53,6 @@ const Brackets = () => {
 
     const handleMatchClick = (match) => {
         if (!isAuthenticated) return;
-        if (!match.player1Id || !match.player2Id) return;
         // We need to check isBye on the player objects
         if (match.player1?.isBye || match.player2?.isBye) return;
 
@@ -66,70 +65,11 @@ const Brackets = () => {
         e.preventDefault();
         if (!selectedMatch) return;
 
-        // Use raw matches for the update logic to avoid pollution?
         // updateBracketMatch rebuilds state.
         const updated = updateBracketMatch(matches, selectedMatch.id, scoreA, scoreB, selectedMatch.microPoints || [], players);
         saveMatches(updated);
         setSelectedMatch(null);
     };
-
-    // --- RENDER HELPERS ---
-    const renderMatch = (match) => {
-        const p1 = match.player1;
-        const p2 = match.player2;
-        const isWinner1 = match.winnerId && match.winnerId === p1?.id;
-        const isWinner2 = match.winnerId && match.winnerId === p2?.id;
-
-        const style = isAuthenticated ? { cursor: 'pointer' } : { cursor: 'default' };
-        const onClick = isAuthenticated ? () => handleMatchClick(match) : undefined;
-        const title = isAuthenticated ? (match.id + " " + t('brackets.clickToEdit')) : match.id;
-
-        // User request: "0:0 means match didn't happen". 
-        // Hide score if pending/scheduled OR if live but score is 0-0.
-        const totalScore = (match.score1 || 0) + (match.score2 || 0);
-        const showScore = match.status === 'finished' || (match.status === 'live' && totalScore > 0);
-
-        return (
-            <div
-                key={match.id}
-                className="match-block"
-                onClick={onClick}
-                title={title}
-                style={style}
-            >
-                <div className="match-header">
-                    <span>{match.id.toUpperCase().replace('WB-', '').replace('LB-', '').replace('GF-', t('brackets.finalBadge') + ' ')}</span>
-                </div>
-                <div className={`match-player ${isWinner1 ? 'winner' : ''}`}>
-                    <span className={`player-name ${!p1 ? 'placeholder' : ''}`}>
-                        {p1 ? p1.full_name : 'TBD'}
-                    </span>
-                    <span className="player-score">{showScore ? (match.score1 ?? 0) : '-'}</span>
-                </div>
-                <div className={`match-player ${isWinner2 ? 'winner' : ''}`}>
-                    <span className={`player-name ${!p2 ? 'placeholder' : ''}`}>
-                        {p2 ? p2.full_name : 'TBD'}
-                    </span>
-                    <span className="player-score">{showScore ? (match.score2 ?? 0) : '-'}</span>
-                </div>
-            </div>
-        );
-    };
-
-    // Helper to extract match number for sorting
-    const getMatchNumber = (id) => {
-        const parts = id.split('-m');
-        return parts.length > 1 ? parseInt(parts[1], 10) : 0;
-    };
-    const byMatchId = (a, b) => getMatchNumber(a.id) - getMatchNumber(b.id);
-
-    // Filter Matches
-    const wbMatches = enrichedMatches.filter(m => m.bracket === 'wb');
-    const lbMatches = enrichedMatches.filter(m => m.bracket === 'lb');
-    const gfMatches = enrichedMatches.filter(m => m.bracket === 'gf').sort(byMatchId);
-
-    const wbRounds = [1, 2, 3, 4, 5].map(r => wbMatches.filter(m => m.round === r).sort(byMatchId));
-    const lbRounds = [1, 2, 3, 4, 5, 6, 7, 8].map(r => lbMatches.filter(m => m.round === r).sort(byMatchId));
 
     return (
         <div style={{ width: '100%', height: 'calc(100vh - 80px)', position: 'relative' }}>
@@ -158,42 +98,12 @@ const Brackets = () => {
                         </div>
 
                         <TransformComponent wrapperClass="bracket-container" contentClass="bracket-canvas">
-                            {/* Section A: Winners Bracket */}
-                            <div className="bracket-section section-wb">
-                                <div className="section-title wb-title">{t('brackets.wb')}</div>
-                                <div className="bracket-rounds-container">
-                                    {wbRounds.map((roundMatches, i) => (
-                                        <div key={`wb-r${i}`} className="round-column">
-                                            <div className="round-header">{t('brackets.round')} {i + 1}</div>
-                                            {roundMatches.map(renderMatch)}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Section B: Finals / Mid */}
-                            <div className="bracket-section section-mid">
-                                <div className="section-title mid-title">{t('brackets.finals')}</div>
-                                <div className="round-column" style={{ justifyContent: 'center' }}>
-                                    {gfMatches.map(renderMatch)}
-                                    <div style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.5 }}>
-                                        <Trophy size={48} color="gold" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Section C: Losers Bracket */}
-                            <div className="bracket-section section-lb">
-                                <div className="section-title lb-title">{t('brackets.lb')}</div>
-                                <div className="bracket-rounds-container">
-                                    {lbRounds.map((roundMatches, i) => (
-                                        <div key={`lb-r${i}`} className="round-column">
-                                            <div className="round-header">LB {t('brackets.round')} {i + 1}</div>
-                                            {roundMatches.map(renderMatch)}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <BracketCanvas
+                                matches={matches}
+                                players={players}
+                                onMatchClick={handleMatchClick}
+                                readonly={!isAuthenticated}
+                            />
                         </TransformComponent>
                     </>
                 )}
