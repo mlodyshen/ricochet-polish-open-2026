@@ -158,6 +158,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
             {/* Section C: Losers Bracket */}
             {visibleSections.includes('lb') && (
                 <div className="bracket-section section-lb">
+                    {/* ... (existing LB code) ... */}
                     <div className="section-title lb-title">{t('brackets.lb')}</div>
                     <div className="bracket-rounds-container">
                         {lbRounds.map((roundMatches, i) => {
@@ -193,6 +194,61 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                                 </div>
                             );
                         })}
+                    </div>
+                </div>
+            )}
+
+            {/* Section D: Placement (Monrad) */}
+            {(visibleSections.includes('lb') || visibleSections.includes('all')) && (
+                <div className="bracket-section section-placement" style={{ borderLeft: '1px dashed var(--border-color)', background: 'rgba(0,0,0,0.02)' }}>
+                    <div className="section-title mid-title">PLACEMENT (MONRAD)</div>
+                    <div className="bracket-rounds-container" style={{ gap: '3rem' }}>
+
+                        {/* Helper to render a mini bracket column */}
+                        {[
+                            { id: 'p25', title: 'Places 25-32' },
+                            { id: 'p17', title: 'Places 17-24' },
+                            { id: 'p13', title: 'Places 13-16' },
+                            { id: 'p9', title: 'Places 9-12' }
+                        ].map(group => {
+                            const groupMatches = enrichedMatches.filter(m => m.bracket.startsWith(group.id)).sort((a, b) => a.round - b.round || byMatchId(a, b));
+                            if (groupMatches.length === 0) return null;
+
+                            // Group by round
+                            const rounds = [];
+                            groupMatches.forEach(m => {
+                                if (!rounds[m.round]) rounds[m.round] = [];
+                                rounds[m.round].push(m);
+                            });
+
+                            return (
+                                <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '8px' }}>
+                                    <div style={{ fontWeight: 800, textAlign: 'center', color: 'var(--text-secondary)' }}>{group.title}</div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        {rounds.map((rMatches, idx) => rMatches && (
+                                            <div key={idx} className="round-column" style={{ minWidth: '180px', gap: '1rem' }}>
+                                                <div className="round-header">R{idx}</div>
+                                                {rMatches.map(renderMatch)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {/* Singles (5-6, 7-8) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', justifyContent: 'center' }}>
+                            {['p7', 'p5'].map(bid => {
+                                const m = enrichedMatches.find(x => x.bracket === bid);
+                                return m ? (
+                                    <div key={bid} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div className="round-header">{bid === 'p5' ? '5th Place' : '7th Place'}</div>
+                                        {renderMatch(m)}
+                                    </div>
+                                ) : null;
+                            })}
+                        </div>
+
                     </div>
                 </div>
             )}

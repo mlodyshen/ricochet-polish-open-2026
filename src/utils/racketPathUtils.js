@@ -94,5 +94,14 @@ export const getZoneConfig = (bracketType, round) => {
     if (bracketType === 'gf') {
         return { label: 'Grand Final', places: '1-2', color: '#eab308' }; // Gold
     }
+    // Placement Brackets
+    if (bracketType.startsWith('p')) {
+        if (bracketType.includes('25') || bracketType.includes('29')) return { label: 'Placement 25-32', places: '25-32', color: '#94a3b8' };
+        if (bracketType.includes('17') || bracketType.includes('21')) return { label: 'Placement 17-24', places: '17-24', color: '#94a3b8' };
+        if (bracketType.includes('13') || bracketType.includes('15')) return { label: 'Placement 13-16', places: '13-16', color: '#94a3b8' };
+        if (bracketType.includes('9') || bracketType.includes('11')) return { label: 'Placement 9-12', places: '9-12', color: '#94a3b8' };
+        if (bracketType === 'p7') return { label: '7th Place', places: '7-8', color: '#94a3b8' }; // Actually winner 7, loser 8
+        if (bracketType === 'p5') return { label: '5th Place', places: '5-6', color: '#94a3b8' };
+    }
     return null;
 };
