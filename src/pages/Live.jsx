@@ -397,13 +397,13 @@ const Live = () => {
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                                        <span style={{ color: match.winnerId === match.player1?.id ? 'var(--accent-green)' : 'inherit' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', color: match.winnerId === match.player1?.id ? 'var(--accent-green)' : 'inherit' }}>
                                             <PlayerFlag countryCode={match.player1?.country} /> {match.player1?.full_name || 'TBD'}
                                         </span>
                                         <span>{match.score1}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                                        <span style={{ color: match.winnerId === match.player2?.id ? 'var(--accent-green)' : 'inherit' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', color: match.winnerId === match.player2?.id ? 'var(--accent-green)' : 'inherit' }}>
                                             <PlayerFlag countryCode={match.player2?.country} /> {match.player2?.full_name || 'TBD'}
                                         </span>
                                         <span>{match.score2}</span>

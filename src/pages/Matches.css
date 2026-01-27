@@ -305,11 +305,14 @@
 
 /* Player Flag */
 .player-flag {
-    width: 22px;
-    height: auto;
+    width: 24px !important;
+    height: auto !important;
+    max-height: 18px;
     border-radius: 2px;
     margin-right: 6px;
+    /* Keep margin here as we might not use flex gap in Matches.jsx spans */
     vertical-align: middle;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     display: inline-block;
+    object-fit: contain;
 }
