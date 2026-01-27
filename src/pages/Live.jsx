@@ -221,7 +221,24 @@ const Live = () => {
         );
     };
 
-    const renderUpcomingList = (matchesList) => {
+    const renderUpcomingList = (matchesList, currentMatch) => {
+        // Trigger Logic
+        let showReadinessAlert = false;
+
+        if (currentMatch && !currentMatch.winnerId) {
+            const bestOf = getBestOf(currentMatch.bracket);
+            const s1 = currentMatch.score1 || 0;
+            const s2 = currentMatch.score2 || 0;
+
+            if (bestOf === 3) {
+                // BO3: Trigger if score is 1:0, 0:1 or 1:1 (i.e. someone has 1 set)
+                if (s1 === 1 || s2 === 1) showReadinessAlert = true;
+            } else {
+                // BO5: Trigger if someone has 2 sets (2:0, 2:1, 2:2 etc)
+                if (s1 === 2 || s2 === 2) showReadinessAlert = true;
+            }
+        }
+
         if (!matchesList || matchesList.length === 0) {
             return (
                 <div className="upcoming-item" style={{ justifyContent: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
@@ -229,16 +246,28 @@ const Live = () => {
                 </div>
             );
         }
-        return matchesList.map(match => (
-            <div key={match.id} className="upcoming-item">
-                <div style={{ fontWeight: 600, flex: 1 }}>
-                    {match.player1?.full_name || 'TBD'} <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>vs</span> {match.player2?.full_name || 'TBD'}
+        return matchesList.map((match, idx) => {
+            const isFirst = idx === 0;
+            const alertActive = isFirst && showReadinessAlert;
+
+            return (
+                <div key={match.id} className={`upcoming-item ${alertActive ? 'readiness-alert' : ''}`}>
+                    {alertActive && (
+                        <div className="alert-badge">
+                            Następny mecz: Proszę o gotowość przy korcie ⏳
+                        </div>
+                    )}
+                    <div style={{ fontWeight: 600, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <span>
+                            {match.player1?.full_name || 'TBD'} <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>vs</span> {match.player2?.full_name || 'TBD'}
+                        </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
+                        <div>{(match.bracket || '').toUpperCase()} R{match.round}</div>
+                    </div>
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
-                    <div>{(match.bracket || '').toUpperCase()} R{match.round}</div>
-                </div>
-            </div>
-        ));
+            );
+        });
     };
 
     return (
@@ -289,7 +318,7 @@ const Live = () => {
                             </div>
                             <div className="upcoming-section">
                                 <div className="upcoming-title"><Clock size={12} style={{ marginRight: '6px' }} /> {t('live.upcomingMatches')}</div>
-                                {renderUpcomingList(pinkState.upcoming)}
+                                {renderUpcomingList(pinkState.upcoming, pinkState.current)}
                             </div>
                         </div>
 
@@ -303,7 +332,7 @@ const Live = () => {
                             </div>
                             <div className="upcoming-section">
                                 <div className="upcoming-title"><Clock size={12} style={{ marginRight: '6px' }} /> {t('live.upcomingMatches')}</div>
-                                {renderUpcomingList(cyanState.upcoming)}
+                                {renderUpcomingList(cyanState.upcoming, cyanState.current)}
                             </div>
                         </div>
                     </div>

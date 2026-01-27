@@ -420,4 +420,42 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+}
+
+/* Readiness Alert */
+.readiness-alert {
+    border: 1px solid #f59e0b !important;
+    background: rgba(245, 158, 11, 0.05);
+    border-radius: 6px;
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem;
+    position: relative;
+    box-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
+    animation: borderColorPulse 2s infinite;
+}
+
+.alert-badge {
+    color: #f59e0b;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes borderColorPulse {
+    0% {
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    50% {
+        border-color: rgba(245, 158, 11, 1);
+    }
+
+    100% {
+        border-color: rgba(245, 158, 11, 0.4);
+    }
 }
