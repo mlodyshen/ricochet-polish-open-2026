@@ -9,6 +9,18 @@ import './Matches.css';
 import { usePlayers } from '../hooks/usePlayers';
 import { useAuth } from '../hooks/useAuth.tsx';
 
+// Helper Component for Flag
+const PlayerFlag = ({ countryCode }) => {
+    if (!countryCode) return null;
+    return (
+        <img
+            src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
+            alt={countryCode}
+            className="player-flag"
+        />
+    );
+};
+
 const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
     const bestOf = getBestOf(match.bracket);
     const winThreshold = Math.ceil(bestOf / 2);
@@ -297,7 +309,9 @@ const Matches = () => {
 
                 <div className="match-teams" style={isCompact ? { flex: 1 } : {}}>
                     <div className={`team-row ${match.winnerId === match.player1.id ? 'winner' : ''}`}>
-                        <span className="team-name" title={match.player1.full_name}>{match.player1.full_name}</span>
+                        <span className="team-name" title={match.player1.full_name}>
+                            <PlayerFlag countryCode={match.player1.country} /> {match.player1.full_name}
+                        </span>
                         <span className="team-score">{match.score1 ?? 0}</span>
                     </div>
 
@@ -305,7 +319,9 @@ const Matches = () => {
 
                     <div className={`team-row ${match.winnerId === match.player2.id ? 'winner' : ''}`}>
                         <span className="team-score">{match.score2 ?? 0}</span>
-                        <span className="team-name" title={match.player2.full_name}>{match.player2.full_name}</span>
+                        <span className="team-name" title={match.player2.full_name}>
+                            <PlayerFlag countryCode={match.player2.country} /> {match.player2.full_name}
+                        </span>
                     </div>
 
                     {isCompact && (

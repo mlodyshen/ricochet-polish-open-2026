@@ -7,6 +7,18 @@ import { usePlayers } from '../hooks/usePlayers';
 import { getBestOf, compareMatchIds } from '../utils/matchUtils';
 import './Live.css';
 
+// Helper Component for Flag
+const PlayerFlag = ({ countryCode }) => {
+    if (!countryCode) return null;
+    return (
+        <img
+            src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
+            alt={countryCode}
+            className="player-flag"
+        />
+    );
+};
+
 const splitName = (fullName) => {
     if (!fullName) return { surname: 'S.', firstName: 'Name' };
     const parts = fullName.trim().split(/\s+/);
@@ -180,7 +192,10 @@ const Live = () => {
                 </div>
                 <div className="players-versus">
                     <div className="player-container left" style={{ color: match.score1 > match.score2 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                        <div className="player-surname">{splitName(match.player1.full_name).surname}</div>
+                        <div className="player-surname">
+                            <PlayerFlag countryCode={match.player1.country} />
+                            {splitName(match.player1.full_name).surname}
+                        </div>
                         <div className="player-firstname">{splitName(match.player1.full_name).firstName}</div>
                     </div>
 
@@ -197,7 +212,18 @@ const Live = () => {
                     </div>
 
                     <div className="player-container right" style={{ color: match.score2 > match.score1 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                        <div className="player-surname">{splitName(match.player2.full_name).surname}</div>
+                        <div className="player-surname">
+                            {/* Flag before name per request, even on right side? */}
+                            {/* If right aligned, "Flag Name" might put flag far right if using flex? 
+                                 Right container has align-items: flex-end.
+                                 So elements stack vertically.
+                                 Wait, surname is a block/div?
+                                 `div.player-surname` contains text.
+                                 I'll put <PlayerFlag /> inside.
+                             */}
+                            <PlayerFlag countryCode={match.player2.country} />
+                            {splitName(match.player2.full_name).surname}
+                        </div>
                         <div className="player-firstname">{splitName(match.player2.full_name).firstName}</div>
                     </div>
                 </div>
@@ -259,7 +285,9 @@ const Live = () => {
                     )}
                     <div style={{ fontWeight: 600, flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <span>
-                            {match.player1?.full_name || 'TBD'} <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>vs</span> {match.player2?.full_name || 'TBD'}
+                            <PlayerFlag countryCode={match.player1?.country} /> {match.player1?.full_name || 'TBD'}
+                            <span style={{ color: 'var(--text-secondary)', fontWeight: 400, margin: '0 0.5rem' }}>vs</span>
+                            <PlayerFlag countryCode={match.player2?.country} /> {match.player2?.full_name || 'TBD'}
                         </span>
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
@@ -272,6 +300,16 @@ const Live = () => {
 
     return (
         <div className={`live-container ${isTvMode ? 'tv-mode' : ''}`}>
+
+            {/* TV Mode Controls */}
+            {/* ... */}
+
+            {/* Note: I need to update finishedMatches too. It's further down. */}
+            {/* I will break this into two chunks if needed, or target specific lines. */}
+            {/* The tool allows one large chunk replacement if contiguous, but these are separate functions. */}
+            {/* Wait, renderUpcomingList is defined before return. finishedMatches is inside return. */}
+            {/* I'll trigger separate replacements for safety or include enough context? */}
+            {/* I'll replace renderUpcomingList first. */}
 
             {/* TV Mode Controls */}
             <div className="tv-controls" style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 10000 }}>
@@ -359,11 +397,15 @@ const Live = () => {
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                                        <span style={{ color: match.winnerId === match.player1?.id ? 'var(--accent-green)' : 'inherit' }}>{match.player1?.full_name || 'TBD'}</span>
+                                        <span style={{ color: match.winnerId === match.player1?.id ? 'var(--accent-green)' : 'inherit' }}>
+                                            <PlayerFlag countryCode={match.player1?.country} /> {match.player1?.full_name || 'TBD'}
+                                        </span>
                                         <span>{match.score1}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                                        <span style={{ color: match.winnerId === match.player2?.id ? 'var(--accent-green)' : 'inherit' }}>{match.player2?.full_name || 'TBD'}</span>
+                                        <span style={{ color: match.winnerId === match.player2?.id ? 'var(--accent-green)' : 'inherit' }}>
+                                            <PlayerFlag countryCode={match.player2?.country} /> {match.player2?.full_name || 'TBD'}
+                                        </span>
                                         <span>{match.score2}</span>
                                     </div>
                                     {match.microPoints && match.microPoints.length > 0 && (
