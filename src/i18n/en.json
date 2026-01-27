@@ -76,7 +76,7 @@
         "lb": "Losers Bracket",
         "gf": "Finals",
         "round": "Round",
-        "liveBadge": "LIVE"
+        "readinessAlert": "Next match: Please be ready near the court ⏳"
     },
     "organizer": {
         "title": "Tournament Management",

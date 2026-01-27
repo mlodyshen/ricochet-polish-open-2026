@@ -77,7 +77,7 @@
         "lb": "Losers Bracket",
         "gf": "Finals",
         "round": "Round",
-        "liveBadge": "LIVE"
+        "readinessAlert": "Następny mecz: Proszę o gotowość przy korcie ⏳"
     },
     "organizer": {
         "title": "Zarządzanie Turniejami",

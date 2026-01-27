@@ -433,40 +433,70 @@
 
 /* Readiness Alert */
 .readiness-alert {
-    border: 1px solid #f59e0b !important;
+    outline: 2px solid #f59e0b;
+    outline-offset: -2px;
+    /* Inner outline to avoid changing dimensions */
     background: rgba(245, 158, 11, 0.05);
+    /* Optional bg highlight */
     border-radius: 6px;
-    padding: 0.5rem !important;
-    margin-bottom: 0.5rem;
     position: relative;
-    box-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
-    animation: borderColorPulse 2s infinite;
+    /* Anchor for absolute badge */
+    /* Removed padding and margin-bottom to prevent layout shift ("puchnięcie") */
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+    /* Enhanced shadow */
+    transition: all 0.3s ease;
+    /* Smooth transition for outline/shadow */
 }
 
 .alert-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    /* Pill background to cover border */
+    border: 1px solid #f59e0b;
     color: #f59e0b;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
+    padding: 2px 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    animation: pulse 1.5s infinite;
+    white-space: nowrap;
+    z-index: 5;
+    animation: badgePopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseWarning 2s infinite;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes borderColorPulse {
+@keyframes badgePopIn {
     0% {
-        border-color: rgba(245, 158, 11, 0.4);
-    }
-
-    50% {
-        border-color: rgba(245, 158, 11, 1);
+        transform: translateX(-50%) scale(0.5);
+        opacity: 0;
     }
 
     100% {
-        border-color: rgba(245, 158, 11, 0.4);
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
     }
 }
+
+@keyframes pulseWarning {
+    0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
+}
+
+/* Removed old @keyframes borderColorPulse as it's no longer used by .readiness-alert */
 
 /* Player Flag */
 .player-flag {

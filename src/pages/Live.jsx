@@ -293,7 +293,7 @@ const Live = () => {
                 <div key={match.id} className={`upcoming-item ${alertActive ? 'readiness-alert' : ''}`}>
                     {alertActive && (
                         <div className="alert-badge">
-                            Następny mecz: Proszę o gotowość przy korcie ⏳
+                            {t('live.readinessAlert')}
                         </div>
                     )}
                     <div style={{ fontWeight: 600, flex: 1, display: 'flex', flexDirection: 'column' }}>
