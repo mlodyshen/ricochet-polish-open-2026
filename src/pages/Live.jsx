@@ -412,7 +412,6 @@ const Live = () => {
                     </section>
                 </div>
 
-                {/* 2. Bracket View */}
                 {/* 2. Bracket View (WB) */}
                 <div className={`view-layer ${viewMode === 'bracket_wb' ? 'active' : 'inactive'}`}>
                     <AutoScaledBracket matches={matches} players={players} visibleSections={['wb', 'mid']} />
