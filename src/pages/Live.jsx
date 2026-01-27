@@ -441,11 +441,24 @@ const Live = () => {
             <div className="qr-widget">
                 <div className="qr-box">
                     <img
-                        src="/qr-live.png"
+                        src="/frame.png"
                         alt="Mobile Results"
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        onError={(e) => e.target.style.display = 'none'}
+                        className="qr-image"
+                        onLoad={(e) => {
+                            e.target.style.display = 'block';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'none';
+                        }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
                     />
+                    <div className="qr-placeholder" style={{ display: 'none' }}>
+                        <div className="qr-placeholder-inner">
+                            <span>SCAN</span>
+                            <span>QR</span>
+                        </div>
+                    </div>
                 </div>
                 <div className="qr-label">{t('live.scanForResults')}</div>
             </div>
