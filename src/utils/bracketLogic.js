@@ -96,33 +96,34 @@ export const getBracketBlueprint = () => {
     // Match 2: L(WB 2) + L(WB 15)
     // ... Match 8: L(WB 8) + L(WB 9)
     allMatches.filter(m => m.bracket === 'lb' && m.round === 1).forEach((m, i) => {
-        // i is 0-7 (Match 1-8)
-        const wbLow = i + 1;       // 1, 2, ... 8
-        const wbHigh = 16 - i;     // 16, 15, ... 9
-
-        m.sourceMatchId1 = `wb-r1-m${wbLow}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `wb-r1-m${wbHigh}`; m.sourceType2 = 'loser';
+        // LB R1 (17-32) - SEQUENTIAL BLOCKS
+        // Match 1: L1 + L2
+        // Match 2: L3 + L4
+        m.sourceMatchId1 = `wb-r1-m${i * 2 + 1}`; m.sourceType1 = 'loser';
+        m.sourceMatchId2 = `wb-r1-m${i * 2 + 2}`; m.sourceType2 = 'loser';
     });
 
     // LB R2 - BIG 'X' CROSS-OVER (Placement 9-16)
     // Top LB (1-4) <- Bottom WB (5-8)
     // Bottom LB (5-8) <- Top WB (1-4)
     allMatches.filter(m => m.bracket === 'lb' && m.round === 2).forEach((m, i) => {
-        // Winner from previous LB round (straight flow)
-        m.sourceMatchId1 = `lb-r1-m${i + 1}`; m.sourceType1 = 'winner';
-
-        // Loser Drop from WB R2 (Cross Halves)
-        // If i < 4 (Top LB 1-4) -> Needs WB Bottom 5-8 (Indices 4-7)
-        // If i >= 4 (Bottom LB 5-8) -> Needs WB Top 1-4 (Indices 0-3)
-        let wbIndex;
-        if (i < 4) {
-            // LB 1 (i=0) -> WB 5
-            wbIndex = i + 4; // 4, 5, 6, 7 -> matches 5, 6, 7, 8
+        // LB R2 (9-16) - BIG 'X' CROSS-OVER
+        if (i === 0) { // Match 1 (Top) <- WB 7+8 (Bottom)
+            m.sourceMatchId1 = 'wb-r2-m7'; m.sourceType1 = 'loser';
+            m.sourceMatchId2 = 'wb-r2-m8'; m.sourceType2 = 'loser';
+        } else if (i === 1) { // Match 2 (Top) <- WB 5+6 (Bottom)
+            m.sourceMatchId1 = 'wb-r2-m5'; m.sourceType1 = 'loser';
+            m.sourceMatchId2 = 'wb-r2-m6'; m.sourceType2 = 'loser';
+        } else if (i === 2) { // Match 3 (Bottom) <- WB 3+4 (Top)
+            m.sourceMatchId1 = 'wb-r2-m3'; m.sourceType1 = 'loser';
+            m.sourceMatchId2 = 'wb-r2-m4'; m.sourceType2 = 'loser';
+        } else if (i === 3) { // Match 4 (Bottom) <- WB 1+2 (Top)
+            m.sourceMatchId1 = 'wb-r2-m1'; m.sourceType1 = 'loser';
+            m.sourceMatchId2 = 'wb-r2-m2'; m.sourceType2 = 'loser';
         } else {
-            // LB 5 (i=4) -> WB 1
-            wbIndex = i - 4; // 0, 1, 2, 3 -> matches 1, 2, 3, 4
+            m.sourceMatchId1 = null;
+            m.sourceMatchId2 = null;
         }
-        m.sourceMatchId2 = `wb-r2-m${wbIndex + 1}`; m.sourceType2 = 'loser';
     });
     // LB R3
     allMatches.filter(m => m.bracket === 'lb' && m.round === 3).forEach((m, i) => {
