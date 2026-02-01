@@ -91,35 +91,36 @@ export const getBracketBlueprint = () => {
     }
 
     // LB Sources (Standard DE Logic)
-    // LB R1 - FULL MIRROR CROSS-OVER
-    // LB 1 (Top) <- WB 15, 16 (Bottom)
-    // LB 8 (Bottom) <- WB 1, 2 (Top)
+    // LB R1 - EXTREME MIRROR PAIRING
+    // Match 1: L(WB 1) + L(WB 16)
+    // Match 2: L(WB 2) + L(WB 15)
+    // ... Match 8: L(WB 8) + L(WB 9)
     allMatches.filter(m => m.bracket === 'lb' && m.round === 1).forEach((m, i) => {
-        // i: 0..7
-        // Mirror Group Index: 7 - i
-        const groupIdx = 7 - i;
-        const s1 = groupIdx * 2 + 1;
-        const s2 = groupIdx * 2 + 2;
+        // i is 0-7 (Match 1-8)
+        const wbLow = i + 1;       // 1, 2, ... 8
+        const wbHigh = 16 - i;     // 16, 15, ... 9
 
-        m.sourceMatchId1 = `wb-r1-m${s1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `wb-r1-m${s2}`; m.sourceType2 = 'loser';
+        m.sourceMatchId1 = `wb-r1-m${wbLow}`; m.sourceType1 = 'loser';
+        m.sourceMatchId2 = `wb-r1-m${wbHigh}`; m.sourceType2 = 'loser';
     });
 
-    // LB R2 - SECTION CROSS-OVER
+    // LB R2 - BIG 'X' CROSS-OVER (Placement 9-16)
     // Top LB (1-4) <- Bottom WB (5-8)
     // Bottom LB (5-8) <- Top WB (1-4)
     allMatches.filter(m => m.bracket === 'lb' && m.round === 2).forEach((m, i) => {
-        // Winner from previous LB round (straight)
+        // Winner from previous LB round (straight flow)
         m.sourceMatchId1 = `lb-r1-m${i + 1}`; m.sourceType1 = 'winner';
 
-        // Loser Drop from WB R2 (Cross)
+        // Loser Drop from WB R2 (Cross Halves)
+        // If i < 4 (Top LB 1-4) -> Needs WB Bottom 5-8 (Indices 4-7)
+        // If i >= 4 (Bottom LB 5-8) -> Needs WB Top 1-4 (Indices 0-3)
         let wbIndex;
         if (i < 4) {
-            // LB 1..4 <- WB 5..8
-            wbIndex = i + 4;
+            // LB 1 (i=0) -> WB 5
+            wbIndex = i + 4; // 4, 5, 6, 7 -> matches 5, 6, 7, 8
         } else {
-            // LB 5..8 <- WB 1..4
-            wbIndex = i - 4;
+            // LB 5 (i=4) -> WB 1
+            wbIndex = i - 4; // 0, 1, 2, 3 -> matches 1, 2, 3, 4
         }
         m.sourceMatchId2 = `wb-r2-m${wbIndex + 1}`; m.sourceType2 = 'loser';
     });
