@@ -119,9 +119,7 @@ export const getBracketBlueprint = () => {
 
         // Source 2: Loser Drop from WB R2 (Block Cross-Over)
         switch (matchNum) {
-            case 1:
-                m.sourceMatchId2 = 'TEST_KLEM_HERE'; // Truth Test requested by User
-                break;
+            case 1: m.sourceMatchId2 = 'wb-r2-m3'; break; // Top Slot gets WB M3
             case 2: m.sourceMatchId2 = 'wb-r2-m4'; break; // Top Slot gets WB M4
 
             case 3: m.sourceMatchId2 = 'wb-r2-m1'; break; // Mid-High Slot gets WB M1
