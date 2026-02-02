@@ -68,20 +68,29 @@ export const getBracketBlueprint = () => {
         nextMatchId: `gf-m1`
     });
 
-    // --- LB R1 (8 Matches) - WB R1 Losers (LINEAR NEIGHBOR MAPPING) ---
-    // User Requirement: Dół LB (M8) bierze WB M15/M16. Góra LB (M1) bierze WB M1/M2.
-    // This is simple linear mapping.
-    // LB M1 <- WB M1/M2
-    // ...
-    // LB M8 <- WB M15/M16
-    for (let i = 1; i <= 8; i++) {
+    // --- LB R1 (8 Matches) - WB R1 Losers (HARDCODED LINEAR) ---
+    // User Requirement: 1:1 Mapping.
+    // WB M1 & M2 -> LB M1 (Top)
+    // WB M15 & M16 -> LB M8 (Bottom) - Ensures Zaborowska (WB M15) goes to Bottom LB.
+    const lbR1Map = [
+        { lb: 1, wb1: 1, wb2: 2 },
+        { lb: 2, wb1: 3, wb2: 4 },
+        { lb: 3, wb1: 5, wb2: 6 },
+        { lb: 4, wb1: 7, wb2: 8 },
+        { lb: 5, wb1: 9, wb2: 10 },
+        { lb: 6, wb1: 11, wb2: 12 },
+        { lb: 7, wb1: 13, wb2: 14 },
+        { lb: 8, wb1: 15, wb2: 16 }, // Zaborowska (WB15) here
+    ];
+
+    lbR1Map.forEach(map => {
         allMatches.push({
-            id: `lb-r1-m${i}`, round: 1, bracket: 'lb',
-            sourceMatchId1: `wb-r1-m${i * 2 - 1}`, sourceType1: 'loser',
-            sourceMatchId2: `wb-r1-m${i * 2}`, sourceType2: 'loser',
-            nextMatchId: `lb-r2-m${i}` // Feeds straight to LB R2 M(i) initially, but cross happens at input of LB R2.
+            id: `lb-r1-m${map.lb}`, round: 1, bracket: 'lb',
+            sourceMatchId1: `wb-r1-m${map.wb1}`, sourceType1: 'loser',
+            sourceMatchId2: `wb-r1-m${map.wb2}`, sourceType2: 'loser',
+            nextMatchId: `lb-r2-m${map.lb}`
         });
-    }
+    });
 
     // --- LB R2 (8 Matches) - WB R2 Losers (CROSS / BIG X) ---
     // Requirement:

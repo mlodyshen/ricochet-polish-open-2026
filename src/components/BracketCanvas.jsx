@@ -255,7 +255,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 )}
 
                 {/* 3. Placement Matches */}
-                {(visibleSections.includes('lb') || visibleSections.includes('all')) && (
+                {(visibleSections.includes('lb') || visibleSections.includes('all') || visibleSections.includes('placement')) && (
                     <div className="section-monrad" style={{ display: 'flex', flexDirection: 'column', padding: '40px' }}>
                         <h2 style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 400, marginBottom: '60px', opacity: 0.3, letterSpacing: '4px', textTransform: 'uppercase' }}>Placement Matches</h2>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', maxWidth: '800px' }}>
