@@ -4,7 +4,7 @@ import { useTournament } from '../contexts/TournamentContext';
 import { db, isFirebaseConfigured } from '../lib/firebase';
 import { collection, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, writeBatch } from 'firebase/firestore';
 
-const BASE_KEY = 'brazilian_v13_FULL_PLACEMENT';
+const BASE_KEY = 'brazilian_v14_ZABOROWSKA_CORE';
 
 export const useMatches = () => {
     const [matches, setMatches] = useState([]);
