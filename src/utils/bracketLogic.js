@@ -75,16 +75,16 @@ export const getBracketBlueprint = () => {
     });
 
 
-    // --- LB R1 (8 Matches) - WB R1 Losers (HARDCODED VISUAL MIRROR) ---
-    // User Requirement:
-    // LB Match 1 (top) takes WB Match 16 (bottom) and WB Match 1 (top)
-    // LB Match 2 (below) takes WB Match 15 (Zaborowska) and WB Match 2
-    // Pattern: LB M(i) takes WB M(17-i) and WB M(i)
+    // --- LB R1 (8 Matches) - WB R1 Losers (SIMPLE LINEAR) ---
+    // User Requirement: Sequential pairing from WB R1
+    // LB Match 1 takes WB M1 & WB M2
+    // ...
+    // LB Match 8 takes WB M15 & WB M16
     for (let i = 1; i <= 8; i++) {
         allMatches.push({
             id: `lb-r1-m${i}`, round: 1, bracket: 'lb',
-            sourceMatchId1: `wb-r1-m${17 - i}`, sourceType1: 'loser',
-            sourceMatchId2: `wb-r1-m${i}`, sourceType2: 'loser',
+            sourceMatchId1: `wb-r1-m${i * 2 - 1}`, sourceType1: 'loser',
+            sourceMatchId2: `wb-r1-m${i * 2}`, sourceType2: 'loser',
             nextMatchId: `lb-r2-m${i}`
         });
     }

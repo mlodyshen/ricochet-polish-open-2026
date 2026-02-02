@@ -4,7 +4,7 @@ import { useTournament } from '../contexts/TournamentContext';
 import { db, isFirebaseConfigured } from '../lib/firebase';
 import { collection, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, writeBatch } from 'firebase/firestore';
 
-const BASE_KEY = 'ricochet_v90_CLEAN_SYNC';
+const BASE_KEY = 'ricochet_v100_SIMPLE_LINEAR_LB';
 
 export const useMatches = () => {
     const [matches, setMatches] = useState([]);
