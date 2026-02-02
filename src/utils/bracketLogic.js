@@ -57,7 +57,7 @@ export const getBracketBlueprint = () => {
     // NUCLEAR WIPE: ONLY WB R1 ALLOWED
     // ... WB R1 Config existing ...
 
-    // FASE 2: ADD LOSERS ROUND 1 (17-32) - EXTREME MIRROR 1vs16
+    // --- FASE 2: ADD LOSERS ROUND 1 (17-32) - EXTREME MIRROR 1vs16 ---
     const lbCounts = [8]; // Activate Round 1 only
     lbCounts.forEach((count, rIdx) => {
         const round = rIdx + 1;
@@ -82,6 +82,18 @@ export const getBracketBlueprint = () => {
         allMatches.push({ id: `lb-r2-m${m}`, round: 2, bracket: 'lb', sourceMatchId1: null, sourceType1: null, sourceMatchId2: null, sourceType2: null });
     }
 
+    // --- MAPPING LOGIC ---
+
+    // LB R1 Maps Losers from WB R1
+    // Logic: Match i (1-8) takes L(WB i) + L(WB 17-i)
+    allMatches.filter(m => m.bracket === 'lb' && m.round === 1).forEach((m, i) => {
+        const matchNum = i + 1;
+        const lowSeedInverted = 17 - matchNum; // if i=0(M1) -> 16
+
+        m.sourceMatchId1 = `wb-r1-m${matchNum}`; m.sourceType1 = 'loser';
+        m.sourceMatchId2 = `wb-r1-m${lowSeedInverted}`; m.sourceType2 = 'loser';
+    });
+
     // LB R2 Logic: Full Vertical Inversion
     // LB Match 1 (Top) <- LB R1 M1 (Winner) + WB R2 M8 (Loser)
     // LB Match 8 (Bottom) <- LB R1 M8 (Winner) + WB R2 M1 (Loser)
@@ -103,72 +115,8 @@ export const getBracketBlueprint = () => {
     });
     console.groupEnd();
 
-    // --- MAPPING LOGIC ---
-    // LB R1 Maps Losers from WB R1
-    // Logic: Match i (1-8) takes L(WB i) + L(WB 17-i)
-    // M1: WB L1 + WB L16
-    // M2: WB L2 + WB L15
-    // ...
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 1).forEach((m, i) => {
-        const matchNum = i + 1;
-        const lowSeedInverted = 17 - matchNum; // if i=0(M1) -> 16
-
-        m.sourceMatchId1 = `wb-r1-m${matchNum}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `wb-r1-m${lowSeedInverted}`; m.sourceType2 = 'loser';
-    });
-    // GF
-    allMatches.push({ id: 'gf-m1', round: 1, bracket: 'gf' });
-    allMatches.push({ id: 'gf-m2', round: 2, bracket: 'gf' });
-
-    // --- PLACEMENT MATCHES (Monrad Style) ---
-
-    // Place 25-32 (Losers of LB R1)
-    // P25-R1: 4 matches (Losers LB R1)
-    for (let i = 1; i <= 4; i++) allMatches.push({ id: `p25-r1-m${i}`, round: 1, bracket: 'p25', sourceMatchId1: null, sourceType1: null, sourceMatchId2: null, sourceType2: null });
-    // P25-R2: 2 matches (Winners of P25-R1 -> 25-28 bracket)
-    for (let i = 1; i <= 2; i++) allMatches.push({ id: `p25-r2-m${i}`, round: 2, bracket: 'p25' }); // 25-28 semis
-    // P29-R2: 2 matches (Losers of P25-R1 -> 29-32 bracket)
-    for (let i = 1; i <= 2; i++) allMatches.push({ id: `p29-r2-m${i}`, round: 2, bracket: 'p29' }); // 29-32 semis
-    // Finals
-    allMatches.push({ id: 'p25-f', round: 3, bracket: 'p25', label: '25th Place' });
-    allMatches.push({ id: 'p27-f', round: 3, bracket: 'p27', label: '27th Place' });
-    allMatches.push({ id: 'p29-f', round: 3, bracket: 'p29', label: '29th Place' });
-    allMatches.push({ id: 'p31-f', round: 3, bracket: 'p31', label: '31st Place' });
-
-
-    // Place 17-24 (Losers of LB R2)
-    // P17-R1: 4 matches
-    for (let i = 1; i <= 4; i++) allMatches.push({ id: `p17-r1-m${i}`, round: 1, bracket: 'p17' });
-    // P17-R2: 2 matches (Winners -> 17-20)
-    for (let i = 1; i <= 2; i++) allMatches.push({ id: `p17-r2-m${i}`, round: 2, bracket: 'p17' });
-    // P21-R2: 2 matches (Losers -> 21-24)
-    for (let i = 1; i <= 2; i++) allMatches.push({ id: `p21-r2-m${i}`, round: 2, bracket: 'p21' });
-    // Finals
-    allMatches.push({ id: 'p17-f', round: 3, bracket: 'p17', label: '17th Place' });
-    allMatches.push({ id: 'p19-f', round: 3, bracket: 'p19', label: '19th Place' });
-    allMatches.push({ id: 'p21-f', round: 3, bracket: 'p21', label: '21st Place' });
-    allMatches.push({ id: 'p23-f', round: 3, bracket: 'p23', label: '23rd Place' });
-
-    // Place 13-16 (Losers of LB R3)
-    // P13-R1: 2 matches
-    for (let i = 1; i <= 2; i++) allMatches.push({ id: `p13-r1-m${i}`, round: 1, bracket: 'p13' });
-    // Finals
-    allMatches.push({ id: 'p13-f', round: 2, bracket: 'p13', label: '13th Place' });
-    allMatches.push({ id: 'p15-f', round: 2, bracket: 'p15', label: '15th Place' });
-
-    // Place 9-12 (Losers of LB R4)
-    // P9-R1: 2 matches
-    for (let i = 1; i <= 2; i++) allMatches.push({ id: `p9-r1-m${i}`, round: 1, bracket: 'p9' });
-    // Finals
-    allMatches.push({ id: 'p9-f', round: 2, bracket: 'p9', label: '9th Place' });
-    allMatches.push({ id: 'p11-f', round: 2, bracket: 'p11', label: '11th Place' });
-
-    // Place 7-8 (Losers of LB R5)
-    allMatches.push({ id: 'p7-f', round: 1, bracket: 'p7', label: '7th Place' });
-
-    // Place 5-6 (Losers of LB R6)
-    allMatches.push({ id: 'p5-f', round: 1, bracket: 'p5', label: '5th Place' });
-    */
+    // --- COMMENTED OUT FUTURE ROUNDS FOR STABILITY ---
+    /*
 
     // --- SOURCES (COMMENTED OUT) ---
     /*
@@ -227,7 +175,11 @@ export const getBracketBlueprint = () => {
 
         console.log(`LB Match ${i + 1} [${m.id}] <== Winner LB R1 M${i + 1} + Loser WB R2 M${wbMatchNum}`);
     });
+    });
     console.groupEnd();
+
+    /*
+    // --- COMMENTED OUT FUTURE ROUNDS FOR STABILITY ---
     // LB R3
     allMatches.filter(m => m.bracket === 'lb' && m.round === 3).forEach((m, i) => {
         m.sourceMatchId1 = `lb-r2-m${i * 2 + 1}`; m.sourceType1 = 'winner';
@@ -264,6 +216,7 @@ export const getBracketBlueprint = () => {
         gf1.sourceMatchId1 = `wb-r5-m1`; gf1.sourceType1 = 'winner';
         gf1.sourceMatchId2 = `lb-r8-m1`; gf1.sourceType2 = 'winner';
     }
+    */
 
     // --- PLACEMENT SOURCES ---
 
@@ -361,7 +314,7 @@ export const getBracketBlueprint = () => {
     // 5-6 Match (from LB R6 Losers)
     const p5f = allMatches.find(m => m.id === 'p5-f');
     if (p5f) { p5f.sourceMatchId1 = 'lb-r6-m1'; p5f.sourceType1 = 'loser'; p5f.sourceMatchId2 = 'lb-r6-m2'; p5f.sourceType2 = 'loser'; }
-    */
+    // */
 
     // --- POST-PROCESSING: LINK DESTINATIONS ---
     /*
