@@ -1,11 +1,11 @@
 
 // Helper: Static Seeding Order
-const SEEDING_ORDER = [
-    [1, 32], [17, 16], [9, 24], [25, 8],
-    [5, 28], [21, 12], [13, 20], [29, 4],
-    [3, 30], [19, 14], [11, 22], [27, 6],
-    [7, 26], [23, 10], [15, 18], [31, 2]
-];
+// Helper: Static Seeding Order
+// User requested: Match 1 is 1vs32, Match 2 is 2vs31...
+const SEEDING_ORDER = [];
+for (let i = 1; i <= 16; i++) {
+    SEEDING_ORDER.push([i, 33 - i]);
+}
 
 // Helper: Define static structure of match sources
 // Helper: Define static structure of match sources
@@ -13,315 +13,86 @@ const SEEDING_ORDER = [
 export const getBracketBlueprint = () => {
     const allMatches = [];
 
-    // NUCLEAR WIPE: ONLY WB R1 ALLOWED
-    // WB (5 Rounds) -> NOW ONLY R1
-
-    // Hardcoded Player List (Mock Data for Reconstruction)
-    const wbR1Config = [
-        { id: 'wb-r1-m1', p1: 'Krůček Jiří', p2: 'Zaborowska Magda' },
-        { id: 'wb-r1-m2', p1: 'van Delden Nick', p2: 'de Ruiter Sonja' },
-        { id: 'wb-r1-m3', p1: 'Jacob Stefan', p2: 'Gober Kacper' },
-        { id: 'wb-r1-m4', p1: 'Lachacz Marta', p2: 'Andulewicz Bartosz' },
-        { id: 'wb-r1-m5', p1: 'Dylak Aleksandra', p2: 'Falada Labos' }, // Note: Names might be transposed in real data, adhering to list implies Order
-        { id: 'wb-r1-m6', p1: 'Pomian Adam', p2: 'Danielewicz Mateusz' },
-        { id: 'wb-r1-m7', p1: 'Leksowicz Maciej', p2: 'Kwiatkowska Daria' },
-        { id: 'wb-r1-m8', p1: 'Bąkowski Patryk', p2: 'Słab Joz' },
-        { id: 'wb-r1-m9', p1: 'Pretzschner Ralf', p2: 'Leśkiewicz Maciej' },
-        { id: 'wb-r1-m10', p1: 'Gober Igor', p2: 'Kołodziej-Gościej Beata' }, // Using best guess for "Kołodzie.."
-        { id: 'wb-r1-m11', p1: 'van Noort Michael', p2: 'Świdzicki Arkadiusz' },
-        { id: 'wb-r1-m12', p1: 'Bibin Daniel', p2: 'Förster Felix' },
-        { id: 'wb-r1-m13', p1: 'Gober Szymon', p2: 'Witkowski Szymon' },
-        { id: 'wb-r1-m14', p1: 'Różycki Sylwester', p2: 'Andzel Adam' },
-        { id: 'wb-r1-m15', p1: 'Klemm Rocco', p2: 'Groh Jeanette' },
-        { id: 'wb-r1-m16', p1: 'Waszkiewicz Kamil', p2: 'Faust Elisabeth' }
-    ];
-
-    wbR1Config.forEach(cfg => {
+    // --- 1. WB R1 (16 Matches) - "FULL MIRROR" SEEDING ---
+    // User Request: Match 1 (1vs32), Match 2 (2vs31)... Match 16 (16vs17)
+    // Seeding: Top seeds 1-16 match against 32-17
+    for (let i = 1; i <= 16; i++) {
+        // Seeds are implied. Match mapping only here.
         allMatches.push({
-            id: cfg.id,
+            id: `wb-r1-m${i}`,
             round: 1,
             bracket: 'wb',
-            // Pre-fill mock data for visual reconstruction
-            player1: { id: cfg.p1, full_name: cfg.p1 },
-            player2: { id: cfg.p2, full_name: cfg.p2 },
-            player1Id: cfg.p1,
-            player2Id: cfg.p2,
-            score1: 3,
-            score2: 0,
-            winnerId: cfg.p1,
-            // Sources
-            sourceMatchId1: null, sourceType1: null, sourceMatchId2: null, sourceType2: null
-        });
-    });
-
-    // NUCLEAR WIPE: ONLY WB R1 ALLOWED
-    // ... WB R1 Config existing ...
-
-    // --- FASE 2: LB ROUND 1 (17-32) ---
-    // Logic: Match i (1-8) takes Loser WB i + Loser WB (17-i)
-    for (let i = 1; i <= 8; i++) {
-        const wbMatchNumA = i;
-        const wbMatchNumB = 17 - i;
-        allMatches.push({
-            id: `lb-r1-m${i}`, round: 1, bracket: 'lb',
-            sourceMatchId1: `wb-r1-m${wbMatchNumA}`, sourceType1: 'loser',
-            sourceMatchId2: `wb-r1-m${wbMatchNumB}`, sourceType2: 'loser'
+            // No strict source, it's seeding level
+            sourceMatchId1: null, sourceType1: null,
+            sourceMatchId2: null, sourceType2: null,
+            nextMatchId: `wb-r2-m${Math.ceil(i / 2)}`
         });
     }
 
-    // --- FASE 3: WB ROUND 2 (1-16) ---
-    // Logic: Match i (1-8) takes Winner WB (2*i-1) + Winner WB (2*i)
+    // --- 2. WB R2 (8 Matches) ---
+    // Standard progression: Winners of R1
+    // Match 1 takes Winner M1 + Winner M2 (implied by sequential list 1-16)
     for (let i = 1; i <= 8; i++) {
         allMatches.push({
-            id: `wb-r2-m${i}`, round: 2, bracket: 'wb',
-            score1: 3, score2: 0, // Auto-advance for testing
-            sourceMatchId1: `wb-r1-m${i * 2 - 1}`, sourceType1: 'winner',
-            sourceMatchId2: `wb-r1-m${i * 2}`, sourceType2: 'winner'
+            id: `wb-r2-m${i}`,
+            round: 2,
+            bracket: 'wb',
+            sourceMatchId1: `wb-r1-m${(i * 2) - 1}`, sourceType1: 'winner',
+            sourceMatchId2: `wb-r1-m${i * 2}`, sourceType2: 'winner',
+            nextMatchId: `wb-r3-m${Math.ceil(i / 2)}`
         });
     }
 
-    // --- FASE 4: LB ROUND 2 (Placement 9-16) - "BIG X" INVERSION ---
-    // Logic: LB R2 M(i) <- Loser WB R2 M(9-i)
+    // --- 3. WB R3 (4 Matches) ---
+    for (let i = 1; i <= 4; i++) {
+        allMatches.push({
+            id: `wb-r3-m${i}`,
+            round: 3,
+            bracket: 'wb',
+            sourceMatchId1: `wb-r2-m${(i * 2) - 1}`, sourceType1: 'winner',
+            sourceMatchId2: `wb-r2-m${i * 2}`, sourceType2: 'winner'
+        });
+    }
+
+    // --- 4. LB R1 (8 Matches) - WB R1 Losers ---
+    // Standard drop: M1 takes Loser WB M1 + Loser WB M2
+    for (let i = 1; i <= 8; i++) {
+        allMatches.push({
+            id: `lb-r1-m${i}`,
+            round: 1,
+            bracket: 'lb',
+            sourceMatchId1: `wb-r1-m${(i * 2) - 1}`, sourceType1: 'loser',
+            sourceMatchId2: `wb-r1-m${i * 2}`, sourceType2: 'loser',
+            nextMatchId: `lb-r2-m${i}`
+        });
+    }
+
+    // --- 5. LB R2 (8 Matches) - "BIG X" / VERTICAL INVERSION ---
+    // Winners of LB R1 vs Losers of WB R2
+    // Logic: WB R2 Losers are inverted.
+    // Match i in LB R2 takes:
+    //  - Source 1: Winner LB R1 Match i (Straight)
+    //  - Source 2: Loser WB R2 Match (9 - i) (Inverted/Crossed)
     for (let i = 1; i <= 8; i++) {
         const invertedWbMatch = 9 - i;
         allMatches.push({
-            id: `lb-r2-m${i}`, round: 2, bracket: 'lb',
-            sourceMatchId1: `lb-r1-m${i}`, sourceType1: 'winner', // Straight flow from LB R1
-            sourceMatchId2: `wb-r2-m${invertedWbMatch}`, sourceType2: 'loser' // CROSS-OVER
-        });
-        console.log(`Inversion confirmed: WB M${invertedWbMatch} -> LB M${i}`);
-    }
-
-    // --- STOP HERE FOR NOW (CLEAN BUILD) ---
-    return allMatches;
-
-    // --- COMMENTED OUT FUTURE ROUNDS FOR STABILITY ---
-    /*
-
-    // --- SOURCES (COMMENTED OUT) ---
-    /*
-    // WB R2-R5 (Winner Sources)
-    for (let r = 2; r <= 5; r++) {
-        const matches = allMatches.filter(m => m.bracket === 'wb' && m.round === r);
-        matches.forEach((m, i) => {
-            m.sourceMatchId1 = `wb-r${r - 1}-m${i * 2 + 1}`; m.sourceType1 = 'winner';
-            m.sourceMatchId2 = `wb-r${r - 1}-m${i * 2 + 2}`; m.sourceType2 = 'winner';
+            id: `lb-r2-m${i}`,
+            round: 2,
+            bracket: 'lb',
+            sourceMatchId1: `lb-r1-m${i}`, sourceType1: 'winner',
+            sourceMatchId2: `wb-r2-m${invertedWbMatch}`, sourceType2: 'loser'
         });
     }
 
-    // LB Sources (Standard DE Logic)
-    // LB R1 - EXTREME MIRROR PAIRING
-    // Match 1: L(WB 1) + L(WB 16)
-    // Match 2: L(WB 2) + L(WB 15)
-    // ... Match 8: L(WB 8) + L(WB 9)
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 1).forEach((m, i) => {
-        // LB R1 (17-32) - SEQUENTIAL BLOCKS
-        // Match 1: L1 + L2
-        // Match 2: L3 + L4
-        m.sourceMatchId1 = `wb-r1-m${i * 2 + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `wb-r1-m${i * 2 + 2}`; m.sourceType2 = 'loser';
-    });
-
-    // LB R2 (9-16) - TOTAL LOGIC RESET (Block X Swaps)
-    // LB Block 1 (Indices 0,1) sources from WB Block 2 (Indices 2,3)
-    // LB Block 2 (Indices 2,3) sources from WB Block 1 (Indices 0,1)
-    // LB Block 3 (Indices 4,5) sources from WB Block 4 (Indices 6,7)
-    // LB Block 4 (Indices 6,7) sources from WB Block 3 (Indices 4,5)
-
-    // Mapping Table (LB Index -> WB Index)
-    // 0 -> 2
-    // 1 -> 3
-    // 2 -> 0
-    // 3 -> 1
-    // 4 -> 6
-    // 5 -> 7
-    // 6 -> 4
-    // 7 -> 5
-
-    const lbToWbMap = [2, 3, 0, 1, 6, 7, 4, 5];
-
-    console.groupCollapsed("LB R2 Placement Logic - Block Swap");
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 2).forEach((m, i) => {
-        const wbSourceIndex = lbToWbMap[i]; // Get 0-7 index
-        const wbMatchNum = wbSourceIndex + 1; // Convert to 1-8 ID
-
-        // Source 1: Straight from LB R1 winner (Sequential)
-        m.sourceMatchId1 = `lb-r1-m${i + 1}`;
-        m.sourceType1 = 'winner';
-
-        // Source 2: Cross-Over from WB R2 loser
-        m.sourceMatchId2 = `wb-r2-m${wbMatchNum}`;
-        m.sourceType2 = 'loser';
-
-        console.log(`LB Match ${i + 1} [${m.id}] <== Winner LB R1 M${i + 1} + Loser WB R2 M${wbMatchNum}`);
-    });
-    });
-    console.groupEnd();
-
-    /*
-    // --- COMMENTED OUT FUTURE ROUNDS FOR STABILITY ---
-    // LB R3
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 3).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r2-m${i * 2 + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `lb-r2-m${i * 2 + 2}`; m.sourceType2 = 'winner';
-    });
-    // LB R4
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 4).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r3-m${i + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `wb-r3-m${i + 1}`; m.sourceType2 = 'loser';
-    });
-    // LB R5
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 5).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r4-m${i * 2 + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `lb-r4-m${i * 2 + 2}`; m.sourceType2 = 'winner';
-    });
-    // LB R6
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 6).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r5-m${i + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `wb-r4-m${i + 1}`; m.sourceType2 = 'loser';
-    });
-    // LB R7
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 7).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r6-m1`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `lb-r6-m2`; m.sourceType2 = 'winner';
-    });
-    // LB R8
-    allMatches.filter(m => m.bracket === 'lb' && m.round === 8).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r7-m1`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `wb-r5-m1`; m.sourceType2 = 'loser';
-    });
-    // GF
-    const gf1 = allMatches.find(m => m.id === 'gf-m1');
-    if (gf1) {
-        gf1.sourceMatchId1 = `wb-r5-m1`; gf1.sourceType1 = 'winner';
-        gf1.sourceMatchId2 = `lb-r8-m1`; gf1.sourceType2 = 'winner';
+    // --- 6. Further rounds (Placeholder/Standard for now to avoid errors) ---
+    // LB R3 (4 Matches)
+    for (let i = 1; i <= 4; i++) {
+        allMatches.push({
+            id: `lb-r3-m${i}`, round: 3, bracket: 'lb',
+            sourceMatchId1: `lb-r2-m${(i * 2) - 1}`, sourceType1: 'winner',
+            sourceMatchId2: `lb-r2-m${i * 2}`, sourceType2: 'winner'
+        });
     }
-    */
-
-    // --- PLACEMENT SOURCES ---
-
-    // 25-32 R1 (from LB R1 Losers)
-    // LB R1 has 8 matches (1-8).
-    // p25-r1-m1 takes losers of lb-r1-m1 and lb-r1-m2
-    allMatches.filter(m => m.bracket === 'p25' && m.round === 1).forEach((m, i) => {
-        // Cross-Pool: Top LB (1-4) -> Bottom P25 (3-4) | Bottom LB -> Top P25
-        let lbBaseIndex;
-        if (i < 2) {
-            // Top P25 (Target 1,2) <- Bottom LB Losers (Matches 5,6 & 7,8)
-            lbBaseIndex = 4 + (i * 2);
-        } else {
-            // Bottom P25 (Target 3,4) <- Top LB Losers (Matches 1,2 & 3,4)
-            lbBaseIndex = (i - 2) * 2;
-        }
-        m.sourceMatchId1 = `lb-r1-m${lbBaseIndex + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `lb-r1-m${lbBaseIndex + 2}`; m.sourceType2 = 'loser';
-    });
-    // 25-32 R2 (Winners -> 25-28)
-    allMatches.filter(m => m.bracket === 'p25' && m.round === 2).forEach((m, i) => {
-        m.sourceMatchId1 = `p25-r1-m${i * 2 + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `p25-r1-m${i * 2 + 2}`; m.sourceType2 = 'winner';
-    });
-    // 29-32 R2 (Losers -> 29-32)
-    allMatches.filter(m => m.bracket === 'p29' && m.round === 2).forEach((m, i) => {
-        m.sourceMatchId1 = `p25-r1-m${i * 2 + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `p25-r1-m${i * 2 + 2}`; m.sourceType2 = 'loser';
-    });
-    // Finals
-    // 25th: winners of p25-r2 (25-28 semis)
-    const p25f = allMatches.find(m => m.id === 'p25-f');
-    if (p25f) { p25f.sourceMatchId1 = 'p25-r2-m1'; p25f.sourceType1 = 'winner'; p25f.sourceMatchId2 = 'p25-r2-m2'; p25f.sourceType2 = 'winner'; }
-    // 27th: losers of p25-r2
-    const p27f = allMatches.find(m => m.id === 'p27-f');
-    if (p27f) { p27f.sourceMatchId1 = 'p25-r2-m1'; p27f.sourceType1 = 'loser'; p27f.sourceMatchId2 = 'p25-r2-m2'; p27f.sourceType2 = 'loser'; }
-    // 29th: winners of p29-r2
-    const p29f = allMatches.find(m => m.id === 'p29-f');
-    if (p29f) { p29f.sourceMatchId1 = 'p29-r2-m1'; p29f.sourceType1 = 'winner'; p29f.sourceMatchId2 = 'p29-r2-m2'; p29f.sourceType2 = 'winner'; }
-    // 31st: losers of p29-r2
-    const p31f = allMatches.find(m => m.id === 'p31-f');
-    if (p31f) { p31f.sourceMatchId1 = 'p29-r2-m1'; p31f.sourceType1 = 'loser'; p31f.sourceMatchId2 = 'p29-r2-m2'; p31f.sourceType2 = 'loser'; }
-
-    // 17-24 R1 (from LB R2 Losers)
-    allMatches.filter(m => m.bracket === 'p17' && m.round === 1).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r2-m${i * 2 + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `lb-r2-m${i * 2 + 2}`; m.sourceType2 = 'loser';
-    });
-    // 17-24 R2 (Winners -> 17-20)
-    allMatches.filter(m => m.bracket === 'p17' && m.round === 2).forEach((m, i) => {
-        m.sourceMatchId1 = `p17-r1-m${i * 2 + 1}`; m.sourceType1 = 'winner';
-        m.sourceMatchId2 = `p17-r1-m${i * 2 + 2}`; m.sourceType2 = 'winner';
-    });
-    // 21-24 R2 (Losers -> 21-24)
-    allMatches.filter(m => m.bracket === 'p21' && m.round === 2).forEach((m, i) => {
-        m.sourceMatchId1 = `p17-r1-m${i * 2 + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `p17-r1-m${i * 2 + 2}`; m.sourceType2 = 'loser';
-    });
-    // Finals (17, 19, 21, 23)
-    const p17f = allMatches.find(m => m.id === 'p17-f');
-    if (p17f) { p17f.sourceMatchId1 = 'p17-r2-m1'; p17f.sourceType1 = 'winner'; p17f.sourceMatchId2 = 'p17-r2-m2'; p17f.sourceType2 = 'winner'; }
-    const p19f = allMatches.find(m => m.id === 'p19-f');
-    if (p19f) { p19f.sourceMatchId1 = 'p17-r2-m1'; p19f.sourceType1 = 'loser'; p19f.sourceMatchId2 = 'p17-r2-m2'; p19f.sourceType2 = 'loser'; }
-    const p21f = allMatches.find(m => m.id === 'p21-f');
-    if (p21f) { p21f.sourceMatchId1 = 'p21-r2-m1'; p21f.sourceType1 = 'winner'; p21f.sourceMatchId2 = 'p21-r2-m2'; p21f.sourceType2 = 'winner'; }
-    const p23f = allMatches.find(m => m.id === 'p23-f');
-    if (p23f) { p23f.sourceMatchId1 = 'p21-r2-m1'; p23f.sourceType1 = 'loser'; p23f.sourceMatchId2 = 'p21-r2-m2'; p23f.sourceType2 = 'loser'; }
-
-    // 13-16 R1 (from LB R3 Losers) (4 losers -> 2 matches)
-    allMatches.filter(m => m.bracket === 'p13' && m.round === 1).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r3-m${i * 2 + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `lb-r3-m${i * 2 + 2}`; m.sourceType2 = 'loser';
-    });
-    // 13-16 Finals
-    const p13f = allMatches.find(m => m.id === 'p13-f');
-    if (p13f) { p13f.sourceMatchId1 = 'p13-r1-m1'; p13f.sourceType1 = 'winner'; p13f.sourceMatchId2 = 'p13-r1-m2'; p13f.sourceType2 = 'winner'; }
-    const p15f = allMatches.find(m => m.id === 'p15-f');
-    if (p15f) { p15f.sourceMatchId1 = 'p13-r1-m1'; p15f.sourceType1 = 'loser'; p15f.sourceMatchId2 = 'p13-r1-m2'; p15f.sourceType2 = 'loser'; }
-
-    // 9-12 R1 (from LB R4 Losers)
-    allMatches.filter(m => m.bracket === 'p9' && m.round === 1).forEach((m, i) => {
-        m.sourceMatchId1 = `lb-r4-m${i * 2 + 1}`; m.sourceType1 = 'loser';
-        m.sourceMatchId2 = `lb-r4-m${i * 2 + 2}`; m.sourceType2 = 'loser';
-    });
-    // 9-12 Finals
-    const p9f = allMatches.find(m => m.id === 'p9-f');
-    if (p9f) { p9f.sourceMatchId1 = 'p9-r1-m1'; p9f.sourceType1 = 'winner'; p9f.sourceMatchId2 = 'p9-r1-m2'; p9f.sourceType2 = 'winner'; }
-    const p11f = allMatches.find(m => m.id === 'p11-f');
-    if (p11f) { p11f.sourceMatchId1 = 'p9-r1-m1'; p11f.sourceType1 = 'loser'; p11f.sourceMatchId2 = 'p9-r1-m2'; p11f.sourceType2 = 'loser'; }
-
-    // 7-8 Match (from LB R5 Losers)
-    const p7f = allMatches.find(m => m.id === 'p7-f');
-    if (p7f) { p7f.sourceMatchId1 = 'lb-r5-m1'; p7f.sourceType1 = 'loser'; p7f.sourceMatchId2 = 'lb-r5-m2'; p7f.sourceType2 = 'loser'; }
-
-    // 5-6 Match (from LB R6 Losers)
-    const p5f = allMatches.find(m => m.id === 'p5-f');
-    if (p5f) { p5f.sourceMatchId1 = 'lb-r6-m1'; p5f.sourceType1 = 'loser'; p5f.sourceMatchId2 = 'lb-r6-m2'; p5f.sourceType2 = 'loser'; }
-    // */
-
-    // --- POST-PROCESSING: LINK DESTINATIONS ---
-    /*
-    // Iterate to set nextMatchId (winner path) and consolationMatchId (loser path)
-    // Create a quick lookup map
-    const matchMap = new Map();
-    allMatches.forEach(m => matchMap.set(m.id, m));
-
-    allMatches.forEach(dest => {
-        // Check Source 1
-        if (dest.sourceMatchId1) {
-            const src = matchMap.get(dest.sourceMatchId1);
-            if (src) {
-                if (dest.sourceType1 === 'winner') src.nextMatchId = dest.id;
-                else if (dest.sourceType1 === 'loser') src.consolationMatchId = dest.id;
-            }
-        }
-        // Check Source 2
-        if (dest.sourceMatchId2) {
-            const src = matchMap.get(dest.sourceMatchId2);
-            if (src) {
-                if (dest.sourceType2 === 'winner') src.nextMatchId = dest.id;
-                else if (dest.sourceType2 === 'loser') src.consolationMatchId = dest.id;
-            }
-        }
-    });
-    */
 
     return allMatches;
 };
