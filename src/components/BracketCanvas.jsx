@@ -28,7 +28,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 sourceMatchId1: m.sourceMatchId1 || (bp ? bp.sourceMatchId1 : null),
                 sourceMatchId2: m.sourceMatchId2 || (bp ? bp.sourceMatchId2 : null),
                 nextMatchId: m.nextMatchId || (bp ? bp.nextMatchId : null),
-                consolationMatchId: m.consolationMatchId || (bp ? bp.consolationMatchId : null)
+                loserMatchId: m.loserMatchId || (bp ? bp.loserMatchId : null)
             };
         });
     }, [matches, players]);
@@ -43,7 +43,10 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
     // Grouping
     const wbMatches = enrichedMatches.filter(m => m.bracket === 'wb');
     const lbMatches = enrichedMatches.filter(m => m.bracket === 'lb');
-    const gfMatches = enrichedMatches.filter(m => m.bracket === 'gf').sort(byMatchId);
+    const gfMatches = enrichedMatches.filter(m => m.bracket === 'gf' || m.bracket === 'p3').sort((a, b) => {
+        if (a.bracket === 'gf' && b.bracket !== 'gf') return -1;
+        return 0;
+    });
 
     // Rounds - Aligning Columns
     const wbRounds = [1, 2, 3, 4, 5].map(r => wbMatches.filter(m => m.round === r).sort(byMatchId));
@@ -52,9 +55,10 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
     // Monrad Groups
     const monradConfig = [
         { id: '25-32', brackets: ['p25', 'p27', 'p29', 'p31'], title: 'Places 25-32' },
-        { id: '17-24', brackets: ['p17', 'p19', 'p21', 'p23'], title: 'Places 17-24' },
+        { id: '17-24', brackets: ['p17', 'p19', 'p21', 'p23'], title: 'Places 17-32' },
         { id: '13-16', brackets: ['p13', 'p15'], title: 'Places 13-16' },
-        { id: '9-12', brackets: ['p9', 'p11'], title: 'Places 9-12' }
+        { id: '9-12', brackets: ['p9', 'p11'], title: 'Places 9-16' },
+        { id: '5-8', brackets: ['p5', 'p7'], title: 'Places 5-8' }
     ];
 
     // --- 2. Path Calculation ---
@@ -92,8 +96,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 }
 
                 // Consolation Path (Drop to LB/Placement)
-                if (m.consolationMatchId) {
-                    const destEl = matchRefs.current[m.consolationMatchId];
+                if (m.loserMatchId) {
+                    const destEl = matchRefs.current[m.loserMatchId];
                     if (destEl) {
                         const destRect = destEl.getBoundingClientRect();
                         const endX = destRect.left - containerRect.left + scrollLeft;
@@ -125,24 +129,22 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
         const isClickable = !readonly && onMatchClick && !match.player1?.isBye && !match.player2?.isBye;
         const showScore = match.status === 'finished' || (match.status === 'live' && (match.score1 > 0 || match.score2 > 0));
 
-        const racketCfg = getRacketPathConfig(match.id);
-        const displayId = customHeader || getMatchNumber(match.id);
-        const getSourceColor = (sourceId) => sourceId ? getMatchColor(sourceId) : '#555';
+        // Styling for placement brackets
+        const isPlacement = match.bracket.startsWith('p');
+        const borderColor = isPlacement ? '#f97316' : racketCfg.color; // Orange for placement
+        const glowColor = isPlacement ? '#f97316' : racketCfg.color;
 
         return (
             <div
                 ref={el => matchRefs.current[match.id] = el}
                 key={match.id}
                 onClick={isClickable ? () => onMatchClick(match) : undefined}
-                className="match-card-hover" // Class for hover effects defined in global css or style tag if needed. I'll use inline styles with state or assume css handles hover?
-                // Actually, I can use a simple style block or just rely on CSS. 
-                // Let's use inline styles and a helper class in Brackets.css or just inline simple interactivity.
-                // Since I cannot edit CSS easily in the same step, I'll use a style object.
+                className="match-card-hover"
                 style={{
                     width: '180px',
                     flexShrink: 0,
-                    background: 'transparent',
-                    borderLeft: `3px solid ${racketCfg.color}`,
+                    background: isPlacement ? 'rgba(249, 115, 22, 0.05)' : 'transparent',
+                    borderLeft: `3px solid ${borderColor}`,
                     transition: 'all 0.3s ease',
                     cursor: isClickable ? 'pointer' : 'default',
                     display: 'flex', flexDirection: 'column',
@@ -150,11 +152,12 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                     zIndex: 10,
                     fontSize: '0.75rem',
                     fontFamily: '"Inter", sans-serif',
-                    overflow: 'visible'
+                    overflow: 'visible',
+                    marginBottom: isPlacement ? '8px' : '0'
                 }}
                 onMouseEnter={(e) => {
                     e.currentTarget.style.backdropFilter = 'blur(5px)';
-                    e.currentTarget.style.boxShadow = `0 0 15px ${racketCfg.color}20`; // subtle glow
+                    e.currentTarget.style.boxShadow = `0 0 15px ${glowColor}20`; // subtle glow
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.backdropFilter = 'none';
@@ -232,7 +235,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                             ))}
                             {visibleSections.includes('mid') && gfMatches.length > 0 && (
                                 <div className="section-mid" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '20px', marginLeft: '10px' }}>
-                                    {gfMatches.map(m => renderMatch(m, "FIN"))}
+                                    {gfMatches.map(m => renderMatch(m, m.bracket === 'p3' ? '3RD' : 'FIN'))}
                                     <div style={{ alignSelf: 'center', opacity: 0.4 }}><Trophy size={48} color="#fbbf24" /></div>
                                 </div>
                             )}
@@ -257,8 +260,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 {/* 3. Placement Matches */}
                 {(visibleSections.includes('lb') || visibleSections.includes('all') || visibleSections.includes('placement')) && (
                     <div className="section-monrad" style={{ display: 'flex', flexDirection: 'column', padding: '40px' }}>
-                        <h2 style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 400, marginBottom: '60px', opacity: 0.3, letterSpacing: '4px', textTransform: 'uppercase' }}>Placement Matches</h2>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', maxWidth: '800px' }}>
+                        <h2 style={{ color: '#f97316', fontSize: '0.75rem', fontWeight: 700, marginBottom: '60px', opacity: 0.9, letterSpacing: '4px', textTransform: 'uppercase', textShadow: '0 0 20px rgba(249, 115, 22, 0.4)' }}>Placement Matches</h2>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '50px', maxWidth: '4000px' }}>
                             {monradConfig.map(group => {
                                 let groupMatches = enrichedMatches.filter(m => group.brackets.some(b => m.bracket.startsWith(b)));
                                 if (!groupMatches.length) {
@@ -269,11 +272,11 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                                 const rounds = [];
                                 groupMatches.forEach(m => { if (!rounds[m.round]) rounds[m.round] = []; rounds[m.round].push(m); });
                                 return (
-                                    <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '180px' }}>
-                                        <div style={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', opacity: 0.3, letterSpacing: '2px' }}>{group.title.toUpperCase()}</div>
-                                        <div style={{ display: 'flex', gap: '20px' }}>
+                                    <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '180px', marginRight: '20px' }}>
+                                        <div style={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', opacity: 0.3, letterSpacing: '2px', marginBottom: '15px' }}>{group.title.toUpperCase()}</div>
+                                        <div style={{ display: 'flex', gap: '30px' }}>
                                             {rounds.map((rMatches, i) => rMatches && (
-                                                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '15px', justifyContent: 'center' }}>
                                                     {rMatches.map(m => renderMatch(m, null))}
                                                 </div>
                                             ))}
@@ -281,15 +284,6 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                                     </div>
                                 );
                             })}
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '180px' }}>
-                                <div style={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', opacity: 0.3, letterSpacing: '2px' }}>FINAL PLACEMENT</div>
-                                {['p7', 'p5'].map(bid => {
-                                    let m = enrichedMatches.find(x => x.bracket === bid);
-                                    if (!m) m = { ...getBracketBlueprint().find(x => x.bracket === bid), player1: null, player2: null };
-                                    return m ? renderMatch(m, bid === 'p5' ? '5TH' : '7TH') : null;
-                                })}
-                            </div>
                         </div>
                     </div>
                 )}
