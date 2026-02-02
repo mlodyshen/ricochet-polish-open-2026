@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { db, isFirebaseConfigured } from '../lib/firebase';
 import { collection, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, writeBatch } from 'firebase/firestore';
 
@@ -91,18 +90,8 @@ export const useMatches = () => {
                 }, (error) => {
                     console.error("Firebase Matches Error:", error);
                 });
-            } else if (isSupabaseConfigured) {
-                // SUPABASE
-                const { data, error } = await supabase
-                    .from('matches')
-                    .select('*')
-                    .eq('tournament_id', activeTournamentId);
-
-                if (!error && data) {
-                    setMatches(data.map(mapToCamel));
-                }
             } else {
-                // LOCAL STORAGE
+                // LOCAL STORAGE (Fallback only if Firebase off, which is unlikely given user statement, but safe to keep as non-supabase fallback)
                 try {
                     const saved = localStorage.getItem(lsKey);
                     const raw = saved ? JSON.parse(saved) : [];
@@ -120,20 +109,9 @@ export const useMatches = () => {
 
         fetchMatches();
 
-        let channel;
-        if (!isFirebaseConfigured && isSupabaseConfigured) {
-            channel = supabase
-                .channel(`matches:${activeTournamentId}`)
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'matches',
-                    filter: `tournament_id=eq.${activeTournamentId}`
-                }, () => {
-                    fetchMatches();
-                })
-                .subscribe();
-        } else if (!isFirebaseConfigured && !isSupabaseConfigured) {
+        // No Supabase channel subscription anymore
+
+        if (!isFirebaseConfigured) {
             // LS Listener
             const loadLS = () => fetchMatches();
             window.addEventListener('storage', loadLS);
@@ -142,30 +120,15 @@ export const useMatches = () => {
 
         return () => {
             if (unsubscribe) unsubscribe();
-            if (channel) supabase.removeChannel(channel);
         };
     }, [activeTournamentId, lsKey]);
 
     const saveMatches = async (newMatches) => {
         if (!isAuthenticated || !activeTournamentId) return;
 
-        // Optimistic update removed as requested to rely on onSnapshot
-        // but for smooth UX we might want it? User said: "Wymuś odświeżenie stanu... nie polegaj na lokalnym stanie setMatches(). Niech onSnapshot sam wykryje zmianę".
-        // So I will comment it out or remove it.
-        // setMatches(newMatches); 
-
-        console.log("Próba zapisu do Firebase...", newMatches);
+        // console.log("Próba zapisu do Firebase...", newMatches);
 
         if (isFirebaseConfigured) {
-            // Import setDoc dynamically or assumed imported if I change top imports. 
-            // Better to change top imports in a separate step or just use dynamic import if compatible?
-            // Accessing 'setDoc' requires import. I need to update imports first or use dynamic.
-            // Let's use dynamic to be safe if I can't see top imports or just assume I can edit top.
-            // I will edit top imports in the same file if possible? Yes, I can invoke another tool or just trust dynamic.
-            // But wait, I'm replacing a block. I can't change top imports easily in this block replacement.
-            // I will use `import('firebase/firestore').then(...)` style or assume I can modify imports in a sec.
-            // Actually, I should update the imports in `useMatches.js` globally.
-
             try {
                 const { setDoc } = await import('firebase/firestore');
 
@@ -177,7 +140,6 @@ export const useMatches = () => {
                 // Using setDoc for all to ensure overwrite/create with specific ID
                 for (const match of payload) {
                     if (!match.id) continue;
-                    // ID format check? match.id should be like 'wb-r1-m1'
                     const docRef = doc(db, "matches", match.id);
                     await setDoc(docRef, match);
                 }
@@ -185,12 +147,6 @@ export const useMatches = () => {
                 console.error("Error saving matches (Firebase):", e);
             }
 
-        } else if (isSupabaseConfigured) {
-            setMatches(newMatches); // Keep optmistic for supabase if not requested otherwise, but let's stick to rule.
-            // User specifically asked about Firebase.
-            const payload = newMatches.map(mapToSnake);
-            const { error } = await supabase.from('matches').upsert(payload);
-            if (error) console.error("Error saving matches:", error);
         } else {
             // LS
             setMatches(newMatches);
