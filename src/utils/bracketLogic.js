@@ -1,9 +1,12 @@
 
-// Helper: Static Seeding Order 1-32
-const SEEDING_ORDER = [];
-for (let i = 1; i <= 16; i++) {
-    SEEDING_ORDER.push([i, 33 - i]);
-}
+// Helper: Static Seeding Order - Professional Layout
+// Order: [1,32], [16,17], [9,24], [8,25], [5,28], [12,21], [13,20], [4,29], [3,30], [14,19], [11,22], [6,27], [7,26], [10,23], [15,18], [2,31]
+const SEEDING_ORDER = [
+    [1, 32], [16, 17], [9, 24], [8, 25],
+    [5, 28], [12, 21], [13, 20], [4, 29],
+    [3, 30], [14, 19], [11, 22], [6, 27],
+    [7, 26], [10, 23], [15, 18], [2, 31]
+];
 
 export const getBracketBlueprint = () => {
     const allMatches = [];
