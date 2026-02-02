@@ -75,20 +75,21 @@ export const getBracketBlueprint = () => {
     });
 
 
-    // --- LB R1 (8 Matches) - WB R1 Losers (MIRROR) ---
-    // User: "Przegrany z meczu a (1) trafia do ostatniego meczu w LB R1 (8)"
-    // We pair 1 & 2 -> LB M8? 3 & 4 -> LB M7? ... 15 & 16 -> LB M1?
+    // --- LB R1 (8 Matches) - WB R1 Losers (FULL MIRROR INVERSION) ---
+    // User Requirement:
+    // Mecz A (1) -> h1 (8)
+    // Mecz P (16) -> a1 (1)
+    // Mecz B (2) -> g1 (7)
+    // Mecz O (15) -> b1 (2)
+    // Formula derived:
+    // LB Match i takes:
+    // Source 1: WB Match (17 - i)  [Outer Mirror: 16, 15... 9]
+    // Source 2: WB Match (9 - i)   [Inner Mirror: 8, 7... 1]
     for (let i = 1; i <= 8; i++) {
-        // Index i=1 (LB M1) takes WB losers from bottom (16, 15)
-        const wbMatchRef1 = (17 - (i * 2));     // i=1 -> 15
-        const wbMatchRef2 = (17 - (i * 2) + 1); // i=1 -> 16
-        // Wait. 15 and 16 feed LB M1.
-        // i=8 (LB M8) -> 17-16=1, 17-15=2. Matches 1 and 2. Correct.
-
         allMatches.push({
             id: `lb-r1-m${i}`, round: 1, bracket: 'lb',
-            sourceMatchId1: `wb-r1-m${wbMatchRef1}`, sourceType1: 'loser',
-            sourceMatchId2: `wb-r1-m${wbMatchRef2}`, sourceType2: 'loser',
+            sourceMatchId1: `wb-r1-m${17 - i}`, sourceType1: 'loser',
+            sourceMatchId2: `wb-r1-m${9 - i}`, sourceType2: 'loser',
             nextMatchId: `lb-r2-m${i}`
         });
     }
