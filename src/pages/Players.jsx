@@ -8,7 +8,7 @@ import { EUROPEAN_COUNTRIES, getCountryCode } from '../constants/countries';
 import './Players.css';
 import { useAuth } from '../hooks/useAuth.tsx';
 
-// Hardcoded lists removed in favor of CSV import
+// Hardcoded lists removed in favor of CSV import`
 
 const PlayerFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     const { t } = useTranslation();

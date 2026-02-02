@@ -34,7 +34,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
     }, [matches, players]);
 
     const getMatchNumber = (id) => {
-        const parts = id?.split ? id.split('-m') : [];
+        if (!id || typeof id !== 'string') return 0;
+        const parts = id.split('-m');
         return parts.length > 1 ? parseInt(parts[1], 10) : 0;
     };
     const byMatchId = (a, b) => getMatchNumber(a?.id) - getMatchNumber(b?.id);
