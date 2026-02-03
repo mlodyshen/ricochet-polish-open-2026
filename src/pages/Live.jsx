@@ -129,6 +129,79 @@ const Live = () => {
 
     const secondsAgo = Math.floor((Date.now() - lastUpdate) / 1000);
 
+    // --- LOGIC CENTRAL (Reuse existing logic) ---
+    const { pinkQueue, cyanQueue, finishedMatches } = useMemo(() => {
+        if (!matches || matches.length === 0) {
+            return { pinkQueue: [], cyanQueue: [], finishedMatches: [] };
+        }
+
+        // Enrich Match Objects
+        const enriched = matches.map(m => {
+            const p1 = players.find(p => p.id === m.player1Id);
+            const p2 = players.find(p => p.id === m.player2Id);
+            return {
+                ...m,
+                player1: p1 || { full_name: 'TBD', id: null, isBye: false },
+                player2: p2 || { full_name: 'TBD', id: null, isBye: false }
+            };
+        });
+
+        // Separate finished and active matches
+        const finished = enriched.filter(m => m.winnerId);
+
+        // Active matches: Live, Pending, Finished OR Scheduled
+        const activeMatches = enriched.filter(m => {
+            if (!m.status) return true;
+            const s = m.status.toLowerCase();
+            return s === 'live' || s === 'finished' || s === 'pending' || s === 'scheduled';
+        })
+            .sort((a, b) => {
+                const sA = (a.status || '').toLowerCase();
+                const sB = (b.status || '').toLowerCase();
+                // Priority 1: Status 'live' comes first
+                if (sA === 'live' && sB !== 'live') return -1;
+                if (sA !== 'live' && sB === 'live') return 1;
+
+                // Priority 2: Original ID order
+                return compareMatchIds(a.id, b.id);
+            });
+
+        const pinkQ = [];
+        const cyanQ = [];
+
+        // Distribute Active Matches to Courts
+        activeMatches.forEach((m, index) => {
+            const matchOrder = index + 1;
+            const court = matchOrder % 2 !== 0 ? 'courtPink' : 'courtCyan';
+            const matchWithCourt = { ...m, assignedCourt: court, matchOrder };
+
+            if (court === 'courtPink') pinkQ.push(matchWithCourt);
+            else cyanQ.push(matchWithCourt);
+        });
+
+        const enrichedFinished = finished.map((m, i) => ({
+            ...m, assignedCourt: i % 2 === 0 ? 'courtPink' : 'courtCyan'
+        }));
+
+        const recentFinished = enrichedFinished.reverse().slice(0, 4);
+        return { pinkQueue: pinkQ, cyanQueue: cyanQ, finishedMatches: recentFinished };
+    }, [matches, players]);
+
+    const getCourtState = (queue) => {
+        // Prefer a match that has started scoring or is explicitly set to live
+        const liveMatch = queue.find(m => (m.score1 > 0 || m.score2 > 0 || (m.status && m.status.toLowerCase() === 'live')));
+        const current = liveMatch || queue[0] || null;
+        let upcoming = [];
+        if (current) {
+            const currentIdx = queue.findIndex(m => m.id === current.id);
+            upcoming = queue.slice(currentIdx + 1, currentIdx + 4);
+        }
+        return { current, upcoming };
+    };
+
+    const pinkState = getCourtState(pinkQueue);
+    const cyanState = getCourtState(cyanQueue);
+
     // Handlers for Live Scoring
     const handleLiveScoreUpdate = (match, type, playerKey, change, setIndex = null) => {
         if (!match) return;
