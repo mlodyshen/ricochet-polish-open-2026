@@ -95,6 +95,40 @@ const Live = () => {
     // TV Mode Detection
     const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
 
+    // State
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [lastUpdate, setLastUpdate] = useState(Date.now());
+
+    // Initial load timestamp & Force Update on matches change
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+        setLastUpdate(Date.now());
+        forceUpdate(n => n + 1);
+    }, [matches]);
+
+    // Clock
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const toggleTvMode = () => {
+        if (isTvMode) {
+            navigate('/live');
+        } else {
+            navigate('/live?mode=tv');
+        }
+    };
+
+
+    const formatTime = (date) => {
+        return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+
+    const secondsAgo = Math.floor((Date.now() - lastUpdate) / 1000);
+
     // Handlers for Live Scoring
     const handleLiveScoreUpdate = (match, type, playerKey, change, setIndex = null) => {
         if (!match) return;
