@@ -280,7 +280,7 @@ const Live = () => {
 
         if (!matchesList || matchesList.length === 0) {
             return (
-                <div className="upcoming-item" style={{ justifyContent: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                <div className="upcoming-item empty">
                     {t('live.noUpcoming')}
                 </div>
             );
@@ -290,21 +290,30 @@ const Live = () => {
             const alertActive = isFirst && showReadinessAlert;
 
             return (
-                <div key={match.id} className={`upcoming-item ${alertActive ? 'readiness-alert' : ''}`}>
+                <div key={match.id} className={`upcoming-item-grid ${alertActive ? 'readiness-alert' : ''}`}>
                     {alertActive && (
                         <div className="alert-badge">
                             {t('live.readinessAlert')}
                         </div>
                     )}
-                    <div style={{ fontWeight: 600, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <span>
-                            <PlayerFlag countryCode={match.player1?.country} /> {match.player1?.full_name || 'TBD'}
-                            <span style={{ color: 'var(--text-secondary)', fontWeight: 400, margin: '0 0.5rem' }}>vs</span>
-                            <PlayerFlag countryCode={match.player2?.country} /> {match.player2?.full_name || 'TBD'}
-                        </span>
+
+                    {/* Grid Layout: P1 vs P2 | Meta */}
+                    <div className="upcoming-match-content">
+                        <div className="upcoming-player start">
+                            <PlayerFlag countryCode={match.player1?.country} />
+                            <span className="name-truncate">{match.player1?.full_name || 'TBD'}</span>
+                        </div>
+
+                        <div className="upcoming-vs">vs</div>
+
+                        <div className="upcoming-player start">
+                            <PlayerFlag countryCode={match.player2?.country} />
+                            <span className="name-truncate">{match.player2?.full_name || 'TBD'}</span>
+                        </div>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
-                        <div>{(match.bracket || '').toUpperCase()} R{match.round}</div>
+
+                    <div className="upcoming-meta-right">
+                        {(match.bracket || '').toUpperCase()} R{match.round}
                     </div>
                 </div>
             );
