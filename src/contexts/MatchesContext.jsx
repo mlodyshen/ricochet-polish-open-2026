@@ -16,13 +16,11 @@ export const MatchesProvider = ({ children }) => {
 
     const lsKey = activeTournamentId ? `${BASE_KEY}_${activeTournamentId}` : null;
 
-    // --- MAPPERS ---
+    // --- MAPPERS (Kept for consistency, simplified where possible) ---
     const mapToCamel = (m) => {
-        let mp = [];
-        try {
-            mp = typeof m.micro_points === 'string' ? JSON.parse(m.micro_points) : (m.micro_points || []);
-        } catch (e) {
-            mp = m.micro_points || [];
+        let mp = m.micro_points || [];
+        if (typeof mp === 'string') {
+            try { mp = JSON.parse(mp); } catch (e) { mp = []; }
         }
 
         return {
@@ -74,36 +72,30 @@ export const MatchesProvider = ({ children }) => {
                 const q = query(collection(db, "matches"), where("tournament_id", "==", activeTournamentId));
 
                 unsubscribe = onSnapshot(q, (snapshot) => {
-                    // CRITICAL FIX: If we are currently saving (optimistic update in progress),
-                    // ignore incoming snapshots to prevent overwriting local state with stale server data.
+                    // Block snapshot updates if we are in the middle of a save operation
+                    // This prevents "flicker" or rewinding of state due to latency
                     if (isSavingRef.current) {
-                        console.log("[MatchesContext] Skipping snapshot due to active save operation (Debounce Echo)");
                         return;
                     }
 
                     const loaded = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        // FORCE ID consistency: use the doc.id as the truth
-                        return {
-                            id: doc.id,
-                            ...data
-                        };
+                        // FORCE ID consistency: The document ID is the source of truth
+                        return { id: doc.id, ...doc.data() };
                     })
-                        // Filter out any auto-generated IDs that don't match our schema (wb-rX-mY)
-                        .filter(m => m.id.includes('-'))
+                        // Filter out any garbage IDs that might have crept in
+                        .filter(m => m.id && m.id.includes('-'))
                         .map(mapToCamel);
 
-                    // Dedup: if duplicate IDs exist, take the last one (rare edge case)
+                    // Deduplicate logic: Map ensures unique IDs
                     const uniqueMap = new Map();
                     loaded.forEach(m => uniqueMap.set(m.id, m));
 
                     setMatches(Array.from(uniqueMap.values()));
-                    console.log(`[MatchesContext] Loaded ${uniqueMap.size} matches from Firebase`);
                 }, (error) => {
                     console.error("[MatchesContext] Firebase Error:", error);
                 });
             } else {
-                // LS Fallback
+                // LocalStorage Fallback
                 try {
                     const saved = localStorage.getItem(lsKey);
                     if (saved) {
@@ -128,6 +120,68 @@ export const MatchesProvider = ({ children }) => {
     }, [matches]);
 
     // --- ACTIONS ---
+
+    // Clean, Single Reference for Saving
+    const saveMatches = useCallback(async (newMatches, specificMatchId = null) => {
+        if (!activeTournamentId) {
+            console.error("No active tournament ID, cannot save!");
+            return;
+        }
+
+        // 1. OPTIMISTIC UPDATE
+        setMatches(newMatches);
+        isSavingRef.current = true; // Lock snapshots
+
+        // 2. PERSISTENCE
+        if (isFirebaseConfigured && isAuthenticated) {
+            try {
+                const { setDoc } = await import('firebase/firestore');
+
+                // Identify what to save
+                let changesToSave = [];
+
+                if (specificMatchId) {
+                    const target = newMatches.find(m => m.id === specificMatchId);
+                    if (target) {
+                        changesToSave = [mapToSnake(target)];
+                    }
+                } else {
+                    // Save All / Diff
+                    const currentMatches = matchesRef.current;
+                    const payload = newMatches.map(m => mapToSnake(m));
+                    changesToSave = payload.filter(p => {
+                        const old = currentMatches.find(m => m.id === p.id);
+                        if (!old) return true;
+                        const oldSnake = mapToSnake(old);
+                        return JSON.stringify(oldSnake) !== JSON.stringify(p);
+                    });
+                }
+
+                if (changesToSave.length > 0) {
+                    const promises = changesToSave.map(match => {
+                        // STRICTLY write to the defined ID
+                        const docRef = doc(db, "matches", match.id);
+                        return setDoc(docRef, match);
+                    });
+
+                    await Promise.all(promises);
+                    console.log(`[MatchesContext] Saved ${changesToSave.length} matches to Firebase.`);
+                }
+            } catch (e) {
+                console.error("Error saving matches:", e);
+            } finally {
+                // Release lock with slight delay
+                setTimeout(() => {
+                    isSavingRef.current = false;
+                }, 500);
+            }
+        } else {
+            // LS
+            localStorage.setItem(lsKey, JSON.stringify(newMatches));
+            isSavingRef.current = false;
+        }
+    }, [isAuthenticated, activeTournamentId, lsKey]);
+
     const resetMatches = async () => {
         if (!isAuthenticated || !activeTournamentId || !isFirebaseConfigured) return;
         try {
@@ -146,75 +200,6 @@ export const MatchesProvider = ({ children }) => {
             setIsSaving(false);
         }
     };
-
-    const saveMatches = useCallback(async (newMatches, specificMatchId = null) => {
-        if (!activeTournamentId) {
-            console.error("No active tournament ID, cannot save!");
-            return;
-        }
-
-        // 1. OPTIMISTIC UPDATE
-        setMatches(newMatches);
-
-        // Mark saving as active to block snapshot echoes
-        isSavingRef.current = true;
-
-        // 2. PERSISTENCE
-        if (isFirebaseConfigured && isAuthenticated) {
-
-            try {
-                const { setDoc } = await import('firebase/firestore');
-
-                let changesToSave = [];
-
-                if (specificMatchId) {
-                    const target = newMatches.find(m => m.id === specificMatchId);
-                    if (target) {
-                        changesToSave = [mapToSnake(target)];
-                    } else {
-                        console.warn("DEBUG: Target match not found in new state!", specificMatchId);
-                    }
-                } else {
-                    const currentMatches = matchesRef.current;
-                    const payload = newMatches.map(m => mapToSnake(m));
-                    changesToSave = payload.filter(p => {
-                        const old = currentMatches.find(m => m.id === p.id);
-                        if (!old) return true;
-                        const oldSnake = mapToSnake(old);
-                        return JSON.stringify(oldSnake) !== JSON.stringify(p);
-                    });
-                }
-
-                if (changesToSave.length === 0) {
-                    isSavingRef.current = false;
-                    return;
-                }
-
-                const promises = changesToSave.map(match => {
-                    console.log("DEBUG: Sending SINGLE match to Firestore:", match.id);
-                    // CRITICAL: Ensure we write to the specific document ID (e.g., wb-r1-m1)
-                    // and merge true is usually safer but we want to overwrite state here
-                    const docRef = doc(db, "matches", match.id);
-                    return setDoc(docRef, match);
-                });
-
-                await Promise.all(promises);
-
-            } catch (e) {
-                console.error("Error initiating save:", e);
-            } finally {
-                // Release lock after a short delay to allow Firestore to catch up
-                setTimeout(() => {
-                    isSavingRef.current = false;
-                    console.log("[MatchesContext] Save lock released");
-                }, 500);
-            }
-        } else {
-            // LS
-            localStorage.setItem(lsKey, JSON.stringify(newMatches));
-            isSavingRef.current = false;
-        }
-    }, [isAuthenticated, activeTournamentId, lsKey]);
 
     return (
         <MatchesContext.Provider value={{ matches, saveMatches, resetMatches, isSaving }}>
