@@ -108,6 +108,12 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
         };
     };
 
+    // Use Ref for onSave to avoid stale closures in setTimeout
+    const onSaveRef = useRef(onSave);
+    useEffect(() => {
+        onSaveRef.current = onSave;
+    }, [onSave]);
+
     // AGGRESSIVE AUTO-SAVE EFFECT
     useEffect(() => {
         if (!isMounted.current) {
@@ -117,7 +123,7 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
 
         // Debounce to avoid write-spam on rapid input
         const timer = setTimeout(() => {
-            onSave(match.id, getSavePayload(), { autoSave: true });
+            onSaveRef.current(match.id, getSavePayload(), { autoSave: true });
         }, 500);
 
         return () => clearTimeout(timer);
