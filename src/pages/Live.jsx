@@ -103,12 +103,20 @@ const Live = () => {
         // Separate finished and active matches
         const finished = enriched.filter(m => m.winnerId);
 
-        // Active matches: Live or Pending
-        // We want to sort them semantically by ID: WB R1 M1, WB R1 M2...
-        // This ensures M1 is visually "before" M10.
-        // Importing compareMatchIds is needed (added to top imports in next step if not present)
-        const activeMatches = enriched.filter(m => !m.winnerId)
-            .sort((a, b) => compareMatchIds(a.id, b.id));
+        // Active matches: Live or Pending (or recently completed)
+        // User Request: filter(m => m.status === 'live' || m.status === 'completed')
+        // We prioritise LIVE matches first, then by ID.
+        const activeMatches = enriched.filter(m =>
+            (m.status === 'live' || m.status === 'pending') && !m.winnerId
+        )
+            .sort((a, b) => {
+                // Priority 1: Status 'live' comes first
+                if (a.status === 'live' && b.status !== 'live') return -1;
+                if (a.status !== 'live' && b.status === 'live') return 1;
+
+                // Priority 2: Original ID order
+                return compareMatchIds(a.id, b.id);
+            });
 
         const pinkQ = [];
         const cyanQ = [];
