@@ -492,7 +492,16 @@ export const rebuildBracketState = (players, existingMatchesMap = {}) => {
                     if (newState.score1 >= thresh) newState.winnerId = match.player1Id;
                     else if (newState.score2 >= thresh) newState.winnerId = match.player2Id;
                 }
-                newState.status = newState.winnerId ? 'finished' : 'live';
+
+                // FORCE LIVE STATUS if scores exist but no winner
+                if (newState.winnerId) {
+                    newState.status = 'finished';
+                } else if (newState.score1 > 0 || newState.score2 > 0 || (newState.microPoints && newState.microPoints.length > 0)) {
+                    newState.status = 'live';
+                } else {
+                    // Keep existing status if provided (e.g. from saved) or default to live if strictly score present
+                    newState.status = saved.status === 'finished' ? 'finished' : 'live';
+                }
             } else {
                 newState.status = (match.player1Id && match.player2Id) ? 'pending' : 'scheduled';
                 newState.winnerId = null;

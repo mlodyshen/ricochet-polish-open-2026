@@ -93,6 +93,8 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
                     winnerId = null;
                 }
             } else {
+                // PARTIAL SCORE LOGIC
+                // If we have scores but not enough to win, it IS live.
                 finalStatus = 'live';
                 winnerId = null;
             }
