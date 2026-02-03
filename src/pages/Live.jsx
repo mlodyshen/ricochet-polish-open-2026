@@ -169,9 +169,18 @@ const Live = () => {
 
     // Handlers for Live Scoring
     const handleLiveScoreUpdate = (match, type, playerKey, change, setIndex = null) => {
-        if (!match) return;
+        console.log(`[JUDGE] CLICK DETECTED: Match ${match?.id} | Type: ${type} | Key: ${playerKey} | Change: ${change}`);
 
-        console.log(`[JUDGE] Update Request: ${type} ${playerKey} ${change}`);
+        if (!match) {
+            console.error("[JUDGE] No match object provided!");
+            return;
+        }
+
+        // Check if saveMatches exists
+        if (!saveMatches) {
+            console.error("[JUDGE] CRITICAL: saveMatches functionality is missing from context!");
+            return;
+        }
 
         // 1. DEEP CLONE (Critical)
         let newScore1 = match.score1 ?? 0;
@@ -226,6 +235,7 @@ const Live = () => {
         }
 
         // Context Update
+        console.log(`[JUDGE] Calculating next state for ${match.id}...`);
         const nextState = updateBracketMatch(
             matches,
             match.id,
@@ -265,7 +275,10 @@ const Live = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        margin: '0 2px'
+        margin: '0 2px',
+        zIndex: 99999, /* FORCE TOP LAYER */
+        position: 'relative', /* REQUIRED FOR Z-INDEX */
+        pointerEvents: 'auto' /* ENSURE CLICKABLE */
     });
 
     const renderLiveMatch = (match, courtColor) => {
@@ -311,9 +324,28 @@ const Live = () => {
                             <div style={{ fontSize: '1.5rem', fontWeight: 800, marginTop: '5px', color: courtColor, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 {currentSet ? currentSet.a : 0}
                                 {isAuthenticated && (
-                                    <div style={{ display: 'flex', gap: '2px' }}>
-                                        <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'a', 1); }} style={btnStyle(courtColor)}><Plus size={14} /></button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'a', -1); }} style={btnStyle(courtColor)}><Minus size={14} /></button>
+                                    <div style={{ display: 'flex', gap: '2px', position: 'relative', zIndex: 99999 }}>
+                                        <button
+                                            id={`btn-p1-plus-${match.id}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                console.log("KLIKNIETO PRZYCISK P1 PLUS");
+                                                handleLiveScoreUpdate(match, 'point', 'a', 1);
+                                            }}
+                                            style={btnStyle(courtColor)}
+                                        >
+                                            <Plus size={14} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                console.log("KLIKNIETO PRZYCISK P1 MINUS");
+                                                handleLiveScoreUpdate(match, 'point', 'a', -1);
+                                            }}
+                                            style={btnStyle(courtColor)}
+                                        >
+                                            <Minus size={14} />
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -326,9 +358,9 @@ const Live = () => {
 
                             {/* P1 SETS +/- */}
                             {isAuthenticated && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginRight: '8px' }}>
-                                    <button onClick={() => handleLiveScoreUpdate(match, 'set', 'score1', 1)} style={btnStyle('rgba(255,255,255,0.5)')}><Plus size={10} /></button>
-                                    <button onClick={() => handleLiveScoreUpdate(match, 'set', 'score1', -1)} style={btnStyle('rgba(255,255,255,0.5)')}><Minus size={10} /></button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginRight: '8px', position: 'relative', zIndex: 99999 }}>
+                                    <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'set', 'score1', 1); }} style={btnStyle('rgba(255,255,255,0.5)')}><Plus size={10} /></button>
+                                    <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'set', 'score1', -1); }} style={btnStyle('rgba(255,255,255,0.5)')}><Minus size={10} /></button>
                                 </div>
                             )}
 
@@ -342,9 +374,9 @@ const Live = () => {
 
                             {/* P2 SETS +/- */}
                             {isAuthenticated && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginLeft: '8px' }}>
-                                    <button onClick={() => handleLiveScoreUpdate(match, 'set', 'score2', 1)} style={btnStyle('rgba(255,255,255,0.5)')}><Plus size={10} /></button>
-                                    <button onClick={() => handleLiveScoreUpdate(match, 'set', 'score2', -1)} style={btnStyle('rgba(255,255,255,0.5)')}><Minus size={10} /></button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginLeft: '8px', position: 'relative', zIndex: 99999 }}>
+                                    <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'set', 'score2', 1); }} style={btnStyle('rgba(255,255,255,0.5)')}><Plus size={10} /></button>
+                                    <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'set', 'score2', -1); }} style={btnStyle('rgba(255,255,255,0.5)')}><Minus size={10} /></button>
                                 </div>
                             )}
                         </div>
@@ -363,9 +395,27 @@ const Live = () => {
                             <div style={{ fontSize: '1.5rem', fontWeight: 800, marginTop: '5px', color: courtColor, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 {currentSet ? currentSet.b : 0}
                                 {isAuthenticated && (
-                                    <div style={{ display: 'flex', gap: '2px' }}>
-                                        <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'b', 1); }} style={btnStyle(courtColor)}><Plus size={14} /></button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'b', -1); }} style={btnStyle(courtColor)}><Minus size={14} /></button>
+                                    <div style={{ display: 'flex', gap: '2px', position: 'relative', zIndex: 99999 }}>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                console.log("KLIKNIETO PRZYCISK P2 PLUS");
+                                                handleLiveScoreUpdate(match, 'point', 'b', 1);
+                                            }}
+                                            style={btnStyle(courtColor)}
+                                        >
+                                            <Plus size={14} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                console.log("KLIKNIETO PRZYCISK P2 MINUS");
+                                                handleLiveScoreUpdate(match, 'point', 'b', -1);
+                                            }}
+                                            style={btnStyle(courtColor)}
+                                        >
+                                            <Minus size={14} />
+                                        </button>
                                     </div>
                                 )}
                             </div>
