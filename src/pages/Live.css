@@ -687,6 +687,81 @@
     font-weight: 400;
 }
 
+.score-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.control-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.control-btn.plus:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.control-btn.minus:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.tiny-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 0 2px;
+    font-weight: 700;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.tiny-btn:hover {
+    opacity: 1;
+    color: white;
+}
+
+.add-set-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    height: fit-content;
+    align-self: flex-start;
+    /* Align with set-boxes */
+}
+
+.add-set-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
 .upcoming-meta-right {
     font-size: 0.7rem;
     color: var(--text-secondary);

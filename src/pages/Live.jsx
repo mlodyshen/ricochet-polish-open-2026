@@ -1,13 +1,40 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Maximize, Trophy, Clock, Activity, X } from 'lucide-react';
+import { Maximize, Trophy, Clock, Activity, X, Plus, Minus } from 'lucide-react';
 import { useMatches } from '../hooks/useMatches';
 import { usePlayers } from '../hooks/usePlayers';
+import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
 import { getBestOf, compareMatchIds, checkMatchStatus } from '../utils/matchUtils';
+import { updateBracketMatch } from '../utils/bracketLogic';
 import { getCountryCode } from '../constants/countries';
 import './Live.css';
+
+// ... (rest of imports)
+
+// Helper Component for Score Controls
+const ScoreControls = ({ onIncrement, onDecrement, size = 'normal', style = {} }) => {
+    return (
+        <div className={`score-controls ${size}`} style={style}>
+            <button
+                onClick={(e) => { e.stopPropagation(); onIncrement(); }}
+                className="control-btn plus"
+                title="Add Point"
+            >
+                <Plus size={size === 'small' ? 10 : 14} strokeWidth={3} />
+            </button>
+            <button
+                onClick={(e) => { e.stopPropagation(); onDecrement(); }}
+                className="control-btn minus"
+                title="Subtract Point"
+            >
+                <Minus size={size === 'small' ? 10 : 14} strokeWidth={3} />
+            </button>
+        </div>
+    );
+};
+
 
 // Possible helper for flags...
 // ... (rest of imports are fine, I will target specific chunks)
@@ -50,168 +77,70 @@ const splitName = (fullName) => {
 
 const Live = () => {
     const { t } = useTranslation();
-    const { matches } = useMatches();
-    const { players } = usePlayers();
+    const { isAuthenticated } = useAuth();
+    const { saveMatches } = useMatches(); // Ensure saveMatches is destructured if not already
 
-    // DEBUG LOG
-    console.log("LIVE DATA CHECK:", matches);
+    // ... (rest of simple vars)
 
-    const { activeTournamentId, tournaments, isLoading: isTournamentLoading } = useTournament();
-    const location = useLocation();
-    const navigate = useNavigate();
+    // Handlers for Live Scoring
+    const handleLiveScoreUpdate = (match, type, playerKey, change, setIndex = null) => {
+        if (!match) return;
 
-    const activeTournament = tournaments.find(t => t.id === activeTournamentId);
+        // Clone current state data
+        let newScore1 = match.score1 ?? 0;
+        let newScore2 = match.score2 ?? 0;
+        let newMicroPoints = [...(match.microPoints || [])];
 
-    // TV Mode Detection
-    const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
-
-    // State
-    const [currentTime, setCurrentTime] = useState(new Date());
-    const [lastUpdate, setLastUpdate] = useState(Date.now());
-
-    // Initial load timestamp
-    // Initial load timestamp & Force Update on matches change
-    const [, forceUpdate] = useState(0);
-    useEffect(() => {
-        setLastUpdate(Date.now());
-        forceUpdate(n => n + 1);
-    }, [matches]);
-
-    // Clock
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const toggleTvMode = () => {
-        if (isTvMode) {
-            navigate('/live');
-        } else {
-            navigate('/live?mode=tv');
-        }
-    };
-
-
-    const formatTime = (date) => {
-        return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    };
-
-    const secondsAgo = Math.floor((Date.now() - lastUpdate) / 1000);
-
-    // --- LOGIC CENTRAL (Reuse existing logic) ---
-    const { pinkQueue, cyanQueue, finishedMatches } = useMemo(() => {
-        if (!matches || matches.length === 0) {
-            return { pinkQueue: [], cyanQueue: [], finishedMatches: [] };
+        if (type === 'set') {
+            if (playerKey === 'score1') newScore1 += change;
+            if (playerKey === 'score2') newScore2 += change;
+        } else if (type === 'point' && setIndex !== null) {
+            // Find or create set
+            const existingSet = newMicroPoints.find(s => s.set === setIndex);
+            if (existingSet) {
+                if (playerKey === 'a') existingSet.a = Math.max(0, (existingSet.a || 0) + change);
+                if (playerKey === 'b') existingSet.b = Math.max(0, (existingSet.b || 0) + change);
+            } else {
+                // Should exist if we clicked it, but safety check
+                // If creating new set logic needed, we'd do it here, but sticking to visible sets for now
+            }
         }
 
-        // Enrich Match Objects
-        const enriched = matches.map(m => {
-            const p1 = players.find(p => p.id === m.player1Id);
-            const p2 = players.find(p => p.id === m.player2Id);
-            return {
-                ...m,
-                player1: p1 || { full_name: 'TBD', id: null, isBye: false },
-                player2: p2 || { full_name: 'TBD', id: null, isBye: false }
-            };
-        });
-        // Removed strict filter: .filter(m => m.player1Id && m.player2Id ...) to allow TBD/Scheduling matches to appear.
-        // We only filter if it is a BYE (implied by player data, but safe to show placeholder for now if needed)
-        // actually if isBye is true, we might want to hide, but let's be permissive first.
+        // Validate
+        if (newScore1 < 0) newScore1 = 0;
+        if (newScore2 < 0) newScore2 = 0;
 
-        // Separate finished and active matches
-        const finished = enriched.filter(m => m.winnerId);
+        // Calc Status
+        // Use logic similar to MatchEditModal to determine finish
+        // checkMatchStatus returns TRUE if LIVE.
+        const bestOf = getBestOf(match.bracket);
+        const winThreshold = Math.ceil(bestOf / 2);
+        let status = 'live';
+        let winnerId = null;
 
-        // Active matches: Live, Pending, Finished OR Scheduled
-        // User Request: Case-insensitive check and relax filters
-        const activeMatches = enriched.filter(m => {
-            // If no status, assume pending/scheduled if active? Match might be fresh.
-            if (!m.status) return true;
-            const s = m.status.toLowerCase();
-            // Broaden filter to include 'scheduled' as well
-            return s === 'live' || s === 'finished' || s === 'pending' || s === 'scheduled';
-        })
-            .sort((a, b) => {
-                const sA = (a.status || '').toLowerCase();
-                const sB = (b.status || '').toLowerCase();
-                // Priority 1: Status 'live' comes first
-                if (sA === 'live' && sB !== 'live') return -1;
-                if (sA !== 'live' && sB === 'live') return 1;
-
-                // Priority 2: Original ID order
-                return compareMatchIds(a.id, b.id);
-            });
-
-        const pinkQ = [];
-        const cyanQ = [];
-
-        // Distribute Active Matches to Courts based on sorted order.
-        // 1st match (M1) -> Pink
-        // 2nd match (M2) -> Cyan
-        // 3rd (M3) -> Pink queue
-        // 4th (M4) -> Cyan queue
-        activeMatches.forEach((m, index) => {
-            const matchOrder = index + 1;
-            const court = matchOrder % 2 !== 0 ? 'courtPink' : 'courtCyan';
-            const matchWithCourt = { ...m, assignedCourt: court, matchOrder };
-
-            if (court === 'courtPink') pinkQ.push(matchWithCourt);
-            else cyanQ.push(matchWithCourt);
-        });
-
-        // For finished matches, we might want to keep court info if we tracked it, 
-        // but here we just assign strictly for display if needed or leave empty.
-        // The original logic assigned courts to all. Let's replicate strict assignment logic for consistency or just return list.
-        // The display logic for recent results uses 'assignedCourt', so we should map that if possible.
-        // Since we don't store court permanently, we can't perfectly recall where M1 happened if M1 is finished.
-        // We will mock it or just use 'courtPink' default for finished to avoid errors, or try to infer.
-        // Actually best is to just properly attribute them if they were part of the sequence.
-        // Simplification: Render them without specific court color dependency if possible, or alternating.
-        const enrichedFinished = finished.map((m, i) => ({
-            ...m, assignedCourt: i % 2 === 0 ? 'courtPink' : 'courtCyan'
-        }));
-
-        const recentFinished = enrichedFinished.reverse().slice(0, 4);
-        return { pinkQueue: pinkQ, cyanQueue: cyanQ, finishedMatches: recentFinished };
-    }, [matches, players]);
-
-    const getCourtState = (queue) => {
-        const liveMatch = queue.find(m => (m.score1 > 0 || m.score2 > 0));
-        const current = liveMatch || queue[0] || null;
-        let upcoming = [];
-        if (current) {
-            const currentIdx = queue.findIndex(m => m.id === current.id);
-            upcoming = queue.slice(currentIdx + 1, currentIdx + 4);
+        if (newScore1 >= winThreshold) {
+            status = 'finished';
+            winnerId = match.player1.id;
+        } else if (newScore2 >= winThreshold) {
+            status = 'finished';
+            winnerId = match.player2.id;
         }
-        return { current, upcoming };
+
+        // Force Update via Context
+        // We use updateBracketMatch util to ensure consistency
+        const nextState = updateBracketMatch(
+            matches,
+            match.id,
+            newScore1,
+            newScore2,
+            newMicroPoints,
+            players,
+            winnerId,
+            status
+        );
+
+        saveMatches(nextState, match.id);
     };
-
-    const pinkState = getCourtState(pinkQueue);
-    const cyanState = getCourtState(cyanQueue);
-
-    // --- RENDERERS ---
-    const renderEmptyLive = (courtColor) => (
-        <div className="live-match-display" style={{ opacity: 0.7 }}>
-            <div className="match-bracket-info">{t('live.noMatch')}</div>
-            <div className="players-versus">
-                <div className="player-container left">
-                    <div className="player-surname text-secondary">--</div>
-                </div>
-                <div className="score-display">
-                    <span className="big-score" style={{ color: courtColor }}>--</span>
-                    <span className="vs-divider"> : </span>
-                    <span className="big-score" style={{ color: courtColor }}>--</span>
-                </div>
-                <div className="player-container right">
-                    <div className="player-surname text-secondary">--</div>
-                </div>
-            </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '1rem' }}>
-                {t('live.autoMatchInfo')}
-            </p>
-        </div>
-    );
 
     const renderLiveMatch = (match, courtColor) => {
         if (!match) return renderEmptyLive(courtColor);
@@ -224,7 +153,18 @@ const Live = () => {
 
         // Prepare micro points (sets)
         const sets = match.microPoints || [];
+        // Ensure continuous sets for display if needed, but here just sort
         const sortedSets = [...sets].sort((a, b) => a.set - b.set);
+
+        // Auto-add next set placeholder if Live and authorized? 
+        // Optional: If authenticated and last set is "finished" (e.g. 11 points), maybe show next?
+        // Simpler: Just show controls on existing sets. If user needs new set, they add it in detailed view OR 
+        // we assume sets are pre-generated or we add a "Add Set" button. 
+        // For compliance with "minimalist", let's assume sets appear as points are added?
+        // Wait, if no sets exist, how to add points?
+        // User said "small buttons... near small points".
+        // If 0 sets, we might need a button to "Start Set 1".
+        const canAddSet = isAuthenticated && isStillPlaying && (sortedSets.length < bestOf);
 
         return (
             <div className="live-match-display">
@@ -252,6 +192,16 @@ const Live = () => {
 
                     <div className="score-center-col">
                         <div className="score-display">
+
+                            {/* Score 1 Controls */}
+                            {isAuthenticated && (
+                                <ScoreControls
+                                    onIncrement={() => handleLiveScoreUpdate(match, 'set', 'score1', 1)}
+                                    onDecrement={() => handleLiveScoreUpdate(match, 'set', 'score1', -1)}
+                                    style={{ marginRight: '8px' }}
+                                />
+                            )}
+
                             <span className="big-score" style={{
                                 color: courtColor,
                                 transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
@@ -267,6 +217,15 @@ const Live = () => {
                             }}>
                                 {(match.winnerId || match.score1 > 0 || match.score2 > 0 || showLive) ? (match.score2 ?? 0) : '-'}
                             </span>
+
+                            {/* Score 2 Controls */}
+                            {isAuthenticated && (
+                                <ScoreControls
+                                    onIncrement={() => handleLiveScoreUpdate(match, 'set', 'score2', 1)}
+                                    onDecrement={() => handleLiveScoreUpdate(match, 'set', 'score2', -1)}
+                                    style={{ marginLeft: '8px' }}
+                                />
+                            )}
                         </div>
                     </div>
 
@@ -280,18 +239,50 @@ const Live = () => {
                 </div>
 
                 {/* Sets Display */}
-                {sortedSets.length > 0 && (
+                {(sortedSets.length > 0 || canAddSet) && (
                     <div className="sets-container">
                         {sortedSets.map((s, idx) => (
-                            <div key={idx} className="set-box" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+                            <div key={idx} className="set-box" style={{ animation: 'fadeIn 0.5s ease-out', position: 'relative' }}>
                                 <div className="set-label">SET {s.set}</div>
-                                <div className="set-score">
+                                <div className="set-score" style={{ alignItems: 'center' }}>
+
+                                    {isAuthenticated && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', marginRight: '4px' }}>
+                                            <button className="tiny-btn" onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'a', 1, s.set); }}>+</button>
+                                            <button className="tiny-btn" onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'a', -1, s.set); }}>-</button>
+                                        </div>
+                                    )}
+
                                     <span className={s.a > s.b ? 'set-winner' : ''}>{s.a}</span>
-                                    <span>:</span>
+                                    <span style={{ margin: '0 2px' }}>:</span>
                                     <span className={s.b > s.a ? 'set-winner' : ''}>{s.b}</span>
+
+                                    {isAuthenticated && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '4px' }}>
+                                            <button className="tiny-btn" onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'b', 1, s.set); }}>+</button>
+                                            <button className="tiny-btn" onClick={(e) => { e.stopPropagation(); handleLiveScoreUpdate(match, 'point', 'b', -1, s.set); }}>-</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
+
+                        {/* Add Set Button */}
+                        {canAddSet && (
+                            <button
+                                className="add-set-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const nextSetNum = sortedSets.length + 1;
+                                    const newMicro = [...(match.microPoints || []), { set: nextSetNum, a: 0, b: 0 }];
+                                    // Optimization: call update directly
+                                    const nextState = updateBracketMatch(matches, match.id, match.score1, match.score2, newMicro, players, match.winnerId, match.status);
+                                    saveMatches(nextState, match.id);
+                                }}
+                            >
+                                <Plus size={12} /> Set {sortedSets.length + 1}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
