@@ -104,6 +104,8 @@ const Live = () => {
         }).filter(m => m.player1Id && m.player2Id && !m.player1.isBye && !m.player2.isBye);
 
         // Separate finished and active matches
+        const finished = enriched.filter(m => m.winnerId);
+
         // Active matches: Live, Pending, OR Finished
         // User Request: Case-insensitive check
         const activeMatches = enriched.filter(m => {
