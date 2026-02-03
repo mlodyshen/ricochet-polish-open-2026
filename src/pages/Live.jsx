@@ -206,38 +206,49 @@ const Live = () => {
     const handleLiveScoreUpdate = (match, type, playerKey, change, setIndex = null) => {
         if (!match) return;
 
-        // Clone current state data
+        console.log(`[JUDGE] Update: ${type} ${playerKey} ${change}`);
+        // DEBUG ALERT
+        if (type === 'point' && !setIndex) window.alert(`Updating Score: ${playerKey} ${change}`);
+
+        // 1. DEEP CLONE (Critical for React/Firestore references)
         let newScore1 = match.score1 ?? 0;
         let newScore2 = match.score2 ?? 0;
-        let newMicroPoints = [...(match.microPoints || [])];
+        // Deep clone array AND objects inside
+        let newMicroPoints = (match.microPoints || []).map(s => ({ ...s }));
 
         if (type === 'set') {
             if (playerKey === 'score1') newScore1 += change;
             if (playerKey === 'score2') newScore2 += change;
         } else if (type === 'point') {
-            // SMART POINT LOGIC (Auto-create Set if needed)
+            // SMART LOGIC: Find target set or create one
             let targetSet;
             if (setIndex !== null) {
                 targetSet = newMicroPoints.find(s => s.set === setIndex);
             } else {
-                // If no index provided, target LAST set or create NEW one
+                // If no index, find the last set (highest number) or create Set 1
                 if (newMicroPoints.length === 0) {
                     newMicroPoints.push({ set: 1, a: 0, b: 0 });
+                    targetSet = newMicroPoints[0];
+                } else {
+                    newMicroPoints.sort((a, b) => a.set - b.set);
+                    targetSet = newMicroPoints[newMicroPoints.length - 1];
                 }
-                targetSet = newMicroPoints[newMicroPoints.length - 1];
             }
 
             if (targetSet) {
-                if (playerKey === 'a') targetSet.a = Math.max(0, (targetSet.a || 0) + change);
-                if (playerKey === 'b') targetSet.b = Math.max(0, (targetSet.b || 0) + change);
+                const currentVal = targetSet[playerKey === 'a' ? 'a' : 'b'] || 0;
+                const nextVal = Math.max(0, currentVal + change);
+
+                if (playerKey === 'a') targetSet.a = nextVal;
+                if (playerKey === 'b') targetSet.b = nextVal;
             }
         }
 
-        // Validate
+        // Validate Sets
         if (newScore1 < 0) newScore1 = 0;
         if (newScore2 < 0) newScore2 = 0;
 
-        // Calc Status
+        // Calc Status / Winner
         const bestOf = getBestOf(match.bracket);
         const winThreshold = Math.ceil(bestOf / 2);
         let status = 'live';
@@ -249,12 +260,9 @@ const Live = () => {
         } else if (newScore2 >= winThreshold) {
             status = 'finished';
             winnerId = match.player2.id;
-        } else {
-            // If dropping below threshold, ensure match is active
-            winnerId = null;
         }
 
-        // Force Update via Context
+        // Update Context
         const nextState = updateBracketMatch(
             matches,
             match.id,
@@ -420,6 +428,33 @@ const Live = () => {
                                 <Plus size={12} /> Set {sortedSets.length + 1}
                             </button>
                         )}
+                    </div>
+                )}
+                {/* JUDGE OVERLAY FOR SMART POINTS (Fixed Z-Index & Position) */}
+                {isAuthenticated && (
+                    <div className="judge-overlay-controls" style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        display: 'flex', justifyContent: 'space-between', padding: '0 1rem', pointerEvents: 'none',
+                        zIndex: 9999, alignItems: 'center'
+                    }}>
+                        {/* P1 Point */}
+                        <button
+                            className="judge-point-btn-large"
+                            style={{ pointerEvents: 'auto', background: 'rgba(34, 197, 94, 0.4)', border: '2px solid rgba(255,255,255,0.8)', color: 'white', borderRadius: '50%', width: '80px', height: '80px', fontSize: '2rem', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(4px)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); console.log('Click P1'); handleLiveScoreUpdate(match, 'point', 'a', 1); }}
+                            title="Add Point P1"
+                        >
+                            +
+                        </button>
+                        {/* P2 Point */}
+                        <button
+                            className="judge-point-btn-large"
+                            style={{ pointerEvents: 'auto', background: 'rgba(34, 197, 94, 0.4)', border: '2px solid rgba(255,255,255,0.8)', color: 'white', borderRadius: '50%', width: '80px', height: '80px', fontSize: '2rem', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(4px)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); console.log('Click P2'); handleLiveScoreUpdate(match, 'point', 'b', 1); }}
+                            title="Add Point P2"
+                        >
+                            +
+                        </button>
                     </div>
                 )}
             </div>
