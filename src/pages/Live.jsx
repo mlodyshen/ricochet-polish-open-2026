@@ -104,26 +104,19 @@ const Live = () => {
         }).filter(m => m.player1Id && m.player2Id && !m.player1.isBye && !m.player2.isBye);
 
         // Separate finished and active matches
-        const finished = enriched.filter(m => m.winnerId);
-
-        // Active matches: Live, Pending, OR Finished (to show results on court)
-        // User Request: (m.status === 'live' || m.status === 'completed')
-        // We interpret 'completed' as 'finished'.
-        // We include 'pending' too if we want to show upcoming, but the user said:
-        // "Active matches on specific courts... Remove m.status===completed filter" (wait, they said remove existing one? No, they said "Remove filter m.status===completed. Replace with live or completed").
-        // I will allow 'live', 'pending' and 'finished' but prioritize LIVE.
-        // Actually, if I strictly follow "status is live OR completed", I might hide pending?
-        // Let's assume they want to see the match ON COURT. Pending matches are usually on court too if scheduled.
-        // I will broaden to:  (status === 'live' || status === 'finished' || status === 'pending')
-
-        const activeMatches = enriched.filter(m =>
-            // We include ALL relevant statuses so nothing is hidden
-            m.status === 'live' || m.status === 'finished' || m.status === 'pending'
-        )
+        // Active matches: Live, Pending, OR Finished
+        // User Request: Case-insensitive check
+        const activeMatches = enriched.filter(m => {
+            if (!m.status) return false;
+            const s = m.status.toLowerCase();
+            return s === 'live' || s === 'finished' || s === 'pending';
+        })
             .sort((a, b) => {
+                const sA = (a.status || '').toLowerCase();
+                const sB = (b.status || '').toLowerCase();
                 // Priority 1: Status 'live' comes first
-                if (a.status === 'live' && b.status !== 'live') return -1;
-                if (a.status !== 'live' && b.status === 'live') return 1;
+                if (sA === 'live' && sB !== 'live') return -1;
+                if (sA !== 'live' && sB === 'live') return 1;
 
                 // Priority 2: Original ID order
                 return compareMatchIds(a.id, b.id);
@@ -368,6 +361,10 @@ const Live = () => {
             <header className="live-header" style={{ paddingRight: isTvMode ? '120px' : '0' }}>
                 <div>
                     <h1 className="live-title">{t('live.title')}</h1>
+                    {/* DEBUG INDICATOR */}
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}>
+                        Loaded: {matches.length} | Active Context
+                    </div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     {/* Digital Clock */}
