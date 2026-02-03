@@ -122,7 +122,7 @@ export const MatchesProvider = ({ children }) => {
         }
     };
 
-    const saveMatches = useCallback(async (newMatches) => {
+    const saveMatches = useCallback(async (newMatches, specificMatchId = null) => {
         if (!activeTournamentId) {
             console.error("No active tournament ID, cannot save!");
             return;
@@ -135,76 +135,31 @@ export const MatchesProvider = ({ children }) => {
         if (isFirebaseConfigured && isAuthenticated) {
 
             try {
-                const { setDoc, updateDoc } = await import('firebase/firestore');
+                const { setDoc } = await import('firebase/firestore');
 
-                // Identify changed matches to avoid spamming 100+ writes
-                // We compare newMatches against the PREVIOUS state (matches) 
-                // But since setState is async and we are inside useCallback, 'matches' might be stale?
-                // Actually 'matches' is not in dependency array to avoid loop. 
-                // However, the caller usually passes the full new state.
-                // Let's rely on finding which match triggered this? 
-                // Ideally, the caller should pass "changedMatchId". 
-                // But for now, let's just diff against memory (expensive but safer than spamming DB)
+                let changesToSave = [];
 
-                // Better approach: Just look for the match that has changed timestamp? No timestamp yet.
-                // Let's filter by checking which match differs from 'matches' state?
-                // But 'matches' in scope is closure-captured from render? 
-                // The dependency array has [isAuthenticated, activeTournamentId, lsKey]. 
-                // So 'matches' is NOT in scope correctly! 
-
-                // FIX: use functional update logic or just assume the Caller sent us a modified list?
-                // Since we don't have the old list reliably to diff here without adding it to dependency...
-                // We will try to rely on a 'Diff' helper or just save valid matches.
-
-                // CRITICAL FIX requested: "Find only the one specific match".
-                // Since we don't know which one changed, we need to be smart.
-                // But wait, the user said "Save only one, specific match". 
-                // We can't know which one unless we diff.
-
-                // Let's use a simple diff by ID match.
-                // We need to access the 'current' matches to diff. 
-                // We can use a ref or just... 
-
-                // Simpler: The caller (updateBracketMatch) returns a NEW array referencing SAME objects for unchanged.
-                // We can check strict equality reference!
-
-                const changedMatches = [];
-                // We need the PREVIOUS matches to compare.
-                // setMatches(prev => ...) gives us prev, but we can't access it outside.
-
-                // HACK: Use a Ref to store previous matches for Diffing
-                // But we define Ref outside.
-
-                // ALERT: To strictly follow instruction "Find the function... must save only one specific match",
-                // we should change the signature of saveMatches to accept (newMatches, changedMatchId)
-                // But that requires changing callers. 
-
-                // ALTERNATIVE: Diff against the state variable 'matches' which IS available in scope if we add it to deps?
-                // No, that causes cycles.
-
-                // Let's assume we simply iterate and check if it looks 'active' or 'just modified'? No.
-
-                // Let's implement the DIFF logic using the injected 'matches' from scope 
-                // (we need to add 'matches' to dependency for this logic to work, but proceed with caution).
-                // Actually, let's use a Mutable Ref to keep track of "last saved state".
-
-                const payload = newMatches.map(m => mapToSnake(m));
-
-                const changesToSave = payload.filter(p => {
-                    // Primitive diff: Find existing match in CURRENT 'matches' state
-                    const old = matches.find(m => m.id === p.id);
-                    if (!old) return true; // New match
-
-                    // Compare critical fields
-                    const oldSnake = mapToSnake(old);
-                    return JSON.stringify(oldSnake) !== JSON.stringify(p);
-                });
+                if (specificMatchId) {
+                    console.log("DEBUG: Target Save for Match ID:", specificMatchId);
+                    const target = newMatches.find(m => m.id === specificMatchId);
+                    if (target) {
+                        changesToSave = [mapToSnake(target)];
+                    } else {
+                        console.warn("DEBUG: Target match not found in new state!", specificMatchId);
+                    }
+                } else {
+                    // Fallback to Diff Logic or Bulk Save
+                    const payload = newMatches.map(m => mapToSnake(m));
+                    changesToSave = payload.filter(p => {
+                        const old = matches.find(m => m.id === p.id);
+                        if (!old) return true;
+                        const oldSnake = mapToSnake(old);
+                        return JSON.stringify(oldSnake) !== JSON.stringify(p);
+                    });
+                }
 
                 if (changesToSave.length === 0) {
-                    // Fallback: If for some reason diff failed (e.g. references broken), save all?
-                    // No, if 0 changes detected, maybe we just save nothing?
-                    // But to be safe vs bugs, if we can't detect, we log warning.
-                    // console.log("No changes detected via Diff.");
+                    // console.log("No changes detected.");
                     return;
                 }
 

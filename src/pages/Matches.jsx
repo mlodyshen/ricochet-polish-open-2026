@@ -309,7 +309,7 @@ const Matches = () => {
         });
 
         console.log("Próba zapisu meczu:", matchId, data);
-        saveMatches(finalState);
+        saveMatches(finalState, matchId); // Pass matchId for targeted saving
         console.log("Zapis wysłany do hooka!");
 
         // Close modal only if manual save

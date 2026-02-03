@@ -70,7 +70,7 @@ const Brackets = () => {
 
         // updateBracketMatch rebuilds state.
         const updated = updateBracketMatch(matches, selectedMatch.id, Number(scoreA) || 0, Number(scoreB) || 0, selectedMatch.microPoints || [], players);
-        saveMatches(updated);
+        saveMatches(updated, selectedMatch.id);
         setSelectedMatch(null);
     };
 
