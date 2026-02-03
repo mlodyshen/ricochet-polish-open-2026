@@ -80,7 +80,20 @@ const Live = () => {
     const { isAuthenticated } = useAuth();
     const { saveMatches } = useMatches(); // Ensure saveMatches is destructured if not already
 
-    // ... (rest of simple vars)
+    const { matches } = useMatches();
+    const { players } = usePlayers();
+
+    // DEBUG LOG
+    console.log("LIVE DATA CHECK:", matches);
+
+    const { activeTournamentId, tournaments, isLoading: isTournamentLoading } = useTournament();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const activeTournament = tournaments.find(t => t.id === activeTournamentId);
+
+    // TV Mode Detection
+    const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
 
     // Handlers for Live Scoring
     const handleLiveScoreUpdate = (match, type, playerKey, change, setIndex = null) => {
