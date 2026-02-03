@@ -56,6 +56,9 @@ export const MatchesProvider = ({ children }) => {
         court: m.court || ""
     });
 
+    // Ref to track saving state to prevent snapshot racing/echoes
+    const isSavingRef = useRef(false);
+
     // --- DATA LOADING ---
     useEffect(() => {
         if (!activeTournamentId) {
@@ -71,12 +74,18 @@ export const MatchesProvider = ({ children }) => {
                 const q = query(collection(db, "matches"), where("tournament_id", "==", activeTournamentId));
 
                 unsubscribe = onSnapshot(q, (snapshot) => {
+                    // CRITICAL FIX: If we are currently saving (optimistic update in progress),
+                    // ignore incoming snapshots to prevent overwriting local state with stale server data.
+                    if (isSavingRef.current) {
+                        console.log("[MatchesContext] Skipping snapshot due to active save operation (Debounce Echo)");
+                        return;
+                    }
+
                     const loaded = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     })).map(mapToCamel);
 
-                    // Simple Diff Check could be here, but for now just set
                     setMatches(loaded);
                     console.log(`[MatchesContext] Loaded ${loaded.length} matches from Firebase`);
                 }, (error) => {
@@ -119,7 +128,7 @@ export const MatchesProvider = ({ children }) => {
                 batch.delete(doc.ref);
             });
             await batch.commit();
-            setMatches([]); // Clear local immediately
+            setMatches([]);
         } catch (e) {
             console.error("Error resetting matches:", e);
         } finally {
@@ -136,6 +145,9 @@ export const MatchesProvider = ({ children }) => {
         // 1. OPTIMISTIC UPDATE
         setMatches(newMatches);
 
+        // Mark saving as active to block snapshot echoes
+        isSavingRef.current = true;
+
         // 2. PERSISTENCE
         if (isFirebaseConfigured && isAuthenticated) {
 
@@ -145,7 +157,6 @@ export const MatchesProvider = ({ children }) => {
                 let changesToSave = [];
 
                 if (specificMatchId) {
-                    // console.log("DEBUG: Target Save for Match ID:", specificMatchId); 
                     const target = newMatches.find(m => m.id === specificMatchId);
                     if (target) {
                         changesToSave = [mapToSnake(target)];
@@ -153,7 +164,6 @@ export const MatchesProvider = ({ children }) => {
                         console.warn("DEBUG: Target match not found in new state!", specificMatchId);
                     }
                 } else {
-                    // Fallback to Diff Logic using Ref to avoid dependency cycle
                     const currentMatches = matchesRef.current;
                     const payload = newMatches.map(m => mapToSnake(m));
                     changesToSave = payload.filter(p => {
@@ -165,6 +175,7 @@ export const MatchesProvider = ({ children }) => {
                 }
 
                 if (changesToSave.length === 0) {
+                    isSavingRef.current = false;
                     return;
                 }
 
@@ -174,16 +185,23 @@ export const MatchesProvider = ({ children }) => {
                     return setDoc(docRef, match);
                 });
 
-                Promise.all(promises).catch(err => console.error("Async Save Error:", err));
+                await Promise.all(promises);
 
             } catch (e) {
                 console.error("Error initiating save:", e);
+            } finally {
+                // Release lock after a short delay to allow Firestore to catch up
+                setTimeout(() => {
+                    isSavingRef.current = false;
+                    console.log("[MatchesContext] Save lock released");
+                }, 500);
             }
         } else {
             // LS
             localStorage.setItem(lsKey, JSON.stringify(newMatches));
+            isSavingRef.current = false;
         }
-    }, [isAuthenticated, activeTournamentId, lsKey]); // Removed matches from deps
+    }, [isAuthenticated, activeTournamentId, lsKey]);
 
     return (
         <MatchesContext.Provider value={{ matches, saveMatches, resetMatches, isSaving }}>
