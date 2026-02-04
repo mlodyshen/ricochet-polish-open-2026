@@ -420,6 +420,26 @@ const Live = () => {
                 <div className="qr-label">{t('live.scanForResults')}</div>
             </div>
 
+            {/* NEWS TICKER */}
+            <div className="news-ticker">
+                <div className="ticker-label">LATEST RESULTS</div>
+                <div className="ticker-content">
+                    <div className="ticker-track">
+                        {finishedMatches.length === 0 && (
+                            <span className="ticker-item">No matches finished yet. Waiting for results...</span>
+                        )}
+                        {finishedMatches.map((m, i) => (
+                            <span key={`ticker-${m.id}-${i}`} className="ticker-item">
+                                <span className="ticker-highlight">{formatName(m.player1)}</span>
+                                <span className="ticker-score">{m.score1}:{m.score2}</span>
+                                <span className="ticker-highlight">{formatName(m.player2)}</span>
+                                <span style={{ opacity: 0.5, marginLeft: '0.5rem', fontSize: '0.7em' }}>{(m.bracket || '').toUpperCase()}</span>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };
