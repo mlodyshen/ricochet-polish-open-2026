@@ -75,7 +75,7 @@ const Brackets = () => {
     };
 
     return (
-        <div style={{ width: '100%', height: 'calc(100vh - 80px)', position: 'relative' }}>
+        <div style={{ width: '100%', height: 'calc(100vh - 140px)', position: 'relative' }}>
             {/* Controls */}
             <div className="bracket-controls">
                 {isAuthenticated && (

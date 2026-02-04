@@ -54,8 +54,14 @@ const Layout = () => {
         return isAuthenticated;
     });
 
-    // Check if we are in Live View Presentation Mode (TV Mode)
-    const isLiveView = location.pathname === '/live' && new URLSearchParams(location.search).get('mode') === 'tv';
+    // Check local path
+    const isBracketsPage = location.pathname === '/brackets';
+
+    const mainContentStyle = isLiveView
+        ? { marginLeft: 0, padding: 0, maxWidth: 'none' }
+        : isBracketsPage
+            ? { maxWidth: '100%', padding: '0 1rem', marginTop: '140px' }
+            : {};
 
     return (
         <div className="app-container">
@@ -104,8 +110,8 @@ const Layout = () => {
                 </aside>
             )}
 
-            {/* Main Content Area - Full Width in Live View */}
-            <main className="main-content" style={isLiveView ? { marginLeft: 0, padding: 0 } : {}}>
+            {/* Main Content Area - Full Width in Live View, Expanded for Brackets */}
+            <main className="main-content" style={mainContentStyle}>
                 <div className="page-container">
                     <Outlet />
                 </div>
