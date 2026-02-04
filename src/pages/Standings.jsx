@@ -86,7 +86,7 @@ const Standings = () => {
                 </div>
                 <div className="podium-info">
                     <div className="podium-name" title={player?.full_name}>
-                        {player ? player.full_name : <span className="empty-slot-text">{t('standings.tbd')}</span>}
+                        {player ? player.full_name : <span className="empty-slot-text">&nbsp;</span>}
                     </div>
                     {player && player.country && (
                         <div className="podium-country">
@@ -134,7 +134,7 @@ const Standings = () => {
                             )}
                             <div className="row-info">
                                 <div className="row-name">
-                                    {player ? player.full_name : <span className="empty-slot-text">{t('standings.tbd')}</span>}
+                                    {player ? player.full_name : <span className="empty-slot-text">&nbsp;</span>}
                                 </div>
                                 {player && player.country && (
                                     <div className="row-country">
