@@ -27,6 +27,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 player2: players.find(p => p.id === m.player2Id) || null,
                 sourceMatchId1: m.sourceMatchId1 || (bp ? bp.sourceMatchId1 : null),
                 sourceMatchId2: m.sourceMatchId2 || (bp ? bp.sourceMatchId2 : null),
+                sourceType1: m.sourceType1 || (bp ? bp.sourceType1 : null),
+                sourceType2: m.sourceType2 || (bp ? bp.sourceType2 : null),
                 nextMatchId: m.nextMatchId || (bp ? bp.nextMatchId : null),
                 loserMatchId: m.loserMatchId || (bp ? bp.loserMatchId : null)
             };
@@ -38,6 +40,20 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
         const parts = id.split('-m');
         return parts.length > 1 ? parseInt(parts[1], 10) : 0;
     };
+
+    const getShortMatchId = (id) => {
+        if (!id) return '';
+        const parts = id.split('-');
+        if (parts.length < 3) return id;
+        // wb-r1-m1 -> WB R1.1
+        // lb-r2-m3 -> LB R2.3
+        const b = parts[0].toUpperCase();
+        const r = parts[1].replace('r', '');
+        const m = parts[2].replace('m', '');
+        if (b === 'P25') return `25-32 #1.${m}`; // Custom logic if needed, but simplistic is fine
+        return `${b} ${r}.${m}`;
+    };
+
     const byMatchId = (a, b) => getMatchNumber(a?.id) - getMatchNumber(b?.id);
 
     // Grouping
@@ -199,10 +215,27 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
                 <div style={{ padding: '10px 0' }}>
                     {[
-                        { p: p1, s: match.score1, w: isWinner1 },
-                        { p: p2, s: match.score2, w: isWinner2 }
+                        { p: p1, s: match.score1, w: isWinner1, srcId: match.sourceMatchId1, srcType: match.sourceType1 },
+                        { p: p2, s: match.score2, w: isWinner2, srcId: match.sourceMatchId2, srcType: match.sourceType2 }
                     ].map((row, idx) => {
-                        let displayText = row.p ? row.p.full_name : 'TBD';
+                        let displayText = 'TBD';
+                        let isPlaceholder = false;
+
+                        if (row.p) {
+                            displayText = row.p.full_name;
+                        } else {
+                            // GENERATE INSTRUCTION TEXT
+                            const sourceLabel = getShortMatchId(row.srcId);
+                            if (sourceLabel) {
+                                const type = row.srcType === 'loser' ? 'Loser' : 'Winner'; // Or polish "Przegrany"/"Wygrany"
+                                displayText = `${type}: ${sourceLabel}`;
+                                isPlaceholder = true;
+                            } else {
+                                displayText = 'Waiting...';
+                                isPlaceholder = true;
+                            }
+                        }
+
                         // Text Color: White normally, Cyan if winner
                         let displayColor = row.p ? '#ffffff' : 'rgba(255,255,255,0.3)';
 
@@ -234,13 +267,9 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                                         color: displayColor,
                                         fontWeight: fontWeight,
-                                        fontSize: '0.85rem',
+                                        fontSize: isPlaceholder ? '0.7rem' : '0.85rem', // Smaller for instructions
                                         maxWidth: '120px',
-                                        // If winner, add a subtle text shadow or color shift?
-                                        // Let's keep it simple White due to minimalist request, maybe Cyan checkmark?
-                                        // actually user asked for "Black, White, Pink, Turquoise".
-                                        // Let's make winner text slightly Turquoise or keep white. 
-                                        // Clean white is best for minimalist.
+                                        fontStyle: isPlaceholder ? 'italic' : 'normal'
                                     }}>
                                         {displayText}
                                     </span>
