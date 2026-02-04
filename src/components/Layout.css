@@ -193,3 +193,26 @@
         /* Below content, scrolalble */
     }
 }
+
+.brand-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: white;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.polish-flag-text {
+    background: linear-gradient(to bottom, #ffffff 50%, #dc143c 50%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    padding: 0 2px;
+    /* slight padding to ensure clips encompass edge */
+    /* Ensure line-height covers the gradient properly */
+    line-height: 1;
+}
