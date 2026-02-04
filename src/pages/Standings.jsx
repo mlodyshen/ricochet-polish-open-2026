@@ -109,7 +109,6 @@ const Standings = () => {
         <div className="standings-container fade-in">
             <div className="standings-header">
                 <h1 className="standings-title text-gradient">{t('navigation.standings')}</h1>
-                <p className="standings-subtitle">{t('standings.description')}</p>
             </div>
 
             <div className="podium-section">
