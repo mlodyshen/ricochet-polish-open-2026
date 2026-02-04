@@ -79,7 +79,19 @@
         "round": "Round",
         "liveBadge": "LIVE",
         "readinessAlert": "Następny mecz: Proszę o gotowość przy korcie ⏳",
-        "scanForResults": "WYNIKI MOBILE"
+        "scanForResults": "WYNIKI MOBILE",
+        "tickerLabel": "OSTATNIE WYNIKI",
+        "tickerEmpty": "Brak zakończonych meczów. Czekamy na wyniki...",
+        "upcomingHeader": "NADCHODZĄCE",
+        "pinkQueue": "KOLEJKA RÓŻOWA",
+        "cyanQueue": "KOLEJKA TURKUSOWA",
+        "recentHeader": "OSTATNIE WYNIKI",
+        "recentEmpty": "Brak wyników.",
+        "courtPinkLabel": "KORT RÓŻOWY",
+        "courtCyanLabel": "KORT TURKUSOWY",
+        "waitingForMatch": "Czekam na mecz...",
+        "sets": "SETY",
+        "clickHint": "L-Klik / P-Klik (Punkty)"
     },
     "organizer": {
         "title": "Zarządzanie Turniejami",
@@ -126,7 +138,17 @@
         "generateConfirm": "Czy na pewno chcesz wygenerować nową drabinkę dla {{count}} graczy? Wszystkie obecne wyniki zostaną usunięte.",
         "generateBtn": "Wygeneruj Drabinkę (ELO)",
         "loginPrompt": "Zaloguj się jako administrator, aby zarządzać turniejem.",
-        "match": "Mecz {{id}}"
+        "match": "Mecz {{id}}",
+        "liveArena": "Arena Live",
+        "controlMatch": "Zarządzaj Meczem",
+        "editResultTitle": "Edytuj Wynik Meczu",
+        "formatInfo": "Format: Do {{n}} wygranych (Best of {{bo}})",
+        "statusLabel": "Status Meczu",
+        "courtLabel": "Przydział Kortu",
+        "bracketWinners": "WYGRANI",
+        "bracketLosers": "PRZEGRANI",
+        "bracketFinal": "FINAŁ",
+        "registeredPlayers": "Zarejestrowanych graczy"
     },
     "brackets": {
         "wb": "Drabinka Wygranych",
@@ -139,7 +161,12 @@
         "resetConfirm": "To zresetuje obecną drabinkę. Kontynuować?",
         "editScoreTitle": "Edytuj Wynik",
         "sourceWinner": "Wygrany z meczu {{n}}",
-        "sourceLoser": "Przegrany z meczu {{n}}"
+        "sourceLoser": "Przegrany z meczu {{n}}",
+        "headerWB": "DRABINKA GŁÓWNA",
+        "headerLB": "DRABINKA PRZEGRANYCH",
+        "headerPlacement": "MECZE O MIEJSCA",
+        "placeRange": "Miejsca {{range}}",
+        "placeSingle": "Miejsce {{place}}"
     },
     "standings": {
         "description": "Klasyfikacja aktualizowana po zakończeniu udziału w turnieju."

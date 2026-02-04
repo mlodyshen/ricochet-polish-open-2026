@@ -92,13 +92,13 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
     // Monrad Groups
     const monradConfig = [
-        { id: '25-32', brackets: ['p25', 'p27', 'p29', 'p31'], title: 'Places 25-32' },
-        { id: '17-24', brackets: ['p17', 'p19', 'p21', 'p23'], title: 'Places 17-24' },
-        { id: '13-16', brackets: ['p13', 'p15'], title: 'Places 13-16' },
-        { id: '9-12', brackets: ['p9', 'p11'], title: 'Places 9-12' },
-        { id: '7-8', brackets: ['p7'], title: '7th Place' },
-        { id: '5-6', brackets: ['p5'], title: '5th Place' },
-        { id: '4th', brackets: ['p4'], title: '4th Place' }
+        { id: '25-32', brackets: ['p25', 'p27', 'p29', 'p31'], title: t('brackets.placeRange', { range: '25-32' }) },
+        { id: '17-24', brackets: ['p17', 'p19', 'p21', 'p23'], title: t('brackets.placeRange', { range: '17-24' }) },
+        { id: '13-16', brackets: ['p13', 'p15'], title: t('brackets.placeRange', { range: '13-16' }) },
+        { id: '9-12', brackets: ['p9', 'p11'], title: t('brackets.placeRange', { range: '9-12' }) },
+        { id: '7-8', brackets: ['p7'], title: t('brackets.placeSingle', { place: '7th' }) },
+        { id: '5-6', brackets: ['p5'], title: t('brackets.placeSingle', { place: '5th' }) },
+        { id: '4th', brackets: ['p4'], title: t('brackets.placeSingle', { place: '4th' }) }
     ];
 
     // --- 2. Path Calculation ---
@@ -299,11 +299,13 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                             // GENERATE INSTRUCTION TEXT
                             const sourceLabel = getShortMatchId(row.srcId);
                             if (sourceLabel) {
-                                const type = row.srcType === 'loser' ? 'Loser' : 'Winner'; // Or polish "Przegrany"/"Wygrany"
-                                displayText = `${type}: ${sourceLabel}`;
+                                const typeText = row.srcType === 'loser'
+                                    ? t('brackets.sourceLoser', { n: sourceLabel })
+                                    : t('brackets.sourceWinner', { n: sourceLabel });
+                                displayText = typeText;
                                 isPlaceholder = true;
                             } else {
-                                displayText = 'Waiting...';
+                                displayText = t('live.waitingMessage'); // Or specific bracket wait message
                                 isPlaceholder = true;
                             }
                         }
@@ -391,7 +393,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                     <div className="section-wb" style={{ display: 'flex', flexDirection: 'column', marginRight: '100px' }}>
                         <div style={sectionHeaderStyle}>
                             <div style={{ width: '6px', height: '32px', background: '#ec4899', borderRadius: '2px' }}></div>
-                            <span>WINNERS BRACKET</span>
+                            <span>{t('brackets.headerWB')}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '80px' }}>
                             {wbRounds.map((roundMatches, i) => (
@@ -401,7 +403,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                             ))}
                             {visibleSections.includes('mid') && gfMatches.length > 0 && (
                                 <div className="section-mid" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '20px', marginLeft: '10px' }}>
-                                    {gfMatches.map(m => renderMatch(m, m.id === 'grand-final' ? 'FINAL' : '3RD'))}
+                                    {gfMatches.map(m => renderMatch(m, m.id === 'grand-final' ? t('brackets.finalBadge').toUpperCase() : '3RD'))}
                                     <div style={{ alignSelf: 'center', opacity: 0.8, marginTop: '30px' }}>
                                         <Trophy size={80} color="#ec4899" style={{ filter: 'drop-shadow(0 0 15px rgba(236, 72, 153, 0.4))' }} />
                                     </div>
@@ -416,7 +418,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                     <div className="section-lb" style={{ display: 'flex', flexDirection: 'column', marginRight: '100px' }}>
                         <div style={sectionHeaderStyle}>
                             <div style={{ width: '6px', height: '32px', background: '#06b6d4', borderRadius: '2px' }}></div>
-                            <span>LOSERS BRACKET</span>
+                            <span>{t('brackets.headerLB')}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '80px' }}>
                             {lbRounds.map((roundMatches, i) => (
@@ -433,7 +435,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                     <div className="section-monrad" style={{ display: 'flex', flexDirection: 'column' }}>
                         <div style={sectionHeaderStyle}>
                             <div style={{ width: '6px', height: '32px', background: '#fff', borderRadius: '2px' }}></div>
-                            <span>PLACEMENT STAGE</span>
+                            <span>{t('brackets.headerPlacement')}</span>
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '60px', maxWidth: '4000px' }}>
                             {monradConfig.map(group => {

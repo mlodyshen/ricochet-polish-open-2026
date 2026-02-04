@@ -77,7 +77,19 @@
         "round": "Round",
         "liveBadge": "LIVE",
         "readinessAlert": "Next match: Please be ready near the court ⏳",
-        "scanForResults": "MOBILE RESULTS"
+        "scanForResults": "MOBILE RESULTS",
+        "tickerLabel": "LATEST RESULTS",
+        "tickerEmpty": "No matches finished yet. Waiting for results...",
+        "upcomingHeader": "UPCOMING",
+        "pinkQueue": "PINK QUEUE",
+        "cyanQueue": "CYAN QUEUE",
+        "recentHeader": "RECENT RESULTS",
+        "recentEmpty": "No results yet.",
+        "courtPinkLabel": "PINK COURT",
+        "courtCyanLabel": "CYAN COURT",
+        "waitingForMatch": "Waiting for match...",
+        "sets": "SETS",
+        "clickHint": "L-Click / R-Click (Points)"
     },
     "organizer": {
         "title": "Tournament Management",
@@ -124,7 +136,17 @@
         "generateConfirm": "Are you sure you want to generate a new bracket for {{count}} players? All current results will be deleted.",
         "generateBtn": "Generate Bracket (ELO)",
         "loginPrompt": "Log in as administrator to manage the tournament.",
-        "match": "Match {{id}}"
+        "match": "Match {{id}}",
+        "liveArena": "Live Arena",
+        "controlMatch": "Control Match",
+        "editResultTitle": "Edit Match Result",
+        "formatInfo": "Format: First to {{n}} (Best of {{bo}})",
+        "statusLabel": "Match Status",
+        "courtLabel": "Court Assignment",
+        "bracketWinners": "WINNERS",
+        "bracketLosers": "LOSERS",
+        "bracketFinal": "FINAL",
+        "registeredPlayers": "Registered Players"
     },
     "brackets": {
         "wb": "Winners Bracket",
@@ -135,7 +157,14 @@
         "finalBadge": "Final",
         "generateNew": "Generate New",
         "resetConfirm": "This will reset the current bracket. Continue?",
-        "editScoreTitle": "Edit Score"
+        "editScoreTitle": "Edit Score",
+        "sourceWinner": "Winner of match {{n}}",
+        "sourceLoser": "Loser of match {{n}}",
+        "headerWB": "WINNERS BRACKET",
+        "headerLB": "LOSERS BRACKET",
+        "headerPlacement": "PLACEMENT STAGE",
+        "placeRange": "Places {{range}}",
+        "placeSingle": "{{place}} Place"
     },
     "standings": {
         "description": "Standings are updated after tournament participation ends."

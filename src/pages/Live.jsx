@@ -176,7 +176,7 @@ const Live = () => {
 
     const renderEmptyLive = (courtColor) => (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px', opacity: 0.5, fontStyle: 'italic', color: courtColor }}>
-            {t('live.waitingForMatch') || "Waiting for match..."}
+            {t('live.waitingForMatch')}
         </div>
     );
 
@@ -210,7 +210,7 @@ const Live = () => {
 
         return (
             <div className="broadcast-card" style={{ background: gradientBg }}>
-                {isStillPlaying && <div className="broadcast-badge-live">LIVE</div>}
+                {isStillPlaying && <div className="broadcast-badge-live">{t('live.liveBadge')}</div>}
 
                 {/* CLICK OVERLAY */}
                 {isStillPlaying && isAuthenticated && (
@@ -253,7 +253,7 @@ const Live = () => {
                                 {currentSet.a}
                             </div>
                         )}
-                        {isAuthenticated && isStillPlaying && <div style={{ fontSize: '0.6rem', opacity: 0.3, marginTop: '4px' }}>L-Click / R-Click</div>}
+                        {isAuthenticated && isStillPlaying && <div style={{ fontSize: '0.6rem', opacity: 0.3, marginTop: '4px' }}>{t('live.clickHint')}</div>}
                     </div>
 
                     {/* SCORE BOARD (Center) */}
@@ -261,7 +261,7 @@ const Live = () => {
                         <div className="sets-score-main">
                             {match.score1}:{match.score2}
                         </div>
-                        <div className="sets-label">SETS</div>
+                        <div className="sets-label">{t('live.sets')}</div>
 
                         <div className="set-dots">
                             {/* Render visual dots for played sets? Or just mini scores */}
@@ -294,7 +294,7 @@ const Live = () => {
                                 {currentSet.b}
                             </div>
                         )}
-                        {isAuthenticated && isStillPlaying && <div style={{ fontSize: '0.6rem', opacity: 0.3, marginTop: '4px' }}>L-Click / R-Click</div>}
+                        {isAuthenticated && isStillPlaying && <div style={{ fontSize: '0.6rem', opacity: 0.3, marginTop: '4px' }}>{t('live.clickHint')}</div>}
                     </div>
                 </div>
             </div>
@@ -348,7 +348,7 @@ const Live = () => {
                         {/* PINK COURT */}
                         <div className="court-card compact glass-panel" style={{ borderLeft: '4px solid var(--accent-pink)' }}>
                             <div className="court-header-slim">
-                                <span style={{ color: 'var(--accent-pink)', fontWeight: 800 }}>PINK COURT</span>
+                                <span style={{ color: 'var(--accent-pink)', fontWeight: 800 }}>{t('live.courtPinkLabel')}</span>
                             </div>
                             {renderLiveMatch(pinkState.current, 'var(--accent-pink)')}
                         </div>
@@ -356,7 +356,7 @@ const Live = () => {
                         {/* CYAN COURT */}
                         <div className="court-card compact glass-panel" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                             <div className="court-header-slim">
-                                <span style={{ color: 'var(--accent-cyan)', fontWeight: 800 }}>CYAN COURT</span>
+                                <span style={{ color: 'var(--accent-cyan)', fontWeight: 800 }}>{t('live.courtCyanLabel')}</span>
                             </div>
                             {renderLiveMatch(cyanState.current, 'var(--accent-cyan)')}
                         </div>
@@ -368,24 +368,24 @@ const Live = () => {
                 {/* RIGHT: SIDEBAR */}
                 <div className="dashboard-column side-column">
                     <div className="upcoming-panel glass-panel">
-                        <div className="panel-header"><Clock size={16} style={{ marginRight: '8px' }} /> UPCOMING</div>
+                        <div className="panel-header"><Clock size={16} style={{ marginRight: '8px' }} /> {t('live.upcomingHeader')}</div>
 
                         <div className="upcoming-group">
-                            <div className="group-label" style={{ color: 'var(--accent-pink)' }}>PINK QUEUE</div>
+                            <div className="group-label" style={{ color: 'var(--accent-pink)' }}>{t('live.pinkQueue')}</div>
                             {renderUpcomingList(pinkState.upcoming)}
                         </div>
                         <div className="divider-line"></div>
                         <div className="upcoming-group">
-                            <div className="group-label" style={{ color: 'var(--accent-cyan)' }}>CYAN QUEUE</div>
+                            <div className="group-label" style={{ color: 'var(--accent-cyan)' }}>{t('live.cyanQueue')}</div>
                             {renderUpcomingList(cyanState.upcoming)}
                         </div>
                     </div>
 
                     {/* RECENT RESULTS */}
                     <div className="glass-panel">
-                        <div className="panel-header"><Trophy size={16} style={{ marginRight: '8px' }} /> RECENT RESULTS</div>
+                        <div className="panel-header"><Trophy size={16} style={{ marginRight: '8px' }} /> {t('live.recentHeader')}</div>
                         <div style={{ padding: '0 1rem' }}>
-                            {finishedMatches.length === 0 && <div className="empty-state">No results yet.</div>}
+                            {finishedMatches.length === 0 && <div className="empty-state">{t('live.recentEmpty')}</div>}
                             {finishedMatches.map(m => (
                                 <div key={m.id} className="recent-item-clean">
                                     <div className="recent-meta" style={{ width: '120px' }}>
@@ -422,11 +422,11 @@ const Live = () => {
 
             {/* NEWS TICKER */}
             <div className="news-ticker">
-                <div className="ticker-label">LATEST RESULTS</div>
+                <div className="ticker-label">{t('live.tickerLabel')}</div>
                 <div className="ticker-content">
                     <div className="ticker-track">
                         {finishedMatches.length === 0 && (
-                            <span className="ticker-item">No matches finished yet. Waiting for results...</span>
+                            <span className="ticker-item">{t('live.tickerEmpty')}</span>
                         )}
                         {finishedMatches.map((m, i) => (
                             <span key={`ticker-${m.id}-${i}`} className="ticker-item">

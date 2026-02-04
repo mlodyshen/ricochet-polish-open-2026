@@ -145,12 +145,12 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '400px', maxWidth: '95%' }}>
                 <div className="modal-header">
-                    <h2 className="modal-title">Edit Match Result</h2>
+                    <h2 className="modal-title">{t('matches.editResultTitle')}</h2>
                     <button onClick={onClose} className="close-button"><X size={20} /></button>
                 </div>
 
                 <div style={{ marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Format: <strong>Best of {bestOf}</strong> (First to {winThreshold})
+                    {t('matches.formatInfo', { n: winThreshold, bo: bestOf })}
                 </div>
 
                 <form onSubmit={handleSave}>
@@ -209,7 +209,7 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
                     )}
 
                     <div className="form-group">
-                        <label className="form-label">Match Status</label>
+                        <label className="form-label">{t('matches.statusLabel')}</label>
                         <select className="form-input" value={status} onChange={e => setStatus(e.target.value)}>
                             <option value="live">Live (Playing)</option>
                             <option value="finished">Finished (Final Result)</option>
@@ -217,7 +217,7 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Court Assignment</label>
+                        <label className="form-label">{t('matches.courtLabel')}</label>
                         <select className="form-input" value={court} onChange={e => setCourt(e.target.value)}>
                             <option value="">-- No Court --</option>
                             <option value="Kort Różowy">Kort Różowy</option>
@@ -318,8 +318,8 @@ const Matches = () => {
         return (
             <div key={match.id} className="active-match-card" style={{ '--accent-color': accentColor }}>
                 <div className="active-match-header">
-                    <span style={{ color: accentColor }}>{match.court || (isPink ? 'PINK COURT' : 'CYAN COURT')}</span>
-                    <span className="live-badge">LIVE</span>
+                    <span style={{ color: accentColor }}>{match.court || (isPink ? t('live.courtPinkLabel') : t('live.courtCyanLabel'))}</span>
+                    <span className="live-badge">{t('live.liveBadge')}</span>
                 </div>
 
                 <div className="active-score-board">
@@ -343,7 +343,7 @@ const Matches = () => {
                 {isAuthenticated && (
                     <div className="active-actions">
                         <button className="edit-btn" onClick={() => setEditingMatch(match)} style={{ borderColor: accentColor, color: accentColor }}>
-                            <Edit2 size={16} style={{ marginRight: '6px' }} /> Control Match
+                            <Edit2 size={16} style={{ marginRight: '6px' }} /> {t('matches.controlMatch')}
                         </button>
                     </div>
 
@@ -356,7 +356,7 @@ const Matches = () => {
         const isWB = match.bracket === 'wb';
         const isGF = match.bracket === 'gf';
         const bracketClass = isGF ? 'gf' : (isWB ? 'wb' : 'lb');
-        const bracketLabel = isGF ? 'FINAL' : (isWB ? 'WINNERS' : 'LOSERS');
+        const bracketLabel = isGF ? t('matches.bracketFinal') : (isWB ? t('matches.bracketWinners') : t('matches.bracketLosers'));
 
         // Determine court color (predictive or assigned)
         // If court is explicitly assigned, use that. Otherwise alternate based on index.
@@ -434,7 +434,7 @@ const Matches = () => {
                     {isAuthenticated && (
                         <div style={{ marginTop: '1.5rem' }}>
                             <p style={{ marginBottom: '1rem', fontSize: '0.9rem', opacity: 0.7 }}>
-                                Zarejestrowanych graczy: <strong>{players.length}</strong>
+                                {t('matches.registeredPlayers')}: <strong>{players.length}</strong>
                             </p>
                             <button
                                 onClick={async () => {
@@ -480,7 +480,7 @@ const Matches = () => {
             {(processedMatches.active.length > 0) && (filter === 'all' || filter === 'pending') && (
                 <section>
                     <div className="section-header">
-                        <Activity size={20} color="#ef4444" /> Live Arena
+                        <Activity size={20} color="#ef4444" /> {t('matches.liveArena')}
                     </div>
                     <div className="active-matches-grid">
                         {processedMatches.active.map((m, i) => renderActiveMatch(m, i))}
