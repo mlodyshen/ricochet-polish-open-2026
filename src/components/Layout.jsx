@@ -62,8 +62,8 @@ const Layout = () => {
             {/* Top Header */}
             <header className="top-header glass">
                 <div className="header-title" style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src="/c.png" alt="Logo" style={{ height: '32px', marginRight: '12px' }} />
-                    <span>{t('common.appName')}</span>
+                    <img src="/c.png" alt="Logo" style={{ height: '35px', marginRight: '15px' }} />
+                    <img src="/po.png" alt="Ricochet Polish Open 2026" style={{ height: '28px', objectFit: 'contain', filter: 'brightness(1.1)' }} />
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <LanguageSelector />
