@@ -85,7 +85,7 @@ const PlayerProfileModal = ({ player, matches, allPlayers, onClose }) => {
                                 {player.elo && (
                                     <div className="meta-item badge-elo">
                                         <Trophy size={14} />
-                                        <span>ELO {player.elo}</span>
+                                        <span>POINTS {player.elo}</span>
                                     </div>
                                 )}
                             </div>
