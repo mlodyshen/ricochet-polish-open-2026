@@ -159,6 +159,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
             else courtLabel = match.court;
         }
 
+        const matchLabel = customHeader || getShortMatchId(match.id);
+
         // Theme Constants
         const COLOR_PINK = '#ec4899';
         const COLOR_CYAN = '#06b6d4';
@@ -216,7 +218,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                     textTransform: 'uppercase'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>{match.bracket} • R{match.round}</span>
+                        <span>{matchLabel}</span>
                         {courtLabel && (
                             <span style={{
                                 color: courtLabel === 'PINK' ? COLOR_PINK : (courtLabel === 'CYAN' ? COLOR_CYAN : '#fff'),
