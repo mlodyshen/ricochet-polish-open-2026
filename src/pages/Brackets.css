@@ -48,14 +48,12 @@
 }
 
 .section-wb {
-    background-color: rgba(236, 72, 153, 0.03);
-    /* Pink tint */
+    /* background-color: rgba(236, 72, 153, 0.03); REMOVED */
     border-right: 1px dashed var(--border-color);
 }
 
 .section-mid {
-    background-color: rgba(59, 130, 246, 0.03);
-    /* Blue tint */
+    /* background-color: rgba(59, 130, 246, 0.03); REMOVED */
     border-right: 1px dashed var(--border-color);
     min-width: 300px;
     align-items: center;
@@ -63,8 +61,7 @@
 }
 
 .section-lb {
-    background-color: rgba(249, 115, 22, 0.03);
-    /* Orange tint */
+    /* background-color: rgba(249, 115, 22, 0.03); REMOVED */
 }
 
 .section-title {
