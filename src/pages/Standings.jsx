@@ -2,8 +2,10 @@
 import React, { useMemo } from 'react';
 import { useMatches } from '../hooks/useMatches';
 import { usePlayers } from '../hooks/usePlayers';
-import { Trophy, Medal } from 'lucide-react';
+import { Trophy, Medal, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getCountryCode } from '../constants/countries';
+import './Standings.css';
 
 const Standings = () => {
     const { t } = useTranslation();
@@ -44,7 +46,6 @@ const Standings = () => {
         }
 
         // 2. Monrad Placements (5-32)
-        // Matches pX-f decide Rank X (Winner) and Rank X+1 (Loser)
         const placementBases = [5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31];
 
         placementBases.forEach(baseRank => {
@@ -63,62 +64,90 @@ const Standings = () => {
 
     const getPlayer = (id) => players.find(p => p.id === id);
 
-    const renderRankIcon = (index) => {
-        if (index === 0) return <Trophy size={24} color="#fbbf24" fill="#fbbf24" />; // Gold
-        if (index === 1) return <Trophy size={24} color="#9ca3af" fill="#9ca3af" />; // Silver
-        if (index === 2) return <Trophy size={24} color="#b45309" fill="#b45309" />; // Bronze
-        return <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>{index + 1}</span>;
+    const top3 = standingsData.slice(0, 3);
+    const rest = standingsData.slice(3);
+
+    const renderPodiumSpot = (index) => {
+        const rank = index + 1;
+        const slot = top3[index];
+        const player = slot ? getPlayer(slot.playerId) : null;
+
+        return (
+            <div key={rank} className={`podium-spot rank-${rank}`}>
+                <div className="podium-avatar-wrapper">
+                    {player?.photo ? (
+                        <img src={player.photo} alt={player?.full_name} className="podium-avatar" />
+                    ) : (
+                        <div className="podium-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <User size={rank === 1 ? 64 : 48} color="var(--text-tertiary)" />
+                        </div>
+                    )}
+                    <div className="rank-badge">{rank}</div>
+                </div>
+                <div className="podium-info">
+                    <div className="podium-name" title={player?.full_name}>
+                        {player ? player.full_name : <span className="empty-slot-text">{t('standings.tbd')}</span>}
+                    </div>
+                    {player && player.country && (
+                        <div className="podium-country">
+                            {getCountryCode(player.country) && (
+                                <img
+                                    src={`https://flagcdn.com/20x15/${getCountryCode(player.country)}.png`}
+                                    alt={player.country}
+                                    style={{ borderRadius: '2px' }}
+                                />
+                            )}
+                            {player.country}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     return (
-        <div className="card fade-in" style={{ maxWidth: '800px', margin: '0 auto', padding: '0' }}>
-            <div style={{ padding: '2rem 2rem 1rem 2rem' }}>
-                <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-                    {t('navigation.standings')}
-                </h1>
-                <p style={{ color: 'var(--text-secondary)' }}>
-                    {t('standings.description')}
-                </p>
+        <div className="standings-container fade-in">
+            <div className="standings-header">
+                <h1 className="standings-title text-gradient">{t('navigation.standings')}</h1>
+                <p className="standings-subtitle">{t('standings.description')}</p>
             </div>
 
-            <div className="standings-list">
-                {standingsData.map((slot, index) => {
+            <div className="podium-section">
+                {renderPodiumSpot(1)} {/* Silver (Left) */}
+                {renderPodiumSpot(0)} {/* Gold (Center) - Logic handles order via CSS order property or layout */}
+                {renderPodiumSpot(2)} {/* Bronze (Right) */}
+            </div>
+
+            <div className="standings-list-container">
+                {rest.map((slot, i) => {
+                    const rank = i + 4;
                     const player = slot ? getPlayer(slot.playerId) : null;
-                    const isTop3 = index < 3;
-
                     return (
-                        <div
-                            key={index}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '1rem 2rem',
-                                borderBottom: '1px solid var(--border-color)',
-                                background: isTop3 && player ? 'var(--bg-secondary)' : 'transparent',
-                                transition: 'all 0.2s',
-                                fontWeight: isTop3 && player ? 600 : 400
-                            }}
-                        >
-                            <div style={{ width: '60px', display: 'flex', justifyContent: 'center' }}>
-                                {renderRankIcon(index)}
-                            </div>
-
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                {player ? (
-                                    <>
-                                        <div style={{ fontSize: '1.1rem' }}>
-                                            {player.full_name}
-                                        </div>
-                                        {player.country && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'var(--bg-primary)', padding: '2px 6px', borderRadius: '4px' }}>{player.country}</span>}
-                                    </>
-                                ) : (
-                                    <span style={{ color: 'var(--text-tertiary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
-                                        —
-                                    </span>
+                        <div key={rank} className="standings-row">
+                            <div className="row-rank">{rank}</div>
+                            {player?.photo ? (
+                                <img src={player.photo} alt={player?.full_name} className="row-avatar" />
+                            ) : (
+                                <div className="row-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-tertiary)' }}>
+                                    <User size={20} color="var(--text-secondary)" />
+                                </div>
+                            )}
+                            <div className="row-info">
+                                <div className="row-name">
+                                    {player ? player.full_name : <span className="empty-slot-text">{t('standings.tbd')}</span>}
+                                </div>
+                                {player && player.country && (
+                                    <div className="row-country">
+                                        {getCountryCode(player.country) && (
+                                            <img
+                                                src={`https://flagcdn.com/16x12/${getCountryCode(player.country)}.png`}
+                                                alt={player.country}
+                                            />
+                                        )}
+                                        {player.country}
+                                    </div>
                                 )}
                             </div>
-
-                            {/* Optional: Add ELO change or Points if needed */}
                         </div>
                     );
                 })}
