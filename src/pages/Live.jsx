@@ -241,8 +241,9 @@ const Live = () => {
 
                     {/* LEFT PLAYER VISUALS */}
                     <div style={{ flex: 1, textAlign: 'left', padding: '10px' }}>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2 }}>
-                            <PlayerFlag countryCode={match.player1.country} /> {p1Name.first} {p1Name.last}
+                        <div style={{ fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <PlayerFlag countryCode={match.player1.country} />
+                            <span>{p1Name.first} {p1Name.last}</span>
                         </div>
                         {isStillPlaying && (
                             <div style={{ marginTop: '0.5rem', fontSize: '3.5rem', fontWeight: 800, color: courtColor, lineHeight: 1 }}>
@@ -289,8 +290,9 @@ const Live = () => {
 
                     {/* RIGHT PLAYER VISUALS */}
                     <div style={{ flex: 1, textAlign: 'right', padding: '10px' }}>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2 }}>
-                            {p2Name.first} {p2Name.last} <PlayerFlag countryCode={match.player2.country} />
+                        <div style={{ fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
+                            <span>{p2Name.first} {p2Name.last}</span>
+                            <PlayerFlag countryCode={match.player2.country} />
                         </div>
                         {isStillPlaying && (
                             <div style={{ marginTop: '0.5rem', fontSize: '3.5rem', fontWeight: 800, color: courtColor, lineHeight: 1 }}>
