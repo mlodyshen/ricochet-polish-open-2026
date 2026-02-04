@@ -104,7 +104,7 @@ const Live = () => {
         const recentFn = finished.map((m, i) => ({
             ...m,
             assignedCourt: i % 2 === 0 ? 'courtPink' : 'courtCyan'
-        })).reverse().slice(0, 5);
+        })).reverse().slice(0, 4);
 
         return { pinkQueue: pink, cyanQueue: cyan, finishedMatches: recentFn };
     }, [matches, players]);
