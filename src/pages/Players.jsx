@@ -278,7 +278,20 @@ const Players = () => {
         setTimeout(() => setToastMessage(null), 3000);
     };
 
-    const fileInputRef = useRef(null);
+    const lastScrollPos = useRef(0);
+
+    const handlePlayerClick = (player) => {
+        lastScrollPos.current = window.scrollY;
+        setSelectedProfilePlayer(player);
+        window.scrollTo(0, 0);
+    };
+
+    const handleProfileClose = () => {
+        setSelectedProfilePlayer(null);
+        setTimeout(() => {
+            window.scrollTo({ top: lastScrollPos.current, behavior: 'instant' });
+        }, 0);
+    };
 
     const handleCsvUpload = async (event) => {
         const file = event.target.files[0];
@@ -430,7 +443,7 @@ const Players = () => {
                         <div
                             key={player.id}
                             className="player-card animate-scale-in"
-                            onClick={() => setSelectedProfilePlayer(player)}
+                            onClick={() => handlePlayerClick(player)}
                         >
                             <div className="card-avatar-wrapper">
                                 <div className="card-avatar">
@@ -501,7 +514,7 @@ const Players = () => {
                 player={selectedProfilePlayer}
                 matches={matches}
                 allPlayers={players}
-                onClose={() => setSelectedProfilePlayer(null)}
+                onClose={handleProfileClose}
             />
 
             {toastMessage && (
