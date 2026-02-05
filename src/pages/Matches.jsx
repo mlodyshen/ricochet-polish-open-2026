@@ -312,7 +312,8 @@ const Matches = () => {
     // --- RENDERERS ---
 
     const renderActiveMatch = (match, index) => {
-        const isPink = match.court === 'Kort Różowy' || (!match.court && index % 2 === 0);
+        const cUpper = (match.court || '').toUpperCase();
+        const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK') || (!match.court && index % 2 === 0);
         const accentColor = isPink ? 'var(--accent-pink)' : 'var(--accent-cyan)';
 
         return (
@@ -352,18 +353,20 @@ const Matches = () => {
         );
     };
 
-    const renderMatchRow = (match, index) => {
+    const renderMatchRow = (match, index, forcedColor = null) => {
         const isWB = match.bracket === 'wb';
         const isGF = match.bracket === 'gf';
         const bracketClass = isGF ? 'gf' : (isWB ? 'wb' : 'lb');
         const bracketLabel = isGF ? t('matches.bracketFinal') : (isWB ? t('matches.bracketWinners') : t('matches.bracketLosers'));
 
         // Determine court color (predictive or assigned)
-        // If court is explicitly assigned, use that. Otherwise alternate based on index.
-        let colorType = 'pink'; // default
-        if (match.court === 'Kort Różowy') colorType = 'pink';
-        else if (match.court === 'Kort Turkusowy') colorType = 'cyan';
-        else colorType = index % 2 === 0 ? 'pink' : 'cyan';
+        let colorType = forcedColor;
+        if (!colorType) {
+            const cUpper = (match.court || '').toUpperCase();
+            if (cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK')) colorType = 'pink';
+            else if (cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN')) colorType = 'cyan';
+            else colorType = index % 2 === 0 ? 'pink' : 'cyan';
+        }
 
         const rowBorderColor = colorType === 'pink' ? 'var(--accent-pink)' : 'var(--accent-cyan)';
 
@@ -376,9 +379,10 @@ const Matches = () => {
                     {(() => {
                         let courtBadge = null;
                         if (match.court) {
-                            const isPink = match.court.includes('Różowy');
-                            const isCyan = match.court.includes('Turkusowy');
-                            const courtName = isPink ? 'PINK' : (isCyan ? 'CYAN' : 'CRT');
+                            const cUpper = match.court.toUpperCase();
+                            const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK');
+                            const isCyan = cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN');
+                            const courtName = isPink ? 'LEFT' : (isCyan ? 'RIGHT' : 'CRT');
                             const badgeStyle = {
                                 fontSize: '0.65rem',
                                 fontWeight: '800',
@@ -501,9 +505,13 @@ const Matches = () => {
                         const cyanQueue = [];
 
                         processedMatches.pending.forEach((m, idx) => {
-                            if (m.court === 'Kort Różowy') {
+                            const cUpper = (m.court || '').toUpperCase();
+                            const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK');
+                            const isCyan = cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN');
+
+                            if (isPink) {
                                 pinkQueue.push(m);
-                            } else if (m.court === 'Kort Turkusowy') {
+                            } else if (isCyan) {
                                 cyanQueue.push(m);
                             } else {
                                 // Default distribution if no court assigned (Alternating)
@@ -520,7 +528,7 @@ const Matches = () => {
                                         {t('live.pinkQueue')}
                                     </h3>
                                     {pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
-                                    {pinkQueue.map(m => renderMatchRow(m))}
+                                    {pinkQueue.map((m, idx) => renderMatchRow(m, idx, 'pink'))}
                                 </div>
 
                                 {/* CYAN COLUMN */}
@@ -529,7 +537,7 @@ const Matches = () => {
                                         {t('live.cyanQueue')}
                                     </h3>
                                     {cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
-                                    {cyanQueue.map(m => renderMatchRow(m))}
+                                    {cyanQueue.map((m, idx) => renderMatchRow(m, idx, 'cyan'))}
                                 </div>
                             </div>
                         );
