@@ -23,11 +23,10 @@ const SCORE_MODAL_STYLES = {
     }
 };
 
-const ResetZoomOnMount = () => {
-    const { resetTransform } = useTransformContext();
+const ResetZoomOnMount = ({ reset }) => {
     useEffect(() => {
-        resetTransform();
-    }, []); // Run once on mount
+        if (reset) reset();
+    }, [reset]); // Run when reset function is available
     return null;
 };
 
@@ -104,7 +103,7 @@ const Brackets = () => {
             >
                 {({ zoomIn, zoomOut, resetTransform }) => (
                     <>
-                        <ResetZoomOnMount />
+                        <ResetZoomOnMount reset={resetTransform} />
                         <div style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 100, display: 'flex', gap: '5px' }}>
                             <button className="btn-icon" onClick={() => zoomIn()}><ZoomIn size={18} /></button>
                             <button className="btn-icon" onClick={() => zoomOut()}><ZoomOut size={18} /></button>
