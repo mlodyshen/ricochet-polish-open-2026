@@ -30,6 +30,7 @@ const PlayerFlag = ({ countryCode }) => {
 };
 
 const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
+    const { t } = useTranslation();
     const bestOf = getBestOf(match.bracket);
     const winThreshold = Math.ceil(bestOf / 2);
 
