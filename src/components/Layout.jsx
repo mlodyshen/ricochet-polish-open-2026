@@ -10,6 +10,7 @@ import {
     Trophy,
     GitBranch,
     Settings,
+    Maximize,
     LogOut
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
@@ -79,6 +80,24 @@ const Layout = () => {
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+
+                    <button
+                        className="theme-toggle"
+                        onClick={() => {
+                            const isTv = new URLSearchParams(location.search).get('mode') === 'tv';
+                            if (isTv) {
+                                navigate(location.pathname); // Remove query param
+                            } else {
+                                navigate('/live?mode=tv'); // Go to live TV mode
+                            }
+                        }}
+                        title="TV Mode"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.4rem 0.8rem', height: '36px', borderRadius: '8px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                    >
+                        <Maximize size={16} />
+                        <span>TV Mode</span>
+                    </button>
+
                     <LanguageSelector />
 
                     {isAuthenticated ? (

@@ -57,7 +57,7 @@ const Live = () => {
 
     // TV Mode
     const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
-    const toggleTvMode = () => navigate(isTvMode ? '/live' : '/live?mode=tv');
+
 
     // Time
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -327,12 +327,7 @@ const Live = () => {
     return (
         <div className={`live-container ${isTvMode ? 'tv-mode' : ''}`}>
 
-            {/* TV CONTROL */}
-            <div style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 10000 }}>
-                <button onClick={toggleTvMode} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto' }}>
-                    {isTvMode ? <X size={18} /> : <Maximize size={18} />} {isTvMode ? "Exit" : "TV Mode"}
-                </button>
-            </div>
+
 
             <header className="live-header">
                 <div>
