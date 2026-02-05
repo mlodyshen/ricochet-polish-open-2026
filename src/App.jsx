@@ -10,7 +10,7 @@ import Brackets from './pages/Brackets';
 import Matches from './pages/Matches';
 
 import Login from './pages/Login';
-import Welcome from './pages/Welcome';
+
 import TournamentSelect from './pages/TournamentSelect';
 import { useAuth } from './hooks/useAuth.tsx';
 
@@ -37,7 +37,7 @@ function App() {
       <MatchesProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Welcome />} />
+          <Route path="/" element={<Navigate to="/live" replace />} />
           <Route path="/tournaments" element={<TournamentSelect />} />
 
           <Route element={<Layout />}>
@@ -56,7 +56,7 @@ function App() {
           </Route>
 
           {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/live" replace />} />
         </Routes>
       </MatchesProvider>
     </TournamentProvider>
