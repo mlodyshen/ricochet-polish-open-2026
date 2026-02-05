@@ -25,8 +25,18 @@ const SCORE_MODAL_STYLES = {
 
 const ResetZoomOnMount = ({ reset }) => {
     useEffect(() => {
-        if (reset) reset();
-    }, [reset]); // Run when reset function is available
+        // 1. Force window/body scroll to top
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+
+        // 2. Reset Pan/Zoom to initial props
+        if (reset) {
+            setTimeout(() => {
+                reset();
+            }, 100); // Slight delay to ensure layout is ready
+        }
+    }, [reset]);
     return null;
 };
 
