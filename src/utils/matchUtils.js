@@ -33,9 +33,9 @@ export const canEditMatch = (match) => {
     return match.player1 && match.player2 && !match.player1.isBye && !match.player2.isBye;
 };
 
-// --- SAFE INTERLEAVED SORTING ---
+// --- SAFE SORTING (WB>LB>Placement) ---
 export const compareMatchIds = (idA, idB) => {
-    // 1. Parse IDs
+    // 1. Parse IDs in detail
     const parseId = (id) => {
         if (id === 'grand-final') return { bracket: 'gf', round: 100, number: 1 };
         if (id === 'consolation-final') return { bracket: 'cf', round: 100, number: 1 };
@@ -58,33 +58,50 @@ export const compareMatchIds = (idA, idB) => {
     const A = parseId(idA);
     const B = parseId(idB);
 
-    // 2. Bracket Priority
-    const getBracketScore = (b) => {
-        if (b === 'wb') return 10;
-        if (b === 'lb') return 20;
-        if (b === 'gf') return 100;
-        if (b === 'cf') return 90;
-        if (b.startsWith('p')) {
-             const num = parseInt(b.slice(1), 10) || 50;
-             return 30 + num; 
+    // 2. Virtual Round Calculation (To fix ordering)
+    const getVirtualRound = (item) => {
+        let r = item.round;
+        
+        // TRICK: LB Round 1 is played alongside WB Round 2.
+        // So we bump LB rounds by +0.5 or +1 to sync or interleave.
+        if (item.bracket === 'lb') {
+             // Standard mapping: LB R1 ~ WB R2
+             // LB matches happen AFTER WB matches of same "phase" usually, or concurrently.
+             // Mapping:
+             // LB R1 (1) -> 2
+             // LB R2 (2) -> 3
+             // LB R3 (3) -> 4
+             return r + 1; 
         }
-        return 50; 
+
+        // PLACEMENT MATCHES (p9, p13...) happen way later, after people lose.
+        // We push them to high numbers so they don't clog early queue.
+        if (item.bracket.startsWith('p')) {
+             return r + 50; 
+        }
+        
+        // GF/CF
+        if (item.bracket === 'gf') return 100;
+        if (item.bracket === 'cf') return 99;
+
+        // WB is standard (1, 2, 3...)
+        return r;
     };
 
-    // 3. Virtual Phase (Map LB R1 to same level as WB R2 to mix them)
-    let phaseA = A.round;
-    let phaseB = B.round;
+    const phaseA = getVirtualRound(A);
+    const phaseB = getVirtualRound(B);
     
-    // TRICK: Move LB R1 to "Round 2" so it sorts WITH WB R2
-    if (A.bracket === 'lb' && A.round === 1) phaseA = 2;
-    if (B.bracket === 'lb' && B.round === 1) phaseB = 2;
-    // Same for later rounds if needed, e.g. WB R3 vs LB R3?
-    
+    // 3. Sort by Virtual Round
     if (phaseA !== phaseB) return phaseA - phaseB;
 
     // 4. Same Phase -> Sort by Match Number
     if (A.number !== B.number) return A.number - B.number;
 
-    // 5. Same Number -> WB First
-    return getBracketScore(A.bracket) - getBracketScore(B.bracket);
+    // 5. Tie-breaker priorities (WB > LB > Rest)
+    const getPriority = (b) => {
+        if (b === 'wb') return 1;
+        if (b === 'lb') return 2;
+        return 10;
+    };
+    return getPriority(A.bracket) - getPriority(B.bracket);
 };
