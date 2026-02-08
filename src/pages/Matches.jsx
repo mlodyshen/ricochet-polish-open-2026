@@ -445,7 +445,6 @@ const Matches = () => {
                         <button
                             className="icon-btn-small"
                             onClick={() => handleMoveMatch(match.id, 'up')}
-                            style={{
                             style={{ padding: 0, lineHeight: 0.8, marginBottom: '2px', opacity: 0.7 }}
                             title="Move Up"
                         >
@@ -460,8 +459,7 @@ const Matches = () => {
                             <span style={{ fontSize: '0.7rem' }}>▼</span>
                         </button>
                     </div>
-        )
-    }
+                )}
                 <div className="row-id" style={{ color: rowBorderColor }}>#{match.id.split('-m')[1]}</div>
                 <div className="row-bracket">
                     <span className={`bracket-badge ${bracketClass}`}>{bracketLabel}</span>
@@ -515,152 +513,152 @@ const Matches = () => {
                         </button>
                     )}
                 </div>
-            </div >
+            </div>
         );
     };
 
-if (!matches || matches.length === 0) {
+    if (!matches || matches.length === 0) {
+        return (
+            <div className="matches-container animate-fade-in">
+                <div className="empty-matches">
+                    <h2>{t('matches.noActiveMatches')}</h2>
+                    <p>{t('matches.generatePrompt')}</p>
+                    {isAuthenticated && (
+                        <div style={{ marginTop: '1.5rem' }}>
+                            <p style={{ marginBottom: '1rem', fontSize: '0.9rem', opacity: 0.7 }}>
+                                {t('matches.registeredPlayers')}: <strong>{players.length}</strong>
+                            </p>
+                            <button
+                                onClick={async () => {
+                                    if (players.length < 2) {
+                                        alert(t('matches.needPlayers'));
+                                        return;
+                                    }
+                                    if (window.confirm(t('matches.generateConfirm', { count: players.length }))) {
+                                        const newBracket = generateDoubleEliminationBracket(players);
+                                        await saveMatches(newBracket);
+                                        if (activeTournamentId) {
+                                            await updateTournament(activeTournamentId, { status: 'in_progress' });
+                                        }
+                                    }
+                                }}
+                                className="btn-primary"
+                            >
+                                <Trophy size={18} style={{ marginRight: '0.5rem' }} />
+                                {t('matches.generateBtn')}
+                            </button>
+                        </div>
+                    )}
+                    {!isAuthenticated && (
+                        <p style={{ marginTop: '1rem', fontSize: '0.9rem', opacity: 0.7 }}>{t('matches.loginPrompt')}</p>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="matches-container animate-fade-in">
-            <div className="empty-matches">
-                <h2>{t('matches.noActiveMatches')}</h2>
-                <p>{t('matches.generatePrompt')}</p>
-                {isAuthenticated && (
-                    <div style={{ marginTop: '1.5rem' }}>
-                        <p style={{ marginBottom: '1rem', fontSize: '0.9rem', opacity: 0.7 }}>
-                            {t('matches.registeredPlayers')}: <strong>{players.length}</strong>
-                        </p>
-                        <button
-                            onClick={async () => {
-                                if (players.length < 2) {
-                                    alert(t('matches.needPlayers'));
-                                    return;
-                                }
-                                if (window.confirm(t('matches.generateConfirm', { count: players.length }))) {
-                                    const newBracket = generateDoubleEliminationBracket(players);
-                                    await saveMatches(newBracket);
-                                    if (activeTournamentId) {
-                                        await updateTournament(activeTournamentId, { status: 'in_progress' });
-                                    }
-                                }
-                            }}
-                            className="btn-primary"
-                        >
-                            <Trophy size={18} style={{ marginRight: '0.5rem' }} />
-                            {t('matches.generateBtn')}
-                        </button>
-                    </div>
-                )}
-                {!isAuthenticated && (
-                    <p style={{ marginTop: '1rem', fontSize: '0.9rem', opacity: 0.7 }}>{t('matches.loginPrompt')}</p>
-                )}
+            <div className="matches-header">
+                <h1 className="matches-title text-gradient">{t('matches.title')}</h1>
+                <div className="matches-filters">
+                    <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>{t('matches.filters.all')}</button>
+                    <button className={`filter-btn ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>{t('matches.filters.pending')}</button>
+                    <button className={`filter-btn ${filter === 'finished' ? 'active' : ''}`} onClick={() => setFilter('finished')}>{t('matches.filters.finished')}</button>
+                </div>
             </div>
+
+            {/* 1. Live Arena */}
+            {(processedMatches.active.length > 0) && (filter === 'all' || filter === 'pending') && (
+                <section>
+                    <div className="section-header">
+                        <Activity size={20} color="#ef4444" /> {t('matches.liveArena')}
+                    </div>
+                    <div className="active-matches-grid">
+                        {processedMatches.active.map((m, i) => renderActiveMatch(m, i))}
+                    </div>
+                </section>
+            )}
+
+            {/* 2. Upcoming / Pending List - COLUMNS */}
+            {(processedMatches.pending.length > 0) && (filter === 'all' || filter === 'pending') && (
+                <section>
+                    <div className="section-header">
+                        <Clock size={20} /> {t('matches.nextMatches')}
+                    </div>
+
+                    {/* Logic to split pending into Pink and Cyan queues */}
+                    {(() => {
+                        const pinkQueue = [];
+                        const cyanQueue = [];
+
+                        processedMatches.pending.forEach((m, idx) => {
+                            const cUpper = (m.court || '').toUpperCase();
+                            const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK');
+                            const isCyan = cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN');
+
+                            if (isPink) {
+                                pinkQueue.push(m);
+                            } else if (isCyan) {
+                                cyanQueue.push(m);
+                            } else {
+                                // Default distribution if no court assigned (Balance Queues)
+                                if (pinkQueue.length <= cyanQueue.length) pinkQueue.push(m);
+                                else cyanQueue.push(m);
+                            }
+                        });
+
+                        return (
+                            <div className="queue-columns">
+                                {/* PINK COLUMN */}
+                                <div className="queue-column">
+                                    <h3 style={{ color: 'var(--accent-pink)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-pink)' }}>
+                                        {t('live.pinkQueue')}
+                                    </h3>
+                                    {pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
+                                    {pinkQueue.map((m, idx) => renderMatchRow(m, idx, 'pink'))}
+                                </div>
+
+                                {/* CYAN COLUMN */}
+                                <div className="queue-column">
+                                    <h3 style={{ color: 'var(--accent-cyan)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-cyan)' }}>
+                                        {t('live.cyanQueue')}
+                                    </h3>
+                                    {cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
+                                    {cyanQueue.map((m, idx) => renderMatchRow(m, idx, 'cyan'))}
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </section>
+            )}
+
+            {/* 3. Finished Matches List */}
+            {(processedMatches.finished.length > 0) && (filter === 'all' || filter === 'finished') && (
+                <section>
+                    <div className="section-header">
+                        <CheckCircle size={20} color="#10b981" /> {t('matches.played')}
+                    </div>
+                    <div className="match-list-container">
+                        {processedMatches.finished.map(m => renderMatchRow(m))}
+                    </div>
+                </section>
+            )}
+
+            {(processedMatches.active.length === 0 && processedMatches.pending.length === 0 && processedMatches.finished.length === 0) && (
+                <div className="empty-state-text">{t('matches.allFinished')}</div>
+            )}
+
+            {editingMatch && (
+                <MatchEditModal
+                    match={editingMatch}
+                    onClose={() => setEditingMatch(null)}
+                    onSave={handleSaveScore}
+                    onClear={handleClearScore}
+                />
+            )}
         </div>
     );
-}
-
-return (
-    <div className="matches-container animate-fade-in">
-        <div className="matches-header">
-            <h1 className="matches-title text-gradient">{t('matches.title')}</h1>
-            <div className="matches-filters">
-                <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>{t('matches.filters.all')}</button>
-                <button className={`filter-btn ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>{t('matches.filters.pending')}</button>
-                <button className={`filter-btn ${filter === 'finished' ? 'active' : ''}`} onClick={() => setFilter('finished')}>{t('matches.filters.finished')}</button>
-            </div>
-        </div>
-
-        {/* 1. Live Arena */}
-        {(processedMatches.active.length > 0) && (filter === 'all' || filter === 'pending') && (
-            <section>
-                <div className="section-header">
-                    <Activity size={20} color="#ef4444" /> {t('matches.liveArena')}
-                </div>
-                <div className="active-matches-grid">
-                    {processedMatches.active.map((m, i) => renderActiveMatch(m, i))}
-                </div>
-            </section>
-        )}
-
-        {/* 2. Upcoming / Pending List - COLUMNS */}
-        {(processedMatches.pending.length > 0) && (filter === 'all' || filter === 'pending') && (
-            <section>
-                <div className="section-header">
-                    <Clock size={20} /> {t('matches.nextMatches')}
-                </div>
-
-                {/* Logic to split pending into Pink and Cyan queues */}
-                {(() => {
-                    const pinkQueue = [];
-                    const cyanQueue = [];
-
-                    processedMatches.pending.forEach((m, idx) => {
-                        const cUpper = (m.court || '').toUpperCase();
-                        const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK');
-                        const isCyan = cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN');
-
-                        if (isPink) {
-                            pinkQueue.push(m);
-                        } else if (isCyan) {
-                            cyanQueue.push(m);
-                        } else {
-                            // Default distribution if no court assigned (Balance Queues)
-                            if (pinkQueue.length <= cyanQueue.length) pinkQueue.push(m);
-                            else cyanQueue.push(m);
-                        }
-                    });
-
-                    return (
-                        <div className="queue-columns">
-                            {/* PINK COLUMN */}
-                            <div className="queue-column">
-                                <h3 style={{ color: 'var(--accent-pink)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-pink)' }}>
-                                    {t('live.pinkQueue')}
-                                </h3>
-                                {pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
-                                {pinkQueue.map((m, idx) => renderMatchRow(m, idx, 'pink'))}
-                            </div>
-
-                            {/* CYAN COLUMN */}
-                            <div className="queue-column">
-                                <h3 style={{ color: 'var(--accent-cyan)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-cyan)' }}>
-                                    {t('live.cyanQueue')}
-                                </h3>
-                                {cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
-                                {cyanQueue.map((m, idx) => renderMatchRow(m, idx, 'cyan'))}
-                            </div>
-                        </div>
-                    );
-                })()}
-            </section>
-        )}
-
-        {/* 3. Finished Matches List */}
-        {(processedMatches.finished.length > 0) && (filter === 'all' || filter === 'finished') && (
-            <section>
-                <div className="section-header">
-                    <CheckCircle size={20} color="#10b981" /> {t('matches.played')}
-                </div>
-                <div className="match-list-container">
-                    {processedMatches.finished.map(m => renderMatchRow(m))}
-                </div>
-            </section>
-        )}
-
-        {(processedMatches.active.length === 0 && processedMatches.pending.length === 0 && processedMatches.finished.length === 0) && (
-            <div className="empty-state-text">{t('matches.allFinished')}</div>
-        )}
-
-        {editingMatch && (
-            <MatchEditModal
-                match={editingMatch}
-                onClose={() => setEditingMatch(null)}
-                onSave={handleSaveScore}
-                onClear={handleClearScore}
-            />
-        )}
-    </div>
-);
 };
 
 export default Matches;
