@@ -118,6 +118,13 @@ const Live = () => {
             if (isReadyA && !isReadyB) return -1;
             if (!isReadyA && isReadyB) return 1;
 
+            // Priority 2.5: Manual Order
+            if (a.manualOrder !== undefined || b.manualOrder !== undefined) {
+                const oa = a.manualOrder ?? Number.MAX_SAFE_INTEGER;
+                const ob = b.manualOrder ?? Number.MAX_SAFE_INTEGER;
+                if (oa !== ob) return oa - ob;
+            }
+
             // Priority 3: Standard logical sort
             return compareMatchIds(a.id, b.id);
         });

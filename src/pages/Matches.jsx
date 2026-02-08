@@ -280,8 +280,15 @@ const Matches = () => {
         // Explicitly check for 'live' status from the data or inferred
         const active = enriched.filter(m => m.status === 'live');
 
-        // Sort pending matches by ID
-        const pending = enriched.filter(m => m.status === 'pending').sort((a, b) => compareMatchIds(a.id, b.id));
+        // Sort pending matches by manualOrder then ID
+        const pending = enriched.filter(m => m.status === 'pending').sort((a, b) => {
+            if (a.manualOrder !== undefined || b.manualOrder !== undefined) {
+                const oa = a.manualOrder ?? Number.MAX_SAFE_INTEGER;
+                const ob = b.manualOrder ?? Number.MAX_SAFE_INTEGER;
+                if (oa !== ob) return oa - ob;
+            }
+            return compareMatchIds(a.id, b.id);
+        });
 
         const finished = enriched.filter(m => m.status === 'finished').reverse();
 
@@ -355,14 +362,58 @@ const Matches = () => {
         );
     };
 
-    const renderMatchRow = (match, index, forcedColor = null) => {
+    const handleMoveMatch = (matchId, direction) => {
+        const pending = processedMatches.pending;
+        const currentIndex = pending.findIndex(m => m.id === matchId);
+        if (currentIndex === -1) return;
+
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (targetIndex < 0 || targetIndex >= pending.length) return;
+
+        // Create a copy of matches to update
+        const newMatches = [...matches];
+
+        // Ensure all pending matches have a baseline manualOrder
+        // We map ID to the desired info to update efficiently
+        const updates = new Map();
+
+        // 1. Assign baseline order to ALL pending matches if they don't have it, 
+        // preserving the current visual order.
+        pending.forEach((m, idx) => {
+            const currentVal = m.manualOrder !== undefined ? m.manualOrder : idx * 100;
+            updates.set(m.id, currentVal);
+        });
+
+        // 2. Perform the swap in the updates map
+        const sourceId = pending[currentIndex].id;
+        const targetId = pending[targetIndex].id;
+
+        const sourceOrder = updates.get(sourceId);
+        const targetOrder = updates.get(targetId);
+
+        // Swap
+        updates.set(sourceId, targetOrder);
+        updates.set(targetId, sourceOrder);
+
+        // 3. Apply updates to the master list
+        const finalMatches = newMatches.map(m => {
+            if (updates.has(m.id)) {
+                return { ...m, manualOrder: updates.get(m.id) };
+            }
+            return m;
+        });
+
+        saveMatches(finalMatches);
+    };
+
+    const renderMatchRow = (match, index, queueType = null) => {
         const isWB = match.bracket === 'wb';
         const isGF = match.bracket === 'gf';
         const bracketClass = isGF ? 'gf' : (isWB ? 'wb' : 'lb');
         const bracketLabel = isGF ? t('matches.bracketFinal') : (isWB ? t('matches.bracketWinners') : t('matches.bracketLosers'));
 
         // Determine court color (predictive or assigned)
-        let colorType = forcedColor;
+        let colorType = queueType; // Use the passed queueType if available
         if (!colorType) {
             const cUpper = (match.court || '').toUpperCase();
             if (cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK')) colorType = 'pink';
@@ -371,9 +422,30 @@ const Matches = () => {
         }
 
         const rowBorderColor = colorType === 'pink' ? 'var(--accent-pink)' : 'var(--accent-cyan)';
+        const isPending = match.status === 'pending';
 
         return (
             <div key={match.id} className="match-list-row" style={{ borderLeft: `4px solid ${rowBorderColor}` }}>
+                {isPending && isAuthenticated && (
+                    <div style={{ display: 'flex', flexDirection: 'column', marginRight: '6px' }}>
+                        <button
+                            className="icon-btn-small"
+                            onClick={() => handleMoveMatch(match.id, 'up')}
+                            style={{ padding: 0, lineHeight: 0.8, marginBottom: '2px', opacity: 0.7 }}
+                            title="Move Up"
+                        >
+                            ▲
+                        </button>
+                        <button
+                            className="icon-btn-small"
+                            onClick={() => handleMoveMatch(match.id, 'down')}
+                            style={{ padding: 0, lineHeight: 0.8, opacity: 0.7 }}
+                            title="Move Down"
+                        >
+                            ▼
+                        </button>
+                    </div>
+                )}
                 <div className="row-id" style={{ color: rowBorderColor }}>#{match.id.split('-m')[1]}</div>
                 <div className="row-bracket">
                     <span className={`bracket-badge ${bracketClass}`}>{bracketLabel}</span>
