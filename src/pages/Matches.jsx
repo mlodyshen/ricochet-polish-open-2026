@@ -515,8 +515,8 @@ const Matches = () => {
                             } else if (isCyan) {
                                 cyanQueue.push(m);
                             } else {
-                                // Default distribution if no court assigned (Alternating)
-                                if (idx % 2 === 0) pinkQueue.push(m);
+                                // Default distribution if no court assigned (Balance Queues)
+                                if (pinkQueue.length <= cyanQueue.length) pinkQueue.push(m);
                                 else cyanQueue.push(m);
                             }
                         });

@@ -82,7 +82,12 @@ const Live = () => {
 
         const active = enriched.filter(m => {
             const s = (m.status || 'pending').toLowerCase();
-            return !m.winnerId && ['live', 'pending', 'scheduled'].includes(s);
+            // FILTER: Only show matches where players are known (Ready to play)
+            // This prevents "TBD vs TBD" or "Scheduled" matches from blocking the queue
+            const playersReady = m.player1 && m.player1.id && m.player2 && m.player2.id;
+            const isBye = m.player1.isBye || m.player2.isBye;
+
+            return !m.winnerId && playersReady && !isBye && ['live', 'pending'].includes(s);
         }).sort((a, b) => {
             const sA = (a.status || '').toLowerCase();
             const sB = (b.status || '').toLowerCase();
@@ -95,7 +100,21 @@ const Live = () => {
         const cyan = [];
 
         active.forEach((m, idx) => {
-            const court = idx % 2 === 0 ? 'courtPink' : 'courtCyan';
+            let court = '';
+
+            // 1. Respect Existing Court Assignment
+            if (m.court) {
+                const cUpper = m.court.toUpperCase();
+                if (cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('PINK')) court = 'courtPink';
+                else if (cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('CYAN')) court = 'courtCyan';
+            }
+
+            // 2. Auto-Assign if Missing (Balance queues)
+            if (!court) {
+                if (pink.length <= cyan.length) court = 'courtPink';
+                else court = 'courtCyan';
+            }
+
             const mWithCourt = { ...m, assignedCourt: court };
             if (court === 'courtPink') pink.push(mWithCourt);
             else cyan.push(mWithCourt);

@@ -57,15 +57,16 @@ export const compareMatchIds = (idA, idB) => {
     const A = parseId(idA);
     const B = parseId(idB);
 
-    // 2. Compare Bracket Priority (WB < LB < GF)
+    // 2. Compare Round (Primary Sort Key for Flow)
+    // Matches should be played round by round ideally
+    if (A.round !== B.round) return A.round - B.round;
+
+    // 3. Compare Bracket Priority (WB < LB < GF)
     const bracketPriority = { wb: 1, lb: 2, gf: 3 };
     const pA = bracketPriority[A.bracket] || 99;
     const pB = bracketPriority[B.bracket] || 99;
 
     if (pA !== pB) return pA - pB;
-
-    // 3. Compare Round
-    if (A.round !== B.round) return A.round - B.round;
 
     // 4. Compare Match Number
     return A.number - B.number;
