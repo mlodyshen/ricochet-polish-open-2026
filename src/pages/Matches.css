@@ -367,3 +367,43 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Reordering Controls */
+.reorder-controls {
+    display: flex;
+    flex-direction: column;
+    margin-right: 8px;
+    justify-content: center;
+    gap: 2px;
+}
+
+.reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
+}
+
+.reorder-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: white;
+    transform: scale(1.1);
+}
+
+.reorder-btn:active {
+    transform: scale(0.95);
+}
+
+.arrow-icon {
+    font-size: 0.7rem;
+    font-weight: bold;
+}

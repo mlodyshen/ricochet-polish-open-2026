@@ -422,8 +422,8 @@ const Matches = () => {
 
         // Base numbering: assign 100, 200, 300 based on current global sorted order
         allPending.forEach((m, idx) => {
-            // Use existing manualOrder if present, otherwise generate one
-            const currentVal = m.manualOrder !== undefined ? m.manualOrder : idx * 100;
+            // Use nullish coalescing to ensure we don't treat null/undefined as a valid "fixed" value
+            const currentVal = (m.manualOrder !== undefined && m.manualOrder !== null) ? m.manualOrder : idx * 100;
             updates.set(m.id, currentVal);
         });
 
@@ -431,6 +431,8 @@ const Matches = () => {
         const orderA = updates.get(matchA.id);
         const orderB = updates.get(matchB.id);
 
+        // Sanity check: if both were null, the above logic should have assigned them 100, 200 etc.
+        // But let's be safe.
         updates.set(matchA.id, orderB);
         updates.set(matchB.id, orderA);
 
@@ -474,22 +476,20 @@ const Matches = () => {
         return (
             <div key={match.id} className="match-list-row" style={gridStyle}>
                 {showControls && (
-                    <div style={{ display: 'flex', flexDirection: 'column', marginRight: '4px', justifyContent: 'center' }}>
+                    <div className="reorder-controls">
                         <button
-                            className="icon-btn-small"
+                            className="reorder-btn up"
                             onClick={() => handleMoveMatch(match.id, 'up')}
-                            style={{ padding: 0, lineHeight: 0.8, marginBottom: '2px', opacity: 1, color: 'white' }}
                             title="Move Up"
                         >
-                            <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>▲</span>
+                            <span className="arrow-icon">▲</span>
                         </button>
                         <button
-                            className="icon-btn-small"
+                            className="reorder-btn down"
                             onClick={() => handleMoveMatch(match.id, 'down')}
-                            style={{ padding: 0, lineHeight: 0.8, opacity: 1, color: 'white' }}
                             title="Move Down"
                         >
-                            <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>▼</span>
+                            <span className="arrow-icon">▼</span>
                         </button>
                     </div>
                 )}
