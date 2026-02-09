@@ -131,10 +131,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
         const COLOR_GOLD = '#fbbf24';
 
         // Background: Dynamic Glass Tints
-        // Use variables from index.css to respect Dark/Light mode
-        let bgStyle = isLive
-            ? 'linear-gradient(135deg, var(--bg-primary), rgba(220, 38, 38, 0.1))' // Red tint for live
-            : 'linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)';
+        // Standard background for all matches (no red tint for live)
+        let bgStyle = 'linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)';
 
         // Highlight Override
         if (isHighlighted) {
@@ -143,8 +141,9 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
         // Border: Pink if live, else subtle grey
         // Border: Pink if live, else subtle grey
-        let borderColor = isLive ? 'var(--accent-pink)' : 'var(--border-color)';
-        let boxShadow = isLive ? '0 0 10px rgba(220, 38, 38, 0.2)' : '0 2px 4px rgba(0, 0, 0, 0.05)';
+        // Border: Standard border, no live highlight
+        let borderColor = 'var(--border-color)';
+        let boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
 
         if (isHighlighted) {
             borderColor = COLOR_GOLD;
