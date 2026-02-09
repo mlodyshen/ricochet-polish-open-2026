@@ -576,65 +576,79 @@
 /* MOBILE */
 @media (max-width: 768px) {
     .live-container {
-        padding: 0.25rem;
+        padding: 0.1rem;
     }
 
     .live-title {
-        font-size: 1.25rem;
+        font-size: 1rem;
     }
 
     .broadcast-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 1.5rem;
-        padding: 1.5rem 1rem;
+        grid-template-columns: 1fr 100px 1fr;
+        /* Narrower center for mobile */
+        gap: 0.25rem;
+        padding: 0.75rem 0.25rem;
         min-height: auto;
     }
 
     .broadcast-player.left,
     .broadcast-player.right {
-        align-items: center;
-        text-align: center;
         padding: 0;
     }
 
     .player-last {
-        font-size: 1.4rem;
+        font-size: 0.9rem;
+        /* Significantly smaller */
+        margin-bottom: 0.25rem;
+    }
+
+    .player-first {
+        font-size: 0.55rem;
     }
 
     .broadcast-center {
-        order: -1;
-        /* Move score to top in mobile stack */
-        height: 110px;
-        margin-bottom: 0.5rem;
+        height: 80px;
+        /* Shorter scoreboard */
+        border-radius: 8px;
+        padding: 0.25rem 0;
     }
 
     .sets-score-main {
-        font-size: 2.8rem;
+        font-size: 1.8rem;
     }
 
-    /* Upcoming Rows Optimization */
+    .player-flag-row {
+        font-size: 0.55rem;
+        padding: 2px 6px;
+        gap: 4px;
+    }
+
+    .player-flag-row img {
+        width: 12px !important;
+    }
+
+    /* Upcoming Rows Optimization - Keep horizontal */
     .upcoming-row-new {
-        grid-template-columns: 1fr 50px 1fr;
-        padding: 0.75rem 0.5rem;
-        gap: 0.5rem;
+        grid-template-columns: 1fr 40px 1fr;
+        padding: 0.5rem 0.25rem;
+        gap: 0.25rem;
     }
 
     .u-last {
-        font-size: 0.9rem;
+        font-size: 0.75rem;
     }
 
     .u-first {
-        font-size: 0.6rem;
+        font-size: 0.5rem;
     }
 
     .u-bo-badge {
-        font-size: 0.6rem;
-        padding: 1px 4px;
+        font-size: 0.5rem;
+        padding: 1px 2px;
     }
 
     .upcoming-round-badge {
-        font-size: 0.55rem;
-        padding: 1px 5px;
+        font-size: 0.45rem;
+        padding: 0 4px;
     }
 }

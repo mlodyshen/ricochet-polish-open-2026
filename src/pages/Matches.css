@@ -455,12 +455,12 @@
 /* Responsive */
 @media (max-width: 768px) {
     .matches-container {
-        padding: 0.5rem;
-        gap: 1.5rem;
+        padding: 0.25rem;
+        gap: 1rem;
     }
 
     .matches-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .active-matches-grid {
@@ -468,49 +468,44 @@
     }
 
     .active-match-card {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     .active-player-name {
-        font-size: 1rem;
+        font-size: 0.85rem;
     }
 
     .active-score-board {
-        grid-template-columns: 1fr 100px 1fr;
+        grid-template-columns: 1fr 80px 1fr;
+        gap: 0.25rem;
     }
 
     .active-set-score {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
     .match-list-row {
-        grid-template-columns: 1fr;
-        padding: 2.5rem 1rem 1rem 1rem;
-        text-align: center;
-        gap: 0.5rem;
-    }
-
-    .player.p1,
-    .player.p2 {
-        justify-content: center;
-        text-align: center;
-        flex-direction: column;
+        grid-template-columns: 30px 1fr 60px 1fr 30px;
+        padding: 1.25rem 0.5rem 0.5rem 0.5rem;
         gap: 0.25rem;
     }
 
     .player .name {
-        font-size: 1rem;
+        font-size: 0.85rem;
     }
 
-    .row-controls {
-        flex-direction: row;
-        gap: 1.5rem;
-        margin-bottom: 0.5rem;
-        justify-content: center;
+    .player-flag {
+        width: 18px;
+        height: 12px;
     }
 
-    .row-action {
-        justify-content: center;
-        margin-top: 0.5rem;
+    .final-score {
+        font-size: 0.9rem;
+        padding: 1px 4px;
+    }
+
+    .row-meta-badge {
+        font-size: 0.55rem;
+        padding: 1px 4px;
     }
 }
