@@ -320,7 +320,12 @@ const Live = () => {
                 </div>
             </div>
 
-
+            <div className="qr-widget" style={{ zIndex: 90 }}>
+                <div className="qr-box" style={{ background: 'white', padding: '5px' }}>
+                    <QRCodeCanvas value={`${window.location.origin}/live?mode=mobile`} size={80} bgColor={"#ffffff"} fgColor={"#000000"} level={"M"} includeMargin={false} />
+                </div>
+                <div className="qr-label">{t('live.scanForResults')}</div>
+            </div>
         </div>
     );
 };
