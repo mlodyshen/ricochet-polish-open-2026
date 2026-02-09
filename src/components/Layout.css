@@ -15,7 +15,7 @@
     align-items: center;
     justify-content: flex-end;
     padding: 0 1.5rem;
-    position: relative;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -211,7 +211,7 @@
 
 /* Main Content */
 .main-content {
-    margin-top: 150px;
+    padding-top: 150px;
     flex: 1;
     overflow-y: auto;
     /* Content scrolls here */
@@ -257,7 +257,8 @@
 
     .main-content {
         margin-left: 0;
-        margin-top: 100px;
+        margin-top: 0;
+        padding-top: 100px;
         /* Increased for two-row header */
         margin-bottom: 0;
         /* Bottom-nav is outside this scroll area */

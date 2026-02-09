@@ -75,7 +75,7 @@ const Layout = () => {
     const mainContentStyle = isLiveView
         ? { marginLeft: 0, padding: 0, maxWidth: 'none' }
         : isBracketsPage
-            ? { maxWidth: '100%', padding: '0 1rem', marginTop: '140px' }
+            ? { maxWidth: '100%', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '140px' }
             : {};
 
     return (

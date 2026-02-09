@@ -7,11 +7,10 @@
 }
 
 .matches-container {
-    height: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    overflow-y: auto;
     padding-bottom: 4rem;
     font-family: 'Inter', system-ui, sans-serif;
 }
