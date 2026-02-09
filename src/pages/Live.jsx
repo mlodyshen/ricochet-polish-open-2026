@@ -355,10 +355,9 @@ const Live = () => {
                         <PlayerFlag countryCode={m.player1.country} />
                     </div>
                     <div className="u-center-stack">
-                        <div className="u-vs" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', letterSpacing: '2px' }}>
+                        <div className="u-vs" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'white', letterSpacing: '2px' }}>
                             {m.score1}:{m.score2}
                         </div>
-                        <div className="u-bo-badge" style={{ marginTop: '2px', opacity: 0.7 }}>BO{bestOf}</div>
                     </div>
                     <div className="u-player right">
                         <PlayerFlag countryCode={m.player2.country} />
