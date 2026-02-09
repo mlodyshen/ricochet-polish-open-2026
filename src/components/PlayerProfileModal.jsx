@@ -1,13 +1,13 @@
-
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, User, Trophy, Medal } from 'lucide-react';
 import { getCountryCode } from '../constants/countries';
 
 const PlayerProfileModal = ({ player, matches, allPlayers, onClose }) => {
-    if (!player) return null;
+    const { t } = useTranslation();
 
     const playerMatches = useMemo(() => {
-        if (!matches) return [];
+        if (!matches || !player) return [];
         // Filter matches where player is involved
         const filtered = matches.filter(m =>
             m.player1Id === player.id || m.player2Id === player.id
@@ -53,6 +53,8 @@ const PlayerProfileModal = ({ player, matches, allPlayers, onClose }) => {
         return { wins, losses, played: played.length };
     }, [playerMatches]);
 
+    if (!player) return null;
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content profile-modal" onClick={e => e.stopPropagation()}>
@@ -97,19 +99,19 @@ const PlayerProfileModal = ({ player, matches, allPlayers, onClose }) => {
                     <div className="stats-row">
                         <div className="stat-card">
                             <span className="stat-value">{stats.played}</span>
-                            <span className="stat-label">Mecze</span>
+                            <span className="stat-label">{t('profile.matchesPlayed')}</span>
                         </div>
                         <div className="stat-card mobile-green">
                             <span className="stat-value">{stats.wins}</span>
-                            <span className="stat-label">Wygrane</span>
+                            <span className="stat-label">{t('profile.wins')}</span>
                         </div>
                         <div className="stat-card mobile-red">
                             <span className="stat-value">{stats.losses}</span>
-                            <span className="stat-label">Przegrane</span>
+                            <span className="stat-label">{t('profile.losses')}</span>
                         </div>
                     </div>
 
-                    <h3 className="section-title-small">Historia Meczów</h3>
+                    <h3 className="section-title-small">{t('profile.matchHistory')}</h3>
 
                     <div className="history-list">
                         {playerMatches.length > 0 ? (
@@ -120,7 +122,7 @@ const PlayerProfileModal = ({ player, matches, allPlayers, onClose }) => {
                                             {(match.bracket || '').toUpperCase()} {match.round ? `R${match.round}` : ''}
                                         </div>
                                         <div className="history-opponent">
-                                            <span style={{ color: 'var(--text-secondary)', marginRight: '4px' }}>vs</span>
+                                            <span style={{ color: 'var(--text-secondary)', marginRight: '4px' }}>{t('common.vs')}</span>
                                             {match.opponent.full_name}
                                         </div>
                                     </div>
@@ -154,7 +156,7 @@ const PlayerProfileModal = ({ player, matches, allPlayers, onClose }) => {
                                 </div>
                             ))
                         ) : (
-                            <div className="empty-history">Brak rozegranych meczów na tym turnieju.</div>
+                            <div className="empty-history">{t('profile.noMatches')}</div>
                         )}
                     </div>
                 </div>

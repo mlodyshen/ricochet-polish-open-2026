@@ -658,7 +658,7 @@
 }
 
 .player-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 1.5rem;
@@ -674,9 +674,9 @@
 
 .player-card:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-primary);
 }
 
 .player-card {
@@ -787,7 +787,7 @@
     width: 100%;
     margin-top: 0.5rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-color);
 }
 
 .card-stat-item {
@@ -799,7 +799,7 @@
 .card-stat-value {
     font-size: 1.1rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-primary);
 }
 
 .card-stat-label {
@@ -849,19 +849,19 @@
 /* Updated Header Search */
 .players-header {
     background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 2rem;
     margin-bottom: 2rem;
 }
 
 .search-input {
     width: 320px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
-    color: white;
+    color: var(--text-primary);
 }
 
 .search-input:focus {
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--bg-secondary);
     border-color: var(--accent-primary);
 }

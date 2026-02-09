@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Clock, Trophy } from 'lucide-react';
+import { Maximize, Clock, Activity, X, Trophy } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
 import { useTournamentMatches } from '../hooks/useTournamentMatches';
@@ -48,8 +48,8 @@ const splitNameForDisplay = (fullName) => {
 const Live = () => {
     const { t } = useTranslation();
     const { isAuthenticated } = useAuth();
-    const { matches, saveMatches } = useTournamentMatches();
-    const { players } = usePlayers();
+    const { matches, saveMatches } = useTournamentMatches(); // Replaces useMatches for logic hydration
+    const { players, updatePlayer } = usePlayers();
     const { activeTournamentId } = useTournament();
 
     const location = useLocation();
@@ -64,6 +64,28 @@ const Live = () => {
         const interval = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(interval);
     }, []);
+
+    // AUTO-FIX NAMES (ONE-OFF)
+    useEffect(() => {
+        if (!players || players.length === 0) return;
+
+        const RANDOM_NAMES = [
+            "Jan Kowalski", "Piotr Nowak", "Adam Wiśniewski", "Krzysztof Wójcik", "Michał Kamiński",
+            "Tomasz Lewandowski", "Marcin Zieliński", "Andrzej Szymański", "Jakub Woźniak", "Dariusz Dąbrowski",
+            "Marek Kozłowski", "Lukasz Jankowski", "Grzegorz Mazur", "Mateusz Kwiatkowski", "Pawel Krawczyk",
+            "James Smith", "Michael Johnson", "Robert Williams", "David Brown", "William Jones",
+            "Richard Garcia", "Joseph Miller", "Thomas Davis", "Charles Rodriguez", "Daniel Martinez",
+            "Hans Muller", "Klaus Weber", "Jurgen Schmidt", "Karl Wagner", "Stefan Meyer",
+            "Pierre Dubois", "Jean Martin", "Carlos Sainz", "Max Verstappen", "Lando Norris", "Lewis Hamilton"
+        ];
+
+        players.forEach((p, i) => {
+            if ((p.full_name || '').startsWith('Player ')) {
+                const newName = RANDOM_NAMES[i % RANDOM_NAMES.length];
+                updatePlayer(p.id, { full_name: newName });
+            }
+        });
+    }, [players, updatePlayer]);
 
     const formatTime = (date) => date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -106,8 +128,8 @@ const Live = () => {
             let court = '';
             if (m.court) {
                 const cUpper = m.court.toUpperCase();
-                if (cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('PINK') || m.court === 'pink') court = 'courtPink';
-                else if (cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('CYAN') || m.court === 'cyan') court = 'courtCyan';
+                if (cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('RÓŻOWY') || cUpper.includes('PINK') || m.court === 'pink') court = 'courtPink';
+                else if (cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('TURKUSOWY') || cUpper.includes('CYAN') || m.court === 'cyan') court = 'courtCyan';
             }
             if (!court) {
                 if (pink.length <= cyan.length) court = 'courtPink';
@@ -187,53 +209,26 @@ const Live = () => {
         const p1Name = splitNameForDisplay(formatName(match.player1));
         const p2Name = splitNameForDisplay(formatName(match.player2));
 
-        const handleZoneClick = (e, playerKey) => {
-            if (!isStillPlaying || !isAuthenticated) return;
-            e.preventDefault();
-            e.stopPropagation();
-            handleUpdate(match, 'point', playerKey, 1);
-        };
-
-        const handleZoneContext = (e, playerKey) => {
-            if (!isStillPlaying || !isAuthenticated) return;
-            e.preventDefault();
-            e.stopPropagation();
-            handleUpdate(match, 'point', playerKey, -1);
-        };
-
-        const gradientBg = `linear-gradient(135deg, color-mix(in srgb, ${courtColor}, transparent 85%) 0%, transparent 100%)`;
-
         return (
-            <div className="broadcast-card" style={{ background: gradientBg }}>
-                {isStillPlaying && <div className="broadcast-badge-live">{t('live.liveBadge')}</div>}
-
-                {isStillPlaying && isAuthenticated && (
-                    <div className="click-overlay">
-                        <div className="click-zone" onClick={(e) => handleZoneClick(e, 'a')} onContextMenu={(e) => handleZoneContext(e, 'a')} />
-                        <div className="click-zone" onClick={(e) => handleZoneClick(e, 'b')} onContextMenu={(e) => handleZoneContext(e, 'b')} />
-                    </div>
-                )}
-
-                <div className="broadcast-header">
-                    <span style={{ marginRight: '1rem' }}>{(match.bracket || '').toUpperCase()} R{match.round}</span>
-                    <span style={{ opacity: 0.5 }}>BO{bestOf}</span>
-                </div>
-
+            <div className="broadcast-card">
                 <div className="broadcast-content">
-                    <div className="broadcast-player left">
-                        <div className="player-name-group">
-                            <span className="player-first">{p1Name.first}</span>
-                            <span className="player-last">{p1Name.last}</span>
-                        </div>
+                    {/* PLAYER 1 (Left) */}
+                    <div className="broadcast-player left"
+                        onClick={() => handleUpdate(match, 'point', 'player1', 1)}
+                        onContextMenu={(e) => { e.preventDefault(); handleUpdate(match, 'point', 'player1', -1); }}>
+                        <div className="player-first">{p1Name.first}</div>
+                        <div className="player-last">{p1Name.last}</div>
                         <div className="player-flag-row">
-                            <PlayerFlag countryCode={match.player1.country} />
-                            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{match.player1.country}</span>
+                            <PlayerFlag countryCode={match.player1.country} /> <span style={{ marginLeft: '6px' }}>{match.player1.country}</span>
                         </div>
                         {isStillPlaying && <div className="current-points" style={{ color: courtColor }}>{currentSet.a}</div>}
                     </div>
 
+                    {/* CENTER: SETS */}
                     <div className="broadcast-center">
-                        <div className="sets-score-main">{match.score1}:{match.score2}</div>
+                        <div className="sets-score-main">
+                            {match.score1} : {match.score2}
+                        </div>
                         <div className="sets-label">{t('live.sets')}</div>
                         <div className="set-dots">
                             {(match.microPoints || []).map((s, idx) => (
@@ -242,16 +237,21 @@ const Live = () => {
                                 </div>
                             ))}
                         </div>
+                        {match.bracket && (
+                            <div style={{ marginTop: '0.5rem', opacity: 0.5, fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                                {match.bracket} R{match.round} | {t('live.bo', { n: bestOf })}
+                            </div>
+                        )}
                     </div>
 
-                    <div className="broadcast-player right">
-                        <div className="player-name-group">
-                            <span className="player-first">{p2Name.first}</span>
-                            <span className="player-last">{p2Name.last}</span>
-                        </div>
+                    {/* PLAYER 2 (Right) */}
+                    <div className="broadcast-player right"
+                        onClick={() => handleUpdate(match, 'point', 'player2', 1)}
+                        onContextMenu={(e) => { e.preventDefault(); handleUpdate(match, 'point', 'player2', -1); }}>
+                        <div className="player-first">{p2Name.first}</div>
+                        <div className="player-last">{p2Name.last}</div>
                         <div className="player-flag-row" style={{ justifyContent: 'flex-end' }}>
-                            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{match.player2.country}</span>
-                            <PlayerFlag countryCode={match.player2.country} />
+                            <span style={{ marginRight: '6px' }}>{match.player2.country}</span> <PlayerFlag countryCode={match.player2.country} />
                         </div>
                         {isStillPlaying && <div className="current-points" style={{ color: courtColor }}>{currentSet.b}</div>}
                     </div>
@@ -262,60 +262,82 @@ const Live = () => {
 
     const renderUpcomingList = (queue) => {
         if (!queue || queue.length === 0) return <div className="upcoming-item empty">{t('live.noUpcoming')}</div>;
-        return queue.map(m => (
-            <div key={m.id} className="upcoming-row">
-                <div className="upcoming-p1">
-                    <PlayerFlag countryCode={m.player1.country} />
-                    <span className="upcoming-name">{formatName(m.player1)}</span>
+        return queue.map(m => {
+            const bestOf = getBestOf(m.bracket);
+            const p1 = splitNameForDisplay(formatName(m.player1));
+            const p2 = splitNameForDisplay(formatName(m.player2));
+
+            return (
+                <div key={m.id} className="upcoming-row-new">
+                    <div className="upcoming-round-badge">
+                        {(m.bracket || '').replace('bracket', '').trim()} R{m.round}
+                    </div>
+                    <div className="u-player left">
+                        <div className="u-name-group">
+                            <span className="u-first">{p1.first}</span>
+                            <span className="u-last">{p1.last}</span>
+                        </div>
+                        <PlayerFlag countryCode={m.player1.country} />
+                    </div>
+                    <div className="u-center-stack">
+                        <div className="u-vs">{t('common.vs')}</div>
+                        <div className="u-bo-badge">{t('live.bo', { n: bestOf })}</div>
+                    </div>
+                    <div className="u-player right">
+                        <PlayerFlag countryCode={m.player2.country} />
+                        <div className="u-name-group">
+                            <span className="u-first">{p2.first}</span>
+                            <span className="u-last">{p2.last}</span>
+                        </div>
+                    </div>
                 </div>
-                <div className="upcoming-vs">vs</div>
-                <div className="upcoming-p2">
-                    <span className="upcoming-name">{formatName(m.player2)}</span>
-                    <PlayerFlag countryCode={m.player2.country} />
-                </div>
-                <div className="upcoming-meta">{(m.bracket || '').toUpperCase()} R{m.round}</div>
-            </div>
-        ));
+            );
+        });
     };
 
     return (
         <div className={`live-container ${isTvMode ? 'tv-mode' : ''}`}>
+            {/* HEADER */}
             <header className="live-header">
-                <h1 className="live-title text-gradient">{t('live.title')}</h1>
-                <div className="digital-clock">{formatTime(currentTime)}</div>
+                <div>
+                    <h1 className="live-title text-gradient">{t('live.title')}</h1>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div className="digital-clock">{formatTime(currentTime)}</div>
+                </div>
             </header>
 
-            <div className="dashboard-grid">
-                <div className="dashboard-column main-column">
-                    <div className="courts-container">
-                        <div className="court-card compact glass-panel" style={{ borderLeft: '4px solid var(--accent-pink)' }}>
-                            <div className="court-header-slim">
-                                <span style={{ color: 'var(--accent-pink)', fontWeight: 800 }}>{t('live.courtPinkLabel')}</span>
-                            </div>
-                            {renderLiveMatch(pinkState.current, 'var(--accent-pink)')}
+            {/* MAIN GRID - 2 EQUAL COLUMNS */}
+            <div className="courts-container">
+                {/* COLUMN 1: LEFT COURT (LEWY) */}
+                <div className="court-column">
+                    <div className="court-card pink">
+                        <div className="court-header-slim">
+                            <span style={{ color: 'var(--accent-pink)' }}>
+                                {t('live.courtPink')}
+                            </span>
                         </div>
-
-                        <div className="court-card compact glass-panel" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                            <div className="court-header-slim">
-                                <span style={{ color: 'var(--accent-cyan)', fontWeight: 800 }}>{t('live.courtCyanLabel')}</span>
-                            </div>
-                            {renderLiveMatch(cyanState.current, 'var(--accent-cyan)')}
-                        </div>
+                        {pinkState.current ? renderLiveMatch(pinkState.current, 'var(--accent-pink)') : renderEmptyLive('var(--accent-pink)')}
+                    </div>
+                    <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem' }}>
+                        <div className="panel-header" style={{ color: 'var(--accent-pink)' }}>{t('live.queueLeft')}</div>
+                        {renderUpcomingList(pinkState.upcoming)}
                     </div>
                 </div>
 
-                <div className="dashboard-column side-column">
-                    <div className="upcoming-panel glass-panel">
-                        <div className="panel-header"><Clock size={16} style={{ marginRight: '8px' }} /> {t('live.upcomingHeader')}</div>
-                        <div className="upcoming-group">
-                            <div className="group-label" style={{ color: 'var(--accent-pink)' }}>{t('live.pinkQueue')}</div>
-                            {renderUpcomingList(pinkState.upcoming)}
+                {/* COLUMN 2: RIGHT COURT (PRAWY) */}
+                <div className="court-column">
+                    <div className="court-card cyan">
+                        <div className="court-header-slim">
+                            <span style={{ color: '#21468B' }}>
+                                {t('live.courtCyan')}
+                            </span>
                         </div>
-                        <div className="divider-line"></div>
-                        <div className="upcoming-group">
-                            <div className="group-label" style={{ color: 'var(--accent-cyan)' }}>{t('live.cyanQueue')}</div>
-                            {renderUpcomingList(cyanState.upcoming)}
-                        </div>
+                        {cyanState.current ? renderLiveMatch(cyanState.current, '#21468B') : renderEmptyLive('#21468B')}
+                    </div>
+                    <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem' }}>
+                        <div className="panel-header" style={{ color: '#21468B' }}>{t('live.queueRight')}</div>
+                        {renderUpcomingList(cyanState.upcoming)}
                     </div>
                 </div>
             </div>

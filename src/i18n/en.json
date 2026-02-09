@@ -9,7 +9,7 @@
         "settings": "Settings"
     },
     "common": {
-        "appName": "RICOCHET POLISH OPEN 2026",
+        "appName": "RICOCHET DUTCH OPEN 2026",
         "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
         "confirmDelete": "Are you sure you want to delete this player?",
         "cancel": "Cancel",
@@ -18,7 +18,9 @@
         "edit": "Edit",
         "delete": "Delete",
         "saved": "Saved!",
-        "back": "Back"
+        "back": "Back",
+        "vs": "VS",
+        "reset": "Reset"
     },
     "players": {
         "title": "Players Database",
@@ -53,6 +55,13 @@
             }
         }
     },
+    "profile": {
+        "matchesPlayed": "Matches",
+        "wins": "Wins",
+        "losses": "Losses",
+        "matchHistory": "Match History",
+        "noMatches": "No matches played yet."
+    },
     "pages": {
         "content_placeholder": "Content for {{title}} will go here."
     },
@@ -83,6 +92,9 @@
         "upcomingHeader": "UPCOMING",
         "pinkQueue": "LEFT COURT QUEUE",
         "cyanQueue": "RIGHT COURT QUEUE",
+        "queueLeft": "QUEUE - LEFT",
+        "queueRight": "QUEUE - RIGHT",
+        "bo": "BO{{n}}",
         "recentHeader": "RECENT RESULTS",
         "recentEmpty": "No results yet.",
         "courtPinkLabel": "LEFT COURT",
@@ -143,6 +155,14 @@
         "formatInfo": "Format: First to {{n}} (Best of {{bo}})",
         "statusLabel": "Match Status",
         "courtLabel": "Court Assignment",
+        "courtLeft": "Left Court",
+        "courtRight": "Right Court",
+        "noCourt": "-- No Court --",
+        "statusLive": "Live (Playing)",
+        "statusFinished": "Finished (Final Result)",
+        "microPoints": "Micro Points per Set",
+        "set": "Set",
+        "queueEmpty": "Queue is empty",
         "bracketWinners": "WINNERS",
         "bracketLosers": "LOSERS",
         "bracketFinal": "FINAL",
@@ -164,7 +184,9 @@
         "headerLB": "LOSERS BRACKET",
         "headerPlacement": "PLACEMENT STAGE",
         "placeRange": "Places {{range}}",
-        "placeSingle": "{{place}} Place"
+        "placeSingle": "{{place}} Place",
+        "scoreP1": "Score P1",
+        "scoreP2": "Score P2"
     },
     "standings": {
         "description": "Standings are updated after tournament participation ends."

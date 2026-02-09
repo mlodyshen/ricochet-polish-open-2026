@@ -35,9 +35,7 @@
     background: transparent;
 }
 
-[data-theme='dark'] .bracket-canvas {
-    background: transparent;
-}
+
 
 /* Sections */
 .bracket-section {
@@ -72,15 +70,15 @@
 }
 
 .wb-title {
-    color: #ec4899;
+    color: var(--accent-pink);
 }
 
 .lb-title {
-    color: #f97316;
+    color: var(--accent-cyan);
 }
 
 .mid-title {
-    color: #3b82f6;
+    color: var(--text-secondary);
 }
 
 /* Rounds Layout */
@@ -158,13 +156,11 @@
 }
 
 .match-player:first-of-type {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--border-color);
     /* Separator between players */
 }
 
-[data-theme='dark'] .match-player:first-of-type {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
+
 
 .player-name {
     white-space: nowrap;
@@ -188,10 +184,9 @@
 }
 
 .match-player.winner {
-    background-color: rgba(34, 197, 94, 0.1);
-    /* Green tint */
-    color: #16a34a;
-    /* Green-600 */
+    background-color: rgba(34, 197, 94, 0.15);
+    /* Slightly stronger for dark mode */
+    color: var(--accent-green);
 }
 
 .match-player.winner .player-score {

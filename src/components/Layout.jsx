@@ -11,7 +11,9 @@ import {
     GitBranch,
     Settings,
     Maximize,
-    LogOut
+    LogOut,
+    Moon,
+    Sun
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import './Layout.css';
@@ -30,12 +32,21 @@ const Layout = () => {
     const { t } = useTranslation();
     const { isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation(); // Keep track of current path
+    const location = useLocation();
 
-    // Force dark theme as per new design
+    // Theme State
+    const [darkMode, setDarkMode] = React.useState(() => {
+        return localStorage.getItem('ricochet_theme') === 'dark';
+    });
+
+    // Apply Theme
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    }, []);
+        const theme = darkMode ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ricochet_theme', theme);
+    }, [darkMode]);
+
+    const toggleTheme = () => setDarkMode(!darkMode);
 
     const handleLogout = () => {
         logout();
@@ -70,16 +81,25 @@ const Layout = () => {
     return (
         <div className="app-container">
             {/* Top Header */}
-            <header className="top-header glass">
+            <header className="top-header">
                 <div className="header-branding">
                     <img src="/c.png" alt="Logo" style={{ height: '32px' }} />
                     <div className="brand-text">
                         <span>RICOCHET</span>
-                        <span className="polish-flag-text">POLISH</span>
+                        <span className="dutch-flag-text">DUTCH</span>
                         <span>OPEN 2026</span>
                     </div>
                 </div>
                 <div className="header-actions">
+
+                    <button
+                        className="theme-toggle"
+                        onClick={toggleTheme}
+                        title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                        style={{ marginRight: '0.5rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}
+                    >
+                        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
 
                     <button
                         className="theme-toggle"
@@ -92,7 +112,7 @@ const Layout = () => {
                             }
                         }}
                         title="TV Mode"
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.4rem 0.8rem', height: '36px', borderRadius: '8px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.4rem 0.8rem', height: '36px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
                     >
                         <Maximize size={16} />
                         <span>TV Mode</span>
@@ -110,27 +130,29 @@ const Layout = () => {
                         </NavLink>
                     )}
                 </div>
-            </header>
+            </header >
 
             {/* Desktop Sidebar - Hidden in Live View */}
-            {!isLiveView && (
-                <aside className="sidebar">
-                    <nav className="nav-list">
-                        {filteredNavItems.map((item, index) => (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                className={({ isActive }) =>
-                                    `nav-item ${isActive ? 'active' : ''} ${isActive ? (index % 2 === 0 ? 'accent-pink' : 'accent-cyan') : ''}`
-                                }
-                            >
-                                <item.icon size={20} />
-                                <span>{t(`navigation.${item.key}`)}</span>
-                            </NavLink>
-                        ))}
-                    </nav>
-                </aside>
-            )}
+            {
+                !isLiveView && (
+                    <aside className="sidebar">
+                        <nav className="nav-list">
+                            {filteredNavItems.map((item, index) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    className={({ isActive }) =>
+                                        `nav-item ${isActive ? 'active accent-pink' : ''}`
+                                    }
+                                >
+                                    <item.icon size={20} />
+                                    <span>{t(`navigation.${item.key}`)}</span>
+                                </NavLink>
+                            ))}
+                        </nav>
+                    </aside>
+                )
+            }
 
             {/* Main Content Area - Full Width in Live View, Expanded for Brackets */}
             <main className="main-content" style={mainContentStyle}>
@@ -140,21 +162,23 @@ const Layout = () => {
             </main>
 
             {/* Mobile Bottom Navigation - Hidden in Live View */}
-            {!isLiveView && (
-                <nav className="bottom-nav">
-                    {filteredNavItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
-                        >
-                            <item.icon size={20} />
-                            <span style={{ fontSize: '10px' }}>{t(`navigation.${item.key}`)}</span>
-                        </NavLink>
-                    ))}
-                </nav>
-            )}
-        </div>
+            {
+                !isLiveView && (
+                    <nav className="bottom-nav">
+                        {filteredNavItems.map((item) => (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
+                            >
+                                <item.icon size={20} />
+                                <span style={{ fontSize: '10px' }}>{t(`navigation.${item.key}`)}</span>
+                            </NavLink>
+                        ))}
+                    </nav>
+                )
+            }
+        </div >
     );
 };
 

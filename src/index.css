@@ -1,72 +1,92 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Colors - Dark Neon Theme (Jersey Inspired) */
-  --bg-primary: #000000;
-  /* Pure Black foundation */
-  --bg-secondary: rgba(20, 20, 25, 0.85);
-  /* Semi-transparent dark */
+  /* Colors - Ricochet Dutch Theme */
+  --bg-primary: rgba(255, 255, 255, 0.6);
+  /* Semi-transparent for glass effect */
+  --bg-secondary: rgba(243, 244, 246, 0.6);
+  /* Light Gray */
 
-  --text-primary: #f0f0f0;
-  /* Off-white for readability */
-  --text-secondary: #94a3b8;
-  /* Muted gray */
-  --text-tertiary: #64748b;
+  --text-primary: #111827;
+  /* Dark Gray/Black */
+  --text-secondary: #4b5563;
+  /* Medium Gray */
+  --text-tertiary: #9ca3af;
 
-  /* Neon Accents extracted from Jersey */
-  --accent-pink: #ec008c;
-  /* Vibrant Neon Pink */
-  --accent-cyan: #00bced;
-  /* Vivid Turquoise/Cyan */
+  /* Accents - Red and Gray */
+  --accent-pink: #dc2626;
+  /* Red */
+  --accent-cyan: #6b7280;
+  /* Gray (was Cyan) */
+  --accent-green: #16a34a;
+  /* Green */
 
   --accent-primary: var(--accent-pink);
   --accent-secondary: var(--accent-cyan);
 
-  --border-color: #333333;
-  /* Dark gray border */
+  --border-color: #e5e7eb;
+  /* Light border */
 
   /* Glass effects */
-  --glass-bg: rgba(0, 0, 0, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
 
-  /* Shadows - Neon Glows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 0 15px rgba(236, 0, 140, 0.2);
-  /* Pink glow hint */
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 188, 237, 0.2);
-  /* Cyan glow hint */
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 15px rgba(220, 38, 38, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 25px rgba(0, 0, 0, 0.05);
 
-  --card-gradient: linear-gradient(145deg, rgba(20, 20, 25, 0.9), rgba(10, 10, 12, 0.95));
+  --card-gradient: linear-gradient(145deg, #ffffff, #f9fafb);
 }
 
-/* Remove forced light mode block since we are overriding root directly */
-/* [data-theme='dark'] block removed */
+/* DARK MODE VARIABLES */
+[data-theme='dark'] {
+  --bg-primary: rgba(17, 24, 39, 0.85);
+  /* Dark Slate / Black Glass */
+  --bg-secondary: rgba(31, 41, 55, 0.8);
 
-/* Background "Flames/Glow" Effect */
+  --text-primary: #f9fafb;
+  /* Gray-50 */
+  --text-secondary: #9ca3af;
+  /* Gray-400 */
+  --text-tertiary: #6b7280;
+
+  --border-color: rgba(255, 255, 255, 0.1);
+
+  --accent-pink: #ef4444;
+  /* Brighter Red for dark mode */
+  --accent-cyan: #3b82f6;
+  /* Blue for dark mode */
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+/* Global Background Gradient (Fixed) */
 body::before {
   content: "";
   position: fixed;
-  top: -20vh;
-  left: -20vw;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(236, 0, 140, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -10;
+  /* Dutch Gradient: Light Mode */
+  background: linear-gradient(135deg,
+      rgba(220, 38, 38, 0.15) 0%,
+      rgba(255, 255, 255, 0.9) 30%,
+      rgba(240, 248, 255, 0.8) 50%,
+      rgba(33, 70, 139, 0.35) 100%);
   pointer-events: none;
-  filter: blur(50px);
 }
 
-body::after {
-  content: "";
-  position: fixed;
-  bottom: -20vh;
-  right: -20vw;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(0, 188, 237, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-  z-index: -1;
-  pointer-events: none;
-  filter: blur(50px);
+[data-theme='dark'] body::before {
+  /* Dutch Gradient: Dark Mode */
+  background: linear-gradient(135deg,
+      rgba(69, 10, 10, 0.5) 0%,
+      #0f172a 30%,
+      #1e293b 60%,
+      rgba(23, 37, 84, 0.6) 100%);
 }
 
 * {
@@ -77,7 +97,8 @@ body::after {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg-primary);
+  background-color: transparent;
+  /* Allow gradient to show */
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
@@ -171,7 +192,8 @@ button {
 
 .bg-accent-cyan {
   background-color: var(--accent-cyan) !important;
-  color: white;
+  color: var(--bg-primary);
+  font-weight: 600;
 }
 
 .container {
@@ -189,6 +211,7 @@ button {
 .text-gradient {
   background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -245,5 +268,6 @@ button {
 /* Different button variants if needed, e.g. .btn-cyan */
 .btn-cyan {
   background: var(--accent-cyan);
-  color: white;
+  color: var(--bg-primary);
+  font-weight: 600;
 }

@@ -77,20 +77,16 @@ export const MatchesProvider = ({ children }) => {
 
                 unsubscribe = onSnapshot(q, (snapshot) => {
                     // Block snapshot updates if we are in the middle of a save operation
-                    // This prevents "flicker" or rewinding of state due to latency
                     if (isSavingRef.current) {
                         return;
                     }
 
                     const loaded = snapshot.docs.map(doc => {
-                        // FORCE ID consistency: The document ID is the source of truth
                         return { ...doc.data(), id: doc.id };
                     })
-                        // Allow any non-empty ID (like 'grand-final')
                         .filter(m => m.id)
                         .map(mapToCamel);
 
-                    // Deduplicate logic: Map ensures unique IDs
                     const uniqueMap = new Map();
                     loaded.forEach(m => uniqueMap.set(m.id, m));
 
@@ -125,12 +121,13 @@ export const MatchesProvider = ({ children }) => {
 
     // --- ACTIONS ---
 
-    // Clean, Single Reference for Saving
     const saveMatches = useCallback(async (newMatches, specificMatchId = null) => {
         if (!activeTournamentId) {
             console.error("No active tournament ID, cannot save!");
             return;
         }
+
+        console.log(`[MatchesContext] Saving ${newMatches.length} matches. Config: FB=${isFirebaseConfigured}, Auth=${isAuthenticated}, ID=${activeTournamentId}`);
 
         // 0. CAPTURE CURRENT STATE BEFORE ASYNC/UPDATES
         const previousMatches = [...matchesRef.current];
@@ -142,15 +139,10 @@ export const MatchesProvider = ({ children }) => {
         // 2. PERSISTENCE
         if (isFirebaseConfigured && isAuthenticated) {
             try {
-
                 // Identify what to save
                 let changesToSave = [];
 
                 // ALWAYS perform a diff check.
-                // We cannot optimize by saving only 'specificMatchId' because
-                // a single match update might propagate changes to other matches (winners/losers advancing).
-                // The diff logic below detects exactly which matches changed.
-
                 const payload = newMatches.map(m => mapToSnake(m));
                 changesToSave = payload.filter(p => {
                     const old = previousMatches.find(m => m.id === p.id);
@@ -158,7 +150,6 @@ export const MatchesProvider = ({ children }) => {
 
                     const oldSnake = mapToSnake(old);
 
-                    // Explicit check for manual_order to avoid JSON stringify subtleties
                     if (p.manual_order !== oldSnake.manual_order) return true;
                     if (p.court !== oldSnake.court) return true;
                     if (p.winner_id !== oldSnake.winner_id) return true;
@@ -172,7 +163,6 @@ export const MatchesProvider = ({ children }) => {
 
                 if (changesToSave.length > 0) {
                     const promises = changesToSave.map(match => {
-                        // STRICTLY write to the defined ID
                         const docRef = doc(db, "matches", match.id);
                         return setDoc(docRef, match);
                     });
@@ -190,22 +180,32 @@ export const MatchesProvider = ({ children }) => {
             }
         } else {
             // LS
+            console.log(`[MatchesContext] Saving to LS: ${lsKey}`);
             localStorage.setItem(lsKey, JSON.stringify(newMatches));
+
+            // Also update global state for backup
+            localStorage.setItem('ricochet_matches_backup', JSON.stringify(newMatches));
+
             isSavingRef.current = false;
         }
     }, [isAuthenticated, activeTournamentId, lsKey]);
 
     const resetMatches = async () => {
-        if (!isAuthenticated || !activeTournamentId || !isFirebaseConfigured) return;
+        if (!isAuthenticated || !activeTournamentId) return;
+
+        setIsSaving(true);
         try {
-            setIsSaving(true);
-            const q = query(collection(db, "matches"), where("tournament_id", "==", activeTournamentId));
-            const snapshot = await getDocs(q);
-            const batch = writeBatch(db);
-            snapshot.docs.forEach((doc) => {
-                batch.delete(doc.ref);
-            });
-            await batch.commit();
+            if (isFirebaseConfigured) {
+                const q = query(collection(db, "matches"), where("tournament_id", "==", activeTournamentId));
+                const snapshot = await getDocs(q);
+                const batch = writeBatch(db);
+                snapshot.docs.forEach((docSnap) => {
+                    batch.delete(docSnap.ref);
+                });
+                await batch.commit();
+            } else {
+                localStorage.removeItem(lsKey);
+            }
             setMatches([]);
         } catch (e) {
             console.error("Error resetting matches:", e);

@@ -106,25 +106,25 @@ const PlayerFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                     <form onSubmit={handleSubmit}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div className="form-group">
-                                <label className="form-label">Nazwisko (Surname)</label>
-                                <input
-                                    className={`form-input ${errors.last_name ? 'error' : ''}`}
-                                    value={formData.last_name}
-                                    onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-                                    placeholder="np. Kowalski"
-                                    autoFocus
-                                />
-                                {errors.last_name && <div className="error-message">{errors.last_name}</div>}
-                            </div>
-                            <div className="form-group">
                                 <label className="form-label">Imię (Name)</label>
                                 <input
                                     className={`form-input ${errors.first_name ? 'error' : ''}`}
                                     value={formData.first_name}
                                     onChange={e => setFormData({ ...formData, first_name: e.target.value })}
                                     placeholder="np. Jan"
+                                    autoFocus
                                 />
                                 {errors.first_name && <div className="error-message">{errors.first_name}</div>}
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Nazwisko (Surname)</label>
+                                <input
+                                    className={`form-input ${errors.last_name ? 'error' : ''}`}
+                                    value={formData.last_name}
+                                    onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+                                    placeholder="np. Kowalski"
+                                />
+                                {errors.last_name && <div className="error-message">{errors.last_name}</div>}
                             </div>
                         </div>
 
@@ -428,6 +428,20 @@ const Players = () => {
                             <button className="btn-secondary" onClick={() => fileInputRef.current?.click()} title="Importuj z pliku CSV">
                                 <Upload size={18} />
                                 <span className="hide-mobile">Importuj zawodników (Turniej)</span>
+                            </button>
+                            <button className="btn-secondary" onClick={() => {
+                                const randomPlayers = Array.from({ length: 32 }, (_, i) => ({
+                                    full_name: `Player ${i + 1}`,
+                                    country: EUROPEAN_COUNTRIES[Math.floor(Math.random() * EUROPEAN_COUNTRIES.length)],
+                                    elo: 1000 + Math.floor(Math.random() * 500) // Random ELO between 1000-1500
+                                }));
+                                // Ensure unique ELOs for fun
+                                randomPlayers.forEach((p, idx) => p.elo += idx);
+
+                                bulkUpsertPlayers(randomPlayers).then(() => showToast('Dodano 32 losowych graczy!'));
+                            }} title="Generuj 32 losowych">
+                                <Plus size={18} />
+                                <span className="hide-mobile">Generuj 32 (Test)</span>
                             </button>
                             <button className="btn-primary" onClick={handleAdd}>
                                 <Plus size={18} />

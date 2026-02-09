@@ -9,7 +9,7 @@
         "settings": "Ustawienia"
     },
     "common": {
-        "appName": "RICOCHET POLISH OPEN 2026",
+        "appName": "RICOCHET DUTCH OPEN 2026",
         "footer": "ricochetpolishopen.com • © 2026 • Created by Kacper",
         "confirmDelete": "Czy na pewno chcesz usunąć tego zawodnika?",
         "cancel": "Anuluj",
@@ -18,7 +18,9 @@
         "edit": "Edytuj",
         "delete": "Usuń",
         "saved": "Zapisano!",
-        "back": "Powrót"
+        "back": "Powrót",
+        "vs": "VS",
+        "reset": "Resetuj"
     },
     "players": {
         "title": "Baza zawodników",
@@ -55,6 +57,13 @@
             }
         }
     },
+    "profile": {
+        "matchesPlayed": "Mecze",
+        "wins": "Wygrane",
+        "losses": "Przegrane",
+        "matchHistory": "Historia Meczów",
+        "noMatches": "Brak rozegranych meczów."
+    },
     "pages": {
         "content_placeholder": "Treść dla {{title}} pojawi się tutaj."
     },
@@ -85,6 +94,9 @@
         "upcomingHeader": "NADCHODZĄCE",
         "pinkQueue": "KOLEJKA LEWY KORT",
         "cyanQueue": "KOLEJKA PRAWY KORT",
+        "queueLeft": "KOLEJKA - LEWY",
+        "queueRight": "KOLEJKA - PRAWY",
+        "bo": "BO{{n}}",
         "recentHeader": "OSTATNIE WYNIKI",
         "recentEmpty": "Brak wyników.",
         "courtPinkLabel": "KORT LEWY",
@@ -145,6 +157,14 @@
         "formatInfo": "Format: Do {{n}} wygranych (Best of {{bo}})",
         "statusLabel": "Status Meczu",
         "courtLabel": "Przydział Kortu",
+        "courtLeft": "Kort Lewy",
+        "courtRight": "Kort Prawy",
+        "noCourt": "-- Brak Kortu --",
+        "statusLive": "W Trakcie (Live)",
+        "statusFinished": "Zakończony (Wynik Końcowy)",
+        "microPoints": "Małe punkty w secie",
+        "set": "Set",
+        "queueEmpty": "Kolejka pusta",
         "bracketWinners": "WYGRANI",
         "bracketLosers": "PRZEGRANI",
         "bracketFinal": "FINAŁ",
@@ -166,7 +186,9 @@
         "headerLB": "DRABINKA PRZEGRANYCH",
         "headerPlacement": "MECZE O MIEJSCA",
         "placeRange": "Miejsca {{range}}",
-        "placeSingle": "Miejsce {{place}}"
+        "placeSingle": "Miejsce {{place}}",
+        "scoreP1": "Wynik G1",
+        "scoreP2": "Wynik G2"
     },
     "standings": {
         "description": "Klasyfikacja aktualizowana po zakończeniu udziału w turnieju."

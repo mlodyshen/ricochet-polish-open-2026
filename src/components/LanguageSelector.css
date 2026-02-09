@@ -55,7 +55,7 @@
 }
 
 .lang-option.active {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(220, 38, 38, 0.1);
     /* Slight blue tint */
     color: var(--accent-primary);
     font-weight: 600;

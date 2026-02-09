@@ -36,6 +36,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
     // --- 4. Interactive Highlight (Path to Final) ---
     const [hoveredMatchId, setHoveredMatchId] = useState(null);
+    const [paths, setPaths] = useState([]);
 
     const highlightedIds = useMemo(() => {
         if (!hoveredMatchId) return new Set();
@@ -101,87 +102,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
         { id: '4th', brackets: ['p4'], title: t('brackets.placeSingle', { place: '4th' }) }
     ];
 
-    // --- 2. Path Calculation ---
-    useLayoutEffect(() => {
-        if (!containerRef.current) return;
-
-        const calcPaths = () => {
-            const newPaths = [];
-            const containerRect = containerRef.current.getBoundingClientRect();
-            const scrollLeft = containerRef.current.scrollLeft;
-            const scrollTop = containerRef.current.scrollTop;
-
-            enrichedMatches.forEach(m => {
-                const srcEl = matchRefs.current[m.id];
-                if (!srcEl) return;
-                const srcRect = srcEl.getBoundingClientRect();
-
-                const startX = srcRect.right - containerRect.left + scrollLeft;
-                const startY = srcRect.top - containerRect.top + scrollTop + (srcRect.height / 2);
-
-                const isSrcHighlighted = highlightedIds.has(m.id);
-
-                // Winner Path (Standard Right)
-                if (m.nextMatchId) {
-                    const destEl = matchRefs.current[m.nextMatchId];
-                    if (destEl) {
-                        const destRect = destEl.getBoundingClientRect();
-                        const endX = destRect.left - containerRect.left + scrollLeft;
-                        const endY = destRect.top - containerRect.top + scrollTop + (destRect.height / 2);
-                        const midX = (startX + endX) / 2;
-
-                        const isDestHighlighted = highlightedIds.has(m.nextMatchId);
-                        const isPathHighlighted = isSrcHighlighted && isDestHighlighted;
-
-                        newPaths.push({
-                            id: `${m.id}-win`,
-                            d: `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`,
-                            color: isPathHighlighted ? '#fbbf24' : 'rgba(255,255,255,0.08)', // Gold if highlighted
-                            width: isPathHighlighted ? 3 : 1,
-                            zIndex: isPathHighlighted ? 100 : 0
-                        });
-                    }
-                }
-
-                // Consolation Path (Drop to LB/Placement)
-                if (m.loserMatchId) {
-                    const destEl = matchRefs.current[m.loserMatchId];
-                    if (destEl) {
-                        const destRect = destEl.getBoundingClientRect();
-                        const endX = destRect.left - containerRect.left + scrollLeft;
-                        const endY = destRect.top - containerRect.top + scrollTop + (destRect.height / 2);
-
-                        // Standard Angular Drop
-                        const midX = (startX + endX) / 2;
-
-                        const isDestHighlighted = highlightedIds.has(m.loserMatchId);
-                        const isPathHighlighted = isSrcHighlighted && isDestHighlighted;
-
-                        newPaths.push({
-                            id: `${m.id}-loss`,
-                            d: `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`,
-                            color: isPathHighlighted ? '#fbbf24' : 'rgba(255,255,255,0.08)',
-                            width: isPathHighlighted ? 2 : 1,
-                            dash: '3 3',
-                            zIndex: isPathHighlighted ? 100 : 0
-                        });
-                    }
-                }
-            });
-            setPaths(newPaths);
-        };
-
-        // Initial calc
-        const timer = requestAnimationFrame(calcPaths);
-
-        // Re-calc on window resize
-        window.addEventListener('resize', calcPaths);
-
-        return () => {
-            cancelAnimationFrame(timer);
-            window.removeEventListener('resize', calcPaths);
-        };
-    }, [matches.length, visibleSections.join(','), players.length, highlightedIds]); // Added highlightedIds dependency
+    // --- 2. Path Calculation (REMOVED) ---
+    // Path calculation logic has been removed as per user request to hide lines.
 
     // --- 3. Render Match Card (Pink/Cyan Theme) ---
     const renderMatch = (match, customHeader = null) => {
@@ -199,33 +121,30 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
         // --- Court Display Logic ---
         // Map long Polish names to short codes if needed or just display
-        let courtLabel = '';
-        if (match.court) {
-            if (match.court.includes('Różowy')) courtLabel = 'PINK';
-            else if (match.court.includes('Turkusowy')) courtLabel = 'CYAN';
-            else courtLabel = match.court;
-        }
+
 
         const matchLabel = customHeader || getShortMatchId(match.id);
 
         // Theme Constants
-        const COLOR_PINK = '#ec4899';
-        const COLOR_CYAN = '#06b6d4';
+        const COLOR_PINK = 'var(--accent-pink)';
+        const COLOR_CYAN = 'var(--accent-cyan)';
         const COLOR_GOLD = '#fbbf24';
 
-        // Background: Dark Glass
+        // Background: Dynamic Glass Tints
+        // Use variables from index.css to respect Dark/Light mode
         let bgStyle = isLive
-            ? 'linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(0, 0, 0, 0.98))'
-            : 'linear-gradient(180deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.98) 100%)';
+            ? 'linear-gradient(135deg, var(--bg-primary), rgba(220, 38, 38, 0.1))' // Red tint for live
+            : 'linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)';
 
         // Highlight Override
         if (isHighlighted) {
-            bgStyle = 'linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(0, 0, 0, 0.9))';
+            bgStyle = 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05))'; // Gold tint
         }
 
         // Border: Pink if live, else subtle grey
-        let borderColor = isLive ? 'rgba(236, 72, 153, 0.6)' : 'rgba(255, 255, 255, 0.1)';
-        let boxShadow = isLive ? '0 0 20px rgba(236, 72, 153, 0.2)' : '0 4px 6px -1px rgba(0, 0, 0, 0.5)';
+        // Border: Pink if live, else subtle grey
+        let borderColor = isLive ? 'var(--accent-pink)' : 'var(--border-color)';
+        let boxShadow = isLive ? '0 0 10px rgba(220, 38, 38, 0.2)' : '0 2px 4px rgba(0, 0, 0, 0.05)';
 
         if (isHighlighted) {
             borderColor = COLOR_GOLD;
@@ -258,7 +177,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 }}
                 onMouseEnter={(e) => {
                     setHoveredMatchId(match.id);
-                    e.currentTarget.style.borderColor = isHighlighted ? COLOR_GOLD : (isLive ? COLOR_PINK : 'rgba(255, 255, 255, 0.4)');
+                    e.currentTarget.style.borderColor = isHighlighted ? COLOR_GOLD : (isLive ? COLOR_PINK : 'var(--accent-cyan)');
                 }}
                 onMouseLeave={(e) => {
                     setHoveredMatchId(null);
@@ -269,8 +188,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 <div style={{
                     padding: '8px 12px',
                     fontSize: '0.65rem',
-                    color: 'rgba(255,255,255,0.5)',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    color: 'var(--text-secondary)',
+                    borderBottom: '1px solid var(--border-color)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     fontWeight: 600,
                     letterSpacing: '1px',
@@ -278,14 +197,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span>{matchLabel}</span>
-                        {courtLabel && (
-                            <span style={{
-                                color: courtLabel === 'PINK' ? COLOR_PINK : (courtLabel === 'CYAN' ? COLOR_CYAN : '#fff'),
-                                fontSize: '0.6rem', border: '1px solid currentColor', borderRadius: '3px', padding: '0 3px'
-                            }}>
-                                {courtLabel}
-                            </span>
-                        )}
+
                     </div>
                     {isLive && <span style={{
                         background: COLOR_PINK, color: 'white', padding: '2px 6px',
@@ -303,7 +215,21 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                         let isPlaceholder = false;
 
                         if (row.p) {
-                            displayText = row.p.full_name;
+                            const fullName = row.p.full_name || "";
+                            // Basic heuristic: Assume "Surname Name" storage from PlayerFormModal
+                            // We want "N. Surname"
+                            const parts = fullName.trim().split(" ");
+                            if (parts.length >= 2) {
+                                const surname = parts[0];
+                                const firstName = parts.slice(1).join(" "); // Everything after first word
+                                if (firstName) {
+                                    displayText = `${firstName.charAt(0)}. ${surname}`;
+                                } else {
+                                    displayText = fullName;
+                                }
+                            } else {
+                                displayText = fullName;
+                            }
                         } else {
                             // GENERATE INSTRUCTION TEXT
                             const sourceLabel = getShortMatchId(row.srcId);
@@ -319,8 +245,8 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                             }
                         }
 
-                        // Text Color: White normally, Cyan if winner
-                        let displayColor = row.p ? '#ffffff' : 'rgba(255,255,255,0.3)';
+                        // Text Color: Dark normally
+                        let displayColor = row.p ? 'var(--text-primary)' : 'var(--text-tertiary)';
 
                         // Bold if winner
                         const fontWeight = row.w ? 700 : 400;
@@ -359,7 +285,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                                 </div>
                                 <span style={{
                                     fontWeight: 700,
-                                    color: row.w ? COLOR_CYAN : 'rgba(255,255,255,0.2)', // Winner gets Cyan score
+                                    color: row.w ? COLOR_CYAN : 'var(--text-tertiary)', // Winner gets Cyan score
                                     fontSize: '0.9rem',
                                     fontFamily: 'monospace'
                                 }}>
@@ -374,12 +300,12 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
     };
 
     if (!enrichedMatches || enrichedMatches.length === 0) {
-        return <div style={{ color: '#fff', padding: '40px' }}>{t('brackets.noData') || 'No bracket data available.'}</div>;
+        return <div style={{ color: 'var(--text-primary)', padding: '40px' }}>{t('brackets.noData') || 'No bracket data available.'}</div>;
     }
 
     // Styles for Section Headers using Pink/Cyan theme
     const sectionHeaderStyle = {
-        color: '#ffffff',
+        color: 'var(--text-primary)',
         fontSize: '1.8rem',
         fontWeight: 900,
         marginBottom: '50px',
@@ -401,7 +327,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 {visibleSections.includes('wb') && (
                     <div className="section-wb" style={{ display: 'flex', flexDirection: 'column', marginRight: '100px' }}>
                         <div style={sectionHeaderStyle}>
-                            <div style={{ width: '6px', height: '32px', background: '#ec4899', borderRadius: '2px' }}></div>
+                            <div style={{ width: '6px', height: '32px', background: 'var(--accent-pink)', borderRadius: '2px' }}></div>
                             <span>{t('brackets.headerWB')}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '80px' }}>
@@ -414,7 +340,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                                 <div className="section-mid" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '20px', marginLeft: '10px' }}>
                                     {gfMatches.map(m => renderMatch(m, m.id === 'grand-final' ? t('brackets.finalBadge').toUpperCase() : '3RD'))}
                                     <div style={{ alignSelf: 'center', opacity: 0.8, marginTop: '30px' }}>
-                                        <Trophy size={80} color="#ec4899" style={{ filter: 'drop-shadow(0 0 15px rgba(236, 72, 153, 0.4))' }} />
+                                        <Trophy size={80} color="var(--accent-pink)" style={{ filter: 'drop-shadow(0 0 15px rgba(220, 38, 38, 0.2))' }} />
                                     </div>
                                 </div>
                             )}
@@ -426,7 +352,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 {visibleSections.includes('lb') && (
                     <div className="section-lb" style={{ display: 'flex', flexDirection: 'column', marginRight: '100px' }}>
                         <div style={sectionHeaderStyle}>
-                            <div style={{ width: '6px', height: '32px', background: '#06b6d4', borderRadius: '2px' }}></div>
+                            <div style={{ width: '6px', height: '32px', background: 'var(--accent-cyan)', borderRadius: '2px' }}></div>
                             <span>{t('brackets.headerLB')}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '80px' }}>
@@ -443,7 +369,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
                 {(visibleSections.includes('lb') || visibleSections.includes('all') || visibleSections.includes('placement')) && (
                     <div className="section-monrad" style={{ display: 'flex', flexDirection: 'column' }}>
                         <div style={sectionHeaderStyle}>
-                            <div style={{ width: '6px', height: '32px', background: '#fff', borderRadius: '2px' }}></div>
+                            <div style={{ width: '6px', height: '32px', background: 'var(--text-secondary)', borderRadius: '2px' }}></div>
                             <span>{t('brackets.headerPlacement')}</span>
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '60px', maxWidth: '4000px' }}>
@@ -461,7 +387,7 @@ const BracketCanvas = ({ matches, players, onMatchClick, readonly = false, visib
 
                                 return (
                                     <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '180px', marginRight: '20px' }}>
-                                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px' }}>{group.title.toUpperCase()}</div>
+                                        <div style={{ color: 'var(--text-tertiary)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px' }}>{group.title.toUpperCase()}</div>
                                         <div style={{ display: 'flex', gap: '40px' }}>
                                             {rounds.map((rMatches, i) => rMatches && (
                                                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '20px', justifyContent: 'center' }}>

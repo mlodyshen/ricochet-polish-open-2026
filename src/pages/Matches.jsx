@@ -4,7 +4,7 @@ import { useMatches } from '../hooks/useMatches';
 import { useTournamentMatches } from '../hooks/useTournamentMatches';
 import { useTournament } from '../contexts/TournamentContext';
 import { updateBracketMatch, clearBracketMatch, generateDoubleEliminationBracket } from '../utils/bracketLogic';
-import { getBestOf, getMatchStatus, canEditMatch, compareMatchIds } from '../utils/matchUtils';
+import { getBestOf, getMatchStatus, compareMatchIds } from '../utils/matchUtils';
 import { Edit2, Trophy, Clock, Activity, CheckCircle, Save, X, Trash2 } from 'lucide-react';
 import './Matches.css';
 import { usePlayers } from '../hooks/usePlayers';
@@ -37,12 +37,6 @@ const PlayerFlag = ({ countryCode }) => {
         />
     );
 };
-
-// ... MatchEditModal code ...
-
-// ... inside Matches component ...
-
-
 
 const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
     const { t } = useTranslation();
@@ -110,7 +104,6 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
                 }
             } else {
                 // PARTIAL SCORE LOGIC
-                // If we have scores but not enough to win, it IS live.
                 finalStatus = 'live';
                 winnerId = null;
             }
@@ -202,11 +195,11 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
 
                     {microPoints.length > 0 && (
                         <div style={{ marginBottom: '1.5rem', background: 'var(--bg-primary)', padding: '1rem', borderRadius: '8px' }}>
-                            <h4 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Micro Points per Set</h4>
+                            <h4 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t('matches.microPoints')}</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 {microPoints.map((mp, idx) => (
                                     <div key={mp.set} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span style={{ fontSize: '0.8rem', width: '40px', color: 'var(--text-secondary)' }}>Set {mp.set}</span>
+                                        <span style={{ fontSize: '0.8rem', width: '40px', color: 'var(--text-secondary)' }}>{t('matches.set')} {mp.set}</span>
                                         <input
                                             type="number" className="form-input" style={{ textAlign: 'center', padding: '0.25rem' }}
                                             value={mp.a} onChange={e => handleMicroChange(mp.set, 'a', e.target.value)}
@@ -227,30 +220,30 @@ const MatchEditModal = ({ match, onClose, onSave, onClear }) => {
                     <div className="form-group">
                         <label className="form-label">{t('matches.statusLabel')}</label>
                         <select className="form-input" value={status} onChange={e => setStatus(e.target.value)}>
-                            <option value="live">Live (Playing)</option>
-                            <option value="finished">Finished (Final Result)</option>
+                            <option value="live">{t('matches.statusLive')}</option>
+                            <option value="finished">{t('matches.statusFinished')}</option>
                         </select>
                     </div>
 
                     <div className="form-group">
                         <label className="form-label">{t('matches.courtLabel')}</label>
                         <select className="form-input" value={court} onChange={e => setCourt(e.target.value)}>
-                            <option value="">-- No Court --</option>
-                            <option value="Kort Różowy">Kort Różowy</option>
-                            <option value="Kort Turkusowy">Kort Turkusowy</option>
+                            <option value="">{t('matches.noCourt')}</option>
+                            <option value="Kort Lewy">{t('live.courtPink')}</option>
+                            <option value="Kort Prawy">{t('live.courtCyan')}</option>
                         </select>
                     </div>
 
                     <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
                         {match.winnerId ? (
                             <button type="button" onClick={handleClear} className="btn-secondary" style={{ borderColor: '#ef4444', color: '#ef4444' }}>
-                                <Trash2 size={16} /> Reset
+                                <Trash2 size={16} /> {t('common.reset')}
                             </button>
                         ) : <div></div>}
                         <div style={{ display: 'flex', gap: '0.75rem' }}>
-                            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                            <button type="button" onClick={onClose} className="btn-secondary">{t('common.cancel')}</button>
                             <button type="submit" className="btn-primary">
-                                <Save size={16} /> Save Score
+                                <Save size={16} /> {t('common.save')}
                             </button>
                         </div>
                     </div>
@@ -268,6 +261,62 @@ const Matches = () => {
     const [filter, setFilter] = useState('all');
     const [editingMatch, setEditingMatch] = useState(null);
     const { isAuthenticated } = useAuth();
+
+    // SCROLL PRESERVATION
+    const lastScrollPos = useRef(0);
+
+    const handleEditOpen = (match) => {
+        lastScrollPos.current = window.scrollY;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setEditingMatch(match);
+    };
+
+    const handleEditClose = () => {
+        setEditingMatch(null);
+        setTimeout(() => {
+            window.scrollTo({ top: lastScrollPos.current, behavior: 'instant' });
+        }, 50);
+    };
+
+    // AUTO-ASSIGN COURTS to Pending Matches to prevent "funneling"
+    useEffect(() => {
+        if (!matches || matches.length === 0) return;
+
+        const pendingUnassigned = matches.filter(m => m.status === 'pending' && !m.court);
+
+        if (pendingUnassigned.length > 0) {
+            console.log("Auto-assigning courts to", pendingUnassigned.length, "matches");
+
+            // Count existing assignments to balance queues (Left vs Right)
+            let leftCount = matches.filter(m =>
+                m.status === 'pending' &&
+                m.court &&
+                (m.court === 'Kort Lewy' || m.court.toUpperCase().includes('LEWY') || m.court.toUpperCase().includes('LEFT'))
+            ).length;
+
+            let rightCount = matches.filter(m =>
+                m.status === 'pending' &&
+                m.court &&
+                (m.court === 'Kort Prawy' || m.court.toUpperCase().includes('PRAWY') || m.court.toUpperCase().includes('RIGHT'))
+            ).length;
+
+            const updatedMatches = matches.map(m => {
+                if (m.status === 'pending' && !m.court) {
+                    // Assign to the queue with fewer matches
+                    if (leftCount <= rightCount) {
+                        leftCount++;
+                        return { ...m, court: 'Kort Lewy' };
+                    } else {
+                        rightCount++;
+                        return { ...m, court: 'Kort Prawy' };
+                    }
+                }
+                return m;
+            });
+
+            saveMatches(updatedMatches);
+        }
+    }, [matches]);
 
 
     const processedMatches = useMemo(() => {
@@ -307,20 +356,20 @@ const Matches = () => {
             .filter(m => m.status === 'finished')
             .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
 
-        // 3. Split Pending into Queues
-        const pinkQueue = [];
-        const cyanQueue = [];
+        // 3. Split Pending into Queues (Left vs Right)
+        const pinkQueue = []; // Left Queue
+        const cyanQueue = []; // Right Queue
         pending.forEach((m) => {
             const cUpper = (m.court || '').toUpperCase();
-            const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK');
-            const isCyan = cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN');
+            const isLeft = cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('RÓŻOWY') || cUpper.includes('PINK');
+            const isRight = cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('TURKUSOWY') || cUpper.includes('CYAN');
 
-            if (isPink) {
+            if (isLeft) {
                 pinkQueue.push(m);
-            } else if (isCyan) {
+            } else if (isRight) {
                 cyanQueue.push(m);
             } else {
-                // Default distribution if no court assigned (Balance Queues)
+                // Default distribution if no court assigned
                 if (pinkQueue.length <= cyanQueue.length) pinkQueue.push(m);
                 else cyanQueue.push(m);
             }
@@ -342,28 +391,32 @@ const Matches = () => {
         saveMatches(finalState, matchId);
 
         if (!options.autoSave) {
-            setEditingMatch(null);
+            handleEditClose();
         }
     };
 
     const handleClearScore = (matchId) => {
         const resetMatches = clearBracketMatch(matches, matchId, players);
         saveMatches(resetMatches);
-        setEditingMatch(null);
+        handleEditClose();
     };
 
     // --- RENDERERS ---
 
     const renderActiveMatch = (match, index) => {
         const cUpper = (match.court || '').toUpperCase();
-        const isPink = cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK') || (!match.court && index % 2 === 0);
-        const accentColor = isPink ? 'var(--accent-pink)' : 'var(--accent-cyan)';
+        const isLeft = cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('RÓŻOWY') || cUpper.includes('PINK') || (!match.court && index % 2 === 0);
+        const accentColor = isLeft ? 'var(--accent-pink)' : '#21468B';
+
+        let courtDisplay = match.court || (isLeft ? t('live.courtPink') : t('live.courtCyan'));
+        if (match.court === 'Kort Lewy') courtDisplay = t('live.courtPink');
+        if (match.court === 'Kort Prawy') courtDisplay = t('live.courtCyan');
 
         return (
             <div key={match.id} className="active-match-card" style={{ '--accent-color': accentColor }}>
                 <div className="active-match-header">
-                    <span style={{ color: accentColor }}>{match.court || (isPink ? t('live.courtPinkLabel') : t('live.courtCyanLabel'))}</span>
-                    <span className="live-badge">{t('live.liveBadge')}</span>
+                    <span style={{ color: accentColor }}>{courtDisplay}</span>
+
                 </div>
 
                 <div className="active-score-board">
@@ -371,22 +424,26 @@ const Matches = () => {
                         <PlayerFlag countryCode={match.player1.country} />
                         <span className="active-player-name">{match.player1.full_name}</span>
                     </div>
-                    <div className="active-set-score">{match.score1 ?? 0}</div>
-                    <div className="vs-divider">:</div>
-                    <div className="active-set-score">{match.score2 ?? 0}</div>
+
+                    <div className="active-score-center">
+                        <div className="active-set-score">{match.score1 ?? 0}</div>
+                        <div className="vs-divider">:</div>
+                        <div className="active-set-score">{match.score2 ?? 0}</div>
+                    </div>
+
                     <div className="active-player right">
-                        <PlayerFlag countryCode={match.player2.country} />
                         <span className="active-player-name">{match.player2.full_name}</span>
+                        <PlayerFlag countryCode={match.player2.country} />
                     </div>
                 </div>
 
                 <div style={{ textAlign: 'center', fontSize: '0.8rem', opacity: 0.6 }}>
-                    {(match.bracket || '').toUpperCase()} ROUND {match.round} • MATCH {match.id.split('-m')[1]}
+                    {(match.bracket || '').toUpperCase()} {t('brackets.round')} {match.round} • {t('matches.match', { id: match.id.split('-m')[1] })}
                 </div>
 
                 {isAuthenticated && (
                     <div className="active-actions">
-                        <button className="edit-btn" onClick={() => setEditingMatch(match)} style={{ borderColor: accentColor, color: accentColor }}>
+                        <button className="edit-btn" onClick={() => handleEditOpen(match)} style={{ borderColor: accentColor, color: accentColor }}>
                             <Edit2 size={16} style={{ marginRight: '6px' }} /> {t('matches.controlMatch')}
                         </button>
                     </div>
@@ -401,8 +458,15 @@ const Matches = () => {
 
         // 1. Identify which queue contains the match
         let targetQueue = null;
-        if (pinkQueue.find(m => m.id === matchId)) targetQueue = pinkQueue;
-        else if (cyanQueue.find(m => m.id === matchId)) targetQueue = cyanQueue;
+        let isLeft = false;
+
+        if (pinkQueue.find(m => m.id === matchId)) {
+            targetQueue = pinkQueue;
+            isLeft = true;
+        } else if (cyanQueue.find(m => m.id === matchId)) {
+            targetQueue = cyanQueue;
+            isLeft = false;
+        }
 
         if (!targetQueue) return;
 
@@ -423,12 +487,16 @@ const Matches = () => {
 
         // Base numbering: assign 100, 200, 300 based on current global sorted order
         allPending.forEach((m, idx) => {
+<<<<<<< HEAD
             // Use nullish coalescing to ensure we don't treat null/undefined as a valid "fixed" value
             const currentVal = (m.manualOrder !== undefined && m.manualOrder !== null) ? m.manualOrder : idx * 100;
+=======
+            const currentVal = m.manualOrder !== undefined ? m.manualOrder : idx * 100;
+>>>>>>> 04d7162 (Implement Dutch Open 2026 theme, global dark mode toggle, and visual polish across all pages)
             updates.set(m.id, currentVal);
         });
 
-        // 4. Swap the manualOrder values of the two matches involved
+        // 4. Swap the manualOrder values
         const orderA = updates.get(matchA.id);
         const orderB = updates.get(matchB.id);
 
@@ -437,10 +505,19 @@ const Matches = () => {
         updates.set(matchA.id, orderB);
         updates.set(matchB.id, orderA);
 
-        // 5. Apply to master list
+        // 5. Apply to master list AND lock courts for involved matches to prevent queue jumping
+        const defaultCourt = isLeft ? 'Kort Lewy' : 'Kort Prawy';
+
         const newMatches = matches.map(m => {
             if (updates.has(m.id)) {
-                return { ...m, manualOrder: updates.get(m.id) };
+                let changes = { manualOrder: updates.get(m.id) };
+
+                // If this is one of the swapped matches and it has no court, lock it to the current queue
+                if ((m.id === matchA.id || m.id === matchB.id) && !m.court) {
+                    changes.court = defaultCourt;
+                }
+
+                return { ...m, ...changes };
             }
             return m;
         });
@@ -454,27 +531,26 @@ const Matches = () => {
         const bracketClass = isGF ? 'gf' : (isWB ? 'wb' : 'lb');
         const bracketLabel = isGF ? t('matches.bracketFinal') : (isWB ? t('matches.bracketWinners') : t('matches.bracketLosers'));
 
-        // Determine court color (predictive or assigned)
+        // Determine court color
         let colorType = queueType;
         if (!colorType) {
             const cUpper = (match.court || '').toUpperCase();
-            if (cUpper.includes('RÓŻOWY') || cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('PINK')) colorType = 'pink';
-            else if (cUpper.includes('TURKUSOWY') || cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('CYAN')) colorType = 'cyan';
+            if (cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('RÓŻOWY') || cUpper.includes('PINK')) colorType = 'pink';
+            else if (cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('TURKUSOWY') || cUpper.includes('CYAN')) colorType = 'cyan';
             else colorType = index % 2 === 0 ? 'pink' : 'cyan';
         }
 
-        const rowBorderColor = colorType === 'pink' ? 'var(--accent-pink)' : 'var(--accent-cyan)';
         const isPending = match.status === 'pending';
         const showControls = isPending && isAuthenticated;
+        const rowClass = `match-list-row ${showControls ? 'has-controls' : ''} ${colorType}`;
+        const matchIdShort = match.id.split('-m')[1] || match.id;
 
-        // Adjust grid columns if controls are present: add 25px column at start
-        // Default CSS is: 40px 100px 1fr 40px (ID | Bracket | Players | Action)
-        const gridStyle = {
-            borderLeft: `4px solid ${rowBorderColor}`,
-            gridTemplateColumns: showControls ? '25px 40px 90px 1fr 40px' : '40px 100px 1fr 40px'
-        };
+        let courtLabel = match.court;
+        if (match.court === 'Kort Lewy') courtLabel = t('live.courtPink');
+        if (match.court === 'Kort Prawy') courtLabel = t('live.courtCyan');
 
         return (
+<<<<<<< HEAD
             <div key={match.id} className="match-list-row" style={gridStyle}>
                 {showControls && (
                     <div className="reorder-controls">
@@ -523,27 +599,48 @@ const Matches = () => {
                         }
                         return null;
                     })()}
+=======
+            <div key={match.id} className={rowClass}>
+                <div className="row-meta-badge">
+                    <span className={`bracket-pill ${bracketClass}`}>{bracketLabel}</span>
+                    <span style={{ opacity: 0.5, margin: '0 4px' }}>•</span>
+                    <span>R{match.round}</span>
+                    <span style={{ opacity: 0.5, margin: '0 4px' }}>•</span>
+                    <span>#{matchIdShort}</span>
+                    {match.court && <span className="court-label"> • {courtLabel}</span>}
+>>>>>>> 04d7162 (Implement Dutch Open 2026 theme, global dark mode toggle, and visual polish across all pages)
                 </div>
 
-                <div className="row-players">
-                    <div className="list-player p1">
-                        <span style={{ color: 'white' }}>{formatName(match.player1)}</span>
-                        <PlayerFlag countryCode={match.player1.country} />
+                {showControls ? (
+                    <div className="row-controls">
+                        <button className="control-btn up" onClick={() => handleMoveMatch(match.id, 'up')} title="Move Up">▲</button>
+                        <button className="control-btn down" onClick={() => handleMoveMatch(match.id, 'down')} title="Move Down">▼</button>
                     </div>
+                ) : <div className="control-placeholder" />}
+
+                <div className="player p1">
+                    <span className="name">{formatName(match.player1)}</span>
+                    <PlayerFlag countryCode={match.player1.country} />
+                </div>
+
+                <div className="match-center-info">
                     {match.status === 'finished' ? (
-                        <div className="list-score">{match.score1} : {match.score2}</div>
+                        <span className="final-score">{match.score1} : {match.score2}</span>
                     ) : (
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>vs</div>
+                        <div className="score-divider">
+                            <span className="vs">{t('common.vs')}</span>
+                        </div>
                     )}
-                    <div className="list-player p2">
-                        <PlayerFlag countryCode={match.player2.country} />
-                        <span style={{ color: 'white' }}>{formatName(match.player2)}</span>
-                    </div>
+                </div>
+
+                <div className="player p2">
+                    <PlayerFlag countryCode={match.player2.country} />
+                    <span className="name">{formatName(match.player2)}</span>
                 </div>
 
                 <div className="row-action">
                     {isAuthenticated && (
-                        <button className="edit-icon-btn" onClick={() => setEditingMatch(match)} title="Edit">
+                        <button className="action-btn" onClick={() => handleEditOpen(match)} title="Edit">
                             <Edit2 size={16} />
                         </button>
                     )}
@@ -607,7 +704,7 @@ const Matches = () => {
             {(processedMatches.active.length > 0) && (filter === 'all' || filter === 'pending') && (
                 <section>
                     <div className="section-header">
-                        <Activity size={20} color="#ef4444" /> {t('matches.liveArena')}
+                        <Activity size={20} color="var(--accent-pink)" /> {t('matches.liveArena')}
                     </div>
                     <div className="active-matches-grid">
                         {processedMatches.active.map((m, i) => renderActiveMatch(m, i))}
@@ -623,21 +720,21 @@ const Matches = () => {
                     </div>
 
                     <div className="queue-columns">
-                        {/* PINK COLUMN */}
+                        {/* LEFT COLUMN */}
                         <div className="queue-column">
                             <h3 style={{ color: 'var(--accent-pink)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-pink)' }}>
-                                {t('live.pinkQueue')}
+                                {t('live.courtPink')}
                             </h3>
-                            {processedMatches.pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
+                            {processedMatches.pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
                             {processedMatches.pinkQueue.map((m, idx) => renderMatchRow(m, idx, 'pink'))}
                         </div>
 
-                        {/* CYAN COLUMN */}
+                        {/* RIGHT COLUMN */}
                         <div className="queue-column">
-                            <h3 style={{ color: 'var(--accent-cyan)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-cyan)' }}>
-                                {t('live.cyanQueue')}
+                            <h3 style={{ color: '#21468B', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid #21468B' }}>
+                                {t('live.courtCyan')}
                             </h3>
-                            {processedMatches.cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>Default queue empty</div>}
+                            {processedMatches.cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
                             {processedMatches.cyanQueue.map((m, idx) => renderMatchRow(m, idx, 'cyan'))}
                         </div>
                     </div>
@@ -663,7 +760,7 @@ const Matches = () => {
             {editingMatch && (
                 <MatchEditModal
                     match={editingMatch}
-                    onClose={() => setEditingMatch(null)}
+                    onClose={handleEditClose}
                     onSave={handleSaveScore}
                     onClear={handleClearScore}
                 />

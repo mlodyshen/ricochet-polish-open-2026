@@ -51,24 +51,49 @@ const Brackets = () => {
     const { activeTournamentId, updateTournament } = useTournament();
 
     const handleGenerate = async () => {
-        if (!isAuthenticated) return;
-        if (players.length < 2) {
-            alert(t('matches.needPlayers'));
+        console.log("Handle Generate Clicked");
+        if (!isAuthenticated) {
+            console.log("User not authenticated");
             return;
         }
-        if (window.confirm(t('brackets.resetConfirm'))) {
-            // Clear old matches first to ensure clean ID set (especially after logic updates)
-            if (resetMatches) await resetMatches();
+        console.log("Players count:", players.length);
 
+        if (players.length < 2) {
+            alert(t('matches.needPlayers') + ` (Count: ${players.length})`);
+            return;
+        }
+
+        // if (window.confirm(t('brackets.resetConfirm'))) {
+        console.log("Auto-confirmed reset. Generating...");
+        try {
+            // Clear old matches first to ensure clean ID set (especially after logic updates)
+            if (resetMatches) {
+                console.log("Calling resetMatches...");
+                await resetMatches();
+            }
+
+            console.log("Generating blueprint...");
             const newBracket = generateDoubleEliminationBracket(players);
+            console.log("New bracket generated:", newBracket.length, "matches");
+
             // Save matches to DB
             await saveMatches(newBracket);
+            console.log("Matches saved.");
 
             // Update tournament status so we know bracket exists
             if (activeTournamentId) {
                 await updateTournament(activeTournamentId, { status: 'in_progress' });
             }
+
+            // Force reload of page to ensure state sync if hot reload is flaky
+            // window.location.reload(); 
+        } catch (err) {
+            console.error("Error during generation:", err);
+            alert("Error: " + err.message);
         }
+        // } else {
+        //     console.log("Reset cancelled");
+        // }
     };
 
     const handleMatchClick = (match) => {
@@ -146,7 +171,7 @@ const Brackets = () => {
                         <form onSubmit={submitScore}>
                             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
                                 <div style={{ flex: 1 }}>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px' }}>Score P1</label>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px' }}>{t('brackets.scoreP1')}</label>
                                     <input
                                         type="number"
                                         className="form-input"
@@ -156,7 +181,7 @@ const Brackets = () => {
                                     />
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px' }}>Score P2</label>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px' }}>{t('brackets.scoreP2')}</label>
                                     <input
                                         type="number"
                                         className="form-input"
