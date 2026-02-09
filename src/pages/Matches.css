@@ -279,9 +279,9 @@
     transition: all 0.2s ease;
     overflow: visible;
     /* Allow badge to pop if needed, but relative usually keeps it */
+    min-height: 90px;
+    /* Force uniform height for alignment */
 }
-
-/* If controls exist, column 1 is used */
 
 /* Court Colors */
 /* Court Colors */
@@ -290,8 +290,7 @@
 }
 
 .match-list-row.cyan {
-    border-right: 4px solid #21468B;
-    border-left: none;
+    border-left: 4px solid #21468B;
 }
 
 .match-list-row:hover {
@@ -308,7 +307,7 @@
     border-color: #21468B;
 }
 
-/* Badge (Top Left for Pink, Top Right for Cyan) */
+/* Badge (Top Left) */
 .row-meta-badge {
     position: absolute;
     top: 0;
@@ -326,16 +325,6 @@
     text-transform: uppercase;
     color: var(--text-secondary);
     gap: 4px;
-}
-
-.match-list-row.cyan .row-meta-badge {
-    left: auto;
-    right: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 8px;
-    border-right: none;
-    border-left: 1px solid var(--border-color);
-    flex-direction: row-reverse;
 }
 
 .bracket-pill {
@@ -383,9 +372,22 @@
     font-weight: 800;
     color: var(--text-primary);
     text-transform: uppercase;
-    line-height: 1;
+    line-height: 1.1;
+    /* Tighter line height helps clamp */
     white-space: normal;
     word-wrap: break-word;
+
+    /* Force 2 lines max with ellipsis for perfect alignment */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.2em;
+    /* Ensure single lines take up space of 2 lines */
+    display: flex;
+    /* Flex centers single line vertically? No, conflict with -webkit-box. -webkit-box is display mode. */
+    /* So just use min-height */
 }
 
 .player-flag {

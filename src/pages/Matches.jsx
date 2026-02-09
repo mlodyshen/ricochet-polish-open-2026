@@ -676,7 +676,7 @@ const Matches = () => {
 
                         {/* RIGHT COLUMN */}
                         <div className="queue-column">
-                            <h3 style={{ color: '#21468B', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', textAlign: 'right', paddingRight: '0.5rem', borderRight: '3px solid #21468B' }}>
+                            <h3 style={{ color: '#21468B', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid #21468B' }}>
                                 {t('live.courtCyan')}
                             </h3>
                             {processedMatches.cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
