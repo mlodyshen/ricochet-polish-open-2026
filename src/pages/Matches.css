@@ -33,6 +33,7 @@
     letter-spacing: -1px;
     background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
 }
@@ -266,9 +267,6 @@
 }
 
 /* If controls exist, column 1 is used */
-.match-list-row.has-controls {
-    /* Same grid, column 1 (35px) used for controls */
-}
 
 /* Court Colors */
 .match-list-row.pink {
@@ -456,30 +454,63 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .matches-container {
+        padding: 0.5rem;
+        gap: 1.5rem;
+    }
+
+    .matches-title {
+        font-size: 1.5rem;
+    }
+
+    .active-matches-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .active-match-card {
+        padding: 1rem;
+    }
+
+    .active-player-name {
+        font-size: 1rem;
+    }
+
+    .active-score-board {
+        grid-template-columns: 1fr 100px 1fr;
+    }
+
+    .active-set-score {
+        font-size: 2rem;
+    }
+
     .match-list-row {
         grid-template-columns: 1fr;
-        padding: 3rem 1rem 1rem 1rem;
-        /* More top padding for badge */
+        padding: 2.5rem 1rem 1rem 1rem;
         text-align: center;
         gap: 0.5rem;
     }
 
-    .player.p1 {
-        justify-content: center;
-        text-align: center;
-        flex-direction: column-reverse;
-    }
-
-    /* Flag on bottom/top? */
+    .player.p1,
     .player.p2 {
         justify-content: center;
         text-align: center;
         flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .player .name {
+        font-size: 1rem;
     }
 
     .row-controls {
         flex-direction: row;
-        gap: 1rem;
+        gap: 1.5rem;
         margin-bottom: 0.5rem;
+        justify-content: center;
+    }
+
+    .row-action {
+        justify-content: center;
+        margin-top: 0.5rem;
     }
 }

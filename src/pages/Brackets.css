@@ -209,17 +209,27 @@
 
 @media (max-width: 768px) {
     .bracket-layout {
-        padding: 20px;
+        padding: 20px 10px;
     }
 
     .bracket-section {
-        padding: 1rem;
-        /* reduce from 2rem */
+        padding: 0.5rem;
     }
 
     .section-wb,
     .section-lb {
-        margin-right: 40px !important;
-        /* Override inline 100px */
+        margin-right: 30px !important;
+    }
+
+    /* Target the inline style containers if possible via specific classes if added, 
+       but for now we'll use structure */
+    .section-wb>div:last-child,
+    .section-lb>div:last-child {
+        gap: 30px !important;
+        /* Force smaller gap between rounds on mobile */
+    }
+
+    .section-monrad>div:last-child {
+        gap: 30px !important;
     }
 }

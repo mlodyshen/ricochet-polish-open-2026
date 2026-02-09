@@ -273,11 +273,27 @@
         left: auto;
         transform: none;
         height: auto;
-        margin-bottom: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .brand-text {
+        font-size: 1.1rem;
     }
 
     .header-actions {
         width: 100%;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    .header-actions span {
+        display: none;
+        /* Hide button text labels (like TV Mode) on mobile */
+    }
+
+    .header-actions button {
+        padding: 0.4rem !important;
+        width: 36px;
         justify-content: center;
     }
 
