@@ -265,25 +265,19 @@
 /* Match Row */
 .match-list-row {
     display: grid;
-    grid-template-columns: 35px 1fr 80px 1fr 35px;
-    /* Default: Active/Spacer | P1 | Center | P2 | Action */
-    gap: 1rem;
+    grid-template-columns: 24px 1fr 50px 1fr 24px;
+    gap: 0.5rem;
     align-items: center;
     background: var(--bg-secondary);
-    /* Dark Panel */
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 1.75rem 1rem 1rem 1rem;
-    /* Top padding for badge */
+    padding: 1.75rem 0.5rem 1rem 0.5rem;
     position: relative;
     transition: all 0.2s ease;
     overflow: visible;
-    /* Allow badge to pop if needed, but relative usually keeps it */
     min-height: 90px;
-    /* Force uniform height for alignment */
 }
 
-/* Court Colors */
 /* Court Colors */
 .match-list-row.pink {
     border-left: 4px solid var(--accent-pink);
@@ -315,7 +309,6 @@
     display: flex;
     align-items: center;
     background: rgba(255, 255, 255, 0.08);
-    /* Light glass */
     border-bottom-right-radius: 8px;
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
@@ -352,26 +345,24 @@
 .player {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.4rem;
     min-width: 0;
 }
 
 .player.p1 {
     justify-content: space-between;
     text-align: left;
-    padding-right: 0.5rem;
-    /* Add some space near center */
+    padding-right: 0.25rem;
 }
 
 .player.p2 {
     justify-content: space-between;
     text-align: right;
-    padding-left: 0.5rem;
-    /* Add some space near center */
+    padding-left: 0.25rem;
 }
 
 .player .name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-primary);
     text-transform: uppercase;
@@ -382,7 +373,7 @@
     display: block;
     min-width: 0;
     flex: 1;
-    /* Allow taking available space */
+    letter-spacing: -0.02em;
 }
 
 .player-flag {
