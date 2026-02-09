@@ -182,7 +182,7 @@ const Live = () => {
             else if (court === 'courtCyan') cyanRecent.push(m);
         });
 
-        return { pinkQueue: pink, cyanQueue: cyan, pinkRecent: pinkRecent.slice(0, 2), cyanRecent: cyanRecent.slice(0, 2) };
+        return { pinkQueue: pink, cyanQueue: cyan, pinkRecent: pinkRecent.slice(0, 1), cyanRecent: cyanRecent.slice(0, 1) };
     }, [matches, players]);
 
     const getCourtState = (queue, recent) => {
