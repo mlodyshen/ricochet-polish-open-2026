@@ -58,12 +58,24 @@ const Live = () => {
     // TV Mode
     const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
 
-    // Fullscreen Detection
+    // Fullscreen Detection (Supports F11 and JS API)
     const [isFullscreen, setIsFullscreen] = useState(false);
     useEffect(() => {
-        const handleFS = () => setIsFullscreen(!!document.fullscreenElement);
-        document.addEventListener('fullscreenchange', handleFS);
-        return () => document.removeEventListener('fullscreenchange', handleFS);
+        const checkFullScreen = () => {
+            const isF11 = (window.innerWidth === window.screen.width && window.innerHeight === window.screen.height);
+            const isAPI = !!document.fullscreenElement;
+            setIsFullscreen(isF11 || isAPI);
+        };
+
+        checkFullScreen(); // Init check
+
+        window.addEventListener('resize', checkFullScreen);
+        document.addEventListener('fullscreenchange', checkFullScreen);
+
+        return () => {
+            window.removeEventListener('resize', checkFullScreen);
+            document.removeEventListener('fullscreenchange', checkFullScreen);
+        };
     }, []);
 
     // Time
@@ -323,6 +335,43 @@ const Live = () => {
         });
     };
 
+    const renderRecentList = (queue) => {
+        if (!queue || queue.length === 0) return <div className="upcoming-item empty">{t('live.noResults')}</div>;
+        return queue.map(m => {
+            const bestOf = getBestOf(m.bracket);
+            const p1 = splitNameForDisplay(formatName(m.player1));
+            const p2 = splitNameForDisplay(formatName(m.player2));
+
+            return (
+                <div key={m.id} className="upcoming-row-new">
+                    <div className="upcoming-round-badge">
+                        {(m.bracket || '').replace('bracket', '').trim()} R{m.round}
+                    </div>
+                    <div className="u-player left">
+                        <div className="u-name-group">
+                            <span className="u-first">{p1.first}</span>
+                            <span className="u-last">{p1.last}</span>
+                        </div>
+                        <PlayerFlag countryCode={m.player1.country} />
+                    </div>
+                    <div className="u-center-stack">
+                        <div className="u-vs" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', letterSpacing: '2px' }}>
+                            {m.score1}:{m.score2}
+                        </div>
+                        <div className="u-bo-badge" style={{ marginTop: '2px', opacity: 0.7 }}>BO{bestOf}</div>
+                    </div>
+                    <div className="u-player right">
+                        <PlayerFlag countryCode={m.player2.country} />
+                        <div className="u-name-group">
+                            <span className="u-first">{p2.first}</span>
+                            <span className="u-last">{p2.last}</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        });
+    };
+
     return (
         <div className={`live-container ${isTvMode ? 'tv-mode' : ''}`}>
             {/* HEADER */}
@@ -353,10 +402,10 @@ const Live = () => {
                     </div>
 
                     {/* RECENT MATCHES - TV MODE ONLY */}
-                    {isTvMode && isFullscreen && pinkState.recent.length > 0 && (
+                    {isTvMode && isFullscreen && (
                         <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem', borderTop: '2px solid var(--accent-pink)' }}>
                             <div className="panel-header" style={{ color: 'var(--accent-pink)', opacity: 0.8 }}>{t('live.recentHeader')}</div>
-                            {renderUpcomingList(pinkState.recent)}
+                            {renderRecentList(pinkState.recent)}
                         </div>
                     )}
                 </div>
@@ -377,10 +426,10 @@ const Live = () => {
                     </div>
 
                     {/* RECENT MATCHES - TV MODE ONLY */}
-                    {isTvMode && isFullscreen && cyanState.recent.length > 0 && (
+                    {isTvMode && isFullscreen && (
                         <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem', borderTop: '2px solid #21468B' }}>
                             <div className="panel-header" style={{ color: '#21468B', opacity: 0.8 }}>{t('live.recentHeader')}</div>
-                            {renderUpcomingList(cyanState.recent)}
+                            {renderRecentList(cyanState.recent)}
                         </div>
                     )}
                 </div>
