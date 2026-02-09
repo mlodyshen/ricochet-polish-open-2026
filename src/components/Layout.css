@@ -233,6 +233,11 @@
     overflow-x: auto;
 }
 
+/* Allow horizontal scroll ONLY for brackets page */
+.main-content:has(.bracket-scroll-container) {
+    overflow-x: auto;
+}
+
 .page-container {
     flex: 1;
     animation: fadeIn 0.4s ease-out;
@@ -288,9 +293,13 @@
     }
 
     .brand-text {
-        font-size: 0.8rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 0.7rem;
+        /* Reduced from 0.8rem to prevent cutting */
+        gap: 0.2rem;
+    }
+
+    .dutch-flag-text {
+        padding: 0 2px;
     }
 
     .header-branding img {
