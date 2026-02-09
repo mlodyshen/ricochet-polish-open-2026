@@ -590,22 +590,42 @@ const Matches = () => {
 
     const renderMatchRowStatic = (match) => {
         return (
-            <div key={match.id} className="match-list-row">
+            <div key={match.id} className={`match-list-row ${isAuthenticated ? 'has-controls' : ''}`}>
                 <div className="row-meta-badge">
                     <span className="bracket-pill">{match.bracket}</span>
                     <span>#{match.id.split('-m')[1]}</span>
                     {match.court && <span className="court-label">• {match.court}</span>}
                 </div>
+
+                {/* Column 1: Placeholder/Controls */}
+                <div className="row-controls">
+                    {/* Empty placeholder to maintain grid alignment */}
+                </div>
+
+                {/* Column 2: Player 1 */}
                 <div className="player p1">
                     <span className="name">{formatName(match.player1)}</span>
                     <PlayerFlag countryCode={match.player1.country} />
                 </div>
+
+                {/* Column 3: Score */}
                 <div className="match-center-info">
                     <span className="final-score">{match.score1} : {match.score2}</span>
                 </div>
+
+                {/* Column 4: Player 2 */}
                 <div className="player p2">
                     <PlayerFlag countryCode={match.player2.country} />
                     <span className="name">{formatName(match.player2)}</span>
+                </div>
+
+                {/* Column 5: Action */}
+                <div className="row-action">
+                    {isAuthenticated && (
+                        <button className="action-btn" onClick={() => handleEditOpen(match)} title="Edit Result">
+                            <Edit2 size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
         );
