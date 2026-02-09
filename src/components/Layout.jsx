@@ -91,12 +91,13 @@ const Layout = () => {
                     </div>
                 </div>
                 <div className="header-actions">
+                    <LanguageSelector />
 
                     <button
                         className="theme-toggle"
                         onClick={toggleTheme}
                         title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                        style={{ marginRight: '0.5rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}
+                        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}
                     >
                         {darkMode ? <Sun size={18} /> : <Moon size={18} />}
                     </button>
@@ -106,9 +107,9 @@ const Layout = () => {
                         onClick={() => {
                             const isTv = new URLSearchParams(location.search).get('mode') === 'tv';
                             if (isTv) {
-                                navigate(location.pathname); // Remove query param
+                                navigate(location.pathname);
                             } else {
-                                navigate('/live?mode=tv'); // Go to live TV mode
+                                navigate('/live?mode=tv');
                             }
                         }}
                         title="TV Mode"
@@ -118,14 +119,12 @@ const Layout = () => {
                         <span>TV Mode</span>
                     </button>
 
-                    <LanguageSelector />
-
                     {isAuthenticated ? (
-                        <button className="theme-toggle" onClick={handleLogout} title="Logout" style={{ marginLeft: '0.5rem' }}>
+                        <button className="theme-toggle" onClick={handleLogout} title="Logout">
                             <LogOut size={20} />
                         </button>
                     ) : (
-                        <NavLink to="/login" className="theme-toggle" title="Admin Login" style={{ marginLeft: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                        <NavLink to="/login" className="theme-toggle" title="Admin Login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
                             <UserCog size={20} />
                         </NavLink>
                     )}

@@ -2,6 +2,10 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh;
+    /* Dynamic viewport height for mobile */
+    overflow: hidden;
+    /* Main container does not scroll */
 }
 
 /* Header */
@@ -208,11 +212,12 @@
 /* Main Content */
 .main-content {
     margin-top: 150px;
-    /* Header (64) + Nav (~60) + Spacing */
-    margin-left: 0;
-    /* Centered layout */
+    flex: 1;
+    overflow-y: auto;
+    /* Content scrolls here */
+    overflow-x: hidden;
+    /* No horizontal scroll by default */
     padding: 2rem;
-    min-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
@@ -220,6 +225,12 @@
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Allow horizontal scroll ONLY for brackets page */
+.main-content:has(.bracket-scroll-container) {
+    overflow-x: auto;
 }
 
 .page-container {
@@ -246,8 +257,10 @@
 
     .main-content {
         margin-left: 0;
-        margin-top: 70px;
-        margin-bottom: 80px;
+        margin-top: 60px;
+        /* Header only */
+        margin-bottom: 0;
+        /* Bottom-nav is outside this scroll area */
         padding: 1rem 0.5rem;
     }
 
@@ -255,9 +268,10 @@
         height: 60px;
         min-height: 60px;
         flex-direction: row;
-        /* Keep horizontal */
         justify-content: space-between;
         padding: 0 0.5rem;
+        background: #1f2937;
+        /* Solid dark background */
     }
 
     .header-branding {
@@ -268,13 +282,19 @@
         transform: none;
         height: auto;
         margin-bottom: 0;
-        gap: 6px;
-        /* Tighter gap */
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
     }
 
     .brand-text {
-        font-size: 0.9rem;
-        /* Much smaller */
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .header-branding img {
+        height: 24px !important;
     }
 
     .header-actions {
@@ -285,30 +305,41 @@
 
     .header-actions span {
         display: none;
-        /* Hide button text labels (like TV Mode) on mobile */
     }
 
-    .header-actions button {
-        padding: 0.4rem !important;
-        width: 36px;
+    .header-actions button,
+    .header-actions .lang-toggle-btn {
+        padding: 0.3rem !important;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        display: flex;
         justify-content: center;
+        align-items: center;
     }
 
     .bottom-nav {
         display: flex;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(12px);
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+        /* Explicitly opaque white */
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border-color);
         padding-bottom: env(safe-area-inset-bottom);
-        /* Handle iPhone notches */
         height: auto;
-        min-height: 64px;
+        min-height: 60px;
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Dark mode override for bottom nav */
+    [data-theme='dark'] .bottom-nav {
+        background-color: #111827;
+        /* Solid dark */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .app-footer {
-        margin-bottom: 70px;
-        /* Ensure footer isn't covered by nav */
-        padding-bottom: 2rem;
+        padding-bottom: 80px;
+        /* Space for bottom nav within scroll */
     }
 }
 
