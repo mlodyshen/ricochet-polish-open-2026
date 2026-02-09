@@ -58,6 +58,14 @@ const Live = () => {
     // TV Mode
     const isTvMode = new URLSearchParams(location.search).get('mode') === 'tv';
 
+    // Fullscreen Detection
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    useEffect(() => {
+        const handleFS = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', handleFS);
+        return () => document.removeEventListener('fullscreenchange', handleFS);
+    }, []);
+
     // Time
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
@@ -124,6 +132,14 @@ const Live = () => {
         const pink = [];
         const cyan = [];
 
+        // RECENT MATCHES CALCULATION
+        const finished = enriched.filter(m => getMatchStatus({ ...m, winner_id: m.winnerId }) === 'finished')
+            .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0)); // Newest first
+
+        const pinkRecent = [];
+        const cyanRecent = [];
+
+        // Distribute Active & Pending
         active.forEach((m) => {
             let court = '';
             if (m.court) {
@@ -140,17 +156,31 @@ const Live = () => {
             else cyan.push(mWithCourt);
         });
 
-        return { pinkQueue: pink, cyanQueue: cyan };
+        // Distribute Finished (Recent) based on court assignment
+        finished.forEach(m => {
+            let court = '';
+            if (m.court) {
+                const cUpper = m.court.toUpperCase();
+                if (cUpper.includes('LEWY') || cUpper.includes('LEFT') || m.court === 'pink') court = 'courtPink';
+                else if (cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || m.court === 'cyan') court = 'courtCyan';
+            }
+            // If no court assigned for finished match, maybe skip or assign default? 
+            // Let's assign based on ID parity if unknown, or just skip to avoid clutter
+            if (court === 'courtPink') pinkRecent.push(m);
+            else if (court === 'courtCyan') cyanRecent.push(m);
+        });
+
+        return { pinkQueue: pink, cyanQueue: cyan, pinkRecent: pinkRecent.slice(0, 2), cyanRecent: cyanRecent.slice(0, 2) };
     }, [matches, players]);
 
-    const getCourtState = (queue) => {
+    const getCourtState = (queue, recent) => {
         const current = queue.length > 0 ? queue[0] : null;
         const upcoming = queue.slice(1, 6);
-        return { current, upcoming };
+        return { current, upcoming, recent: recent || [] };
     };
 
-    const pinkState = getCourtState(pinkQueue);
-    const cyanState = getCourtState(cyanQueue);
+    const pinkState = getCourtState(pinkQueue, pinkRecent);
+    const cyanState = getCourtState(cyanQueue, cyanRecent);
 
     // --- SCORE HANDLER ---
     const handleUpdate = (match, type, playerKey, change) => {
@@ -306,7 +336,7 @@ const Live = () => {
             </header>
 
             {/* MAIN GRID - 2 EQUAL COLUMNS */}
-            <div className="courts-container">
+            <div className={`courts-container ${isFullscreen && isTvMode ? 'tv-fullscreen' : ''}`}>
                 {/* COLUMN 1: LEFT COURT (LEWY) */}
                 <div className="court-column">
                     <div className="court-card pink">
@@ -321,6 +351,14 @@ const Live = () => {
                         <div className="panel-header" style={{ color: 'var(--accent-pink)' }}>{t('live.queueLeft')}</div>
                         {renderUpcomingList(pinkState.upcoming)}
                     </div>
+
+                    {/* RECENT MATCHES - TV MODE ONLY */}
+                    {isTvMode && isFullscreen && pinkState.recent.length > 0 && (
+                        <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem', borderTop: '2px solid var(--accent-pink)' }}>
+                            <div className="panel-header" style={{ color: 'var(--accent-pink)', opacity: 0.8 }}>{t('live.recentHeader')}</div>
+                            {renderUpcomingList(pinkState.recent)}
+                        </div>
+                    )}
                 </div>
 
                 {/* COLUMN 2: RIGHT COURT (PRAWY) */}
@@ -337,6 +375,14 @@ const Live = () => {
                         <div className="panel-header" style={{ color: '#21468B' }}>{t('live.queueRight')}</div>
                         {renderUpcomingList(cyanState.upcoming)}
                     </div>
+
+                    {/* RECENT MATCHES - TV MODE ONLY */}
+                    {isTvMode && isFullscreen && cyanState.recent.length > 0 && (
+                        <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem', borderTop: '2px solid #21468B' }}>
+                            <div className="panel-header" style={{ color: '#21468B', opacity: 0.8 }}>{t('live.recentHeader')}</div>
+                            {renderUpcomingList(cyanState.recent)}
+                        </div>
+                    )}
                 </div>
             </div>
 
