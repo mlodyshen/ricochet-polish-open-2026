@@ -499,6 +499,34 @@ const Matches = () => {
         saveMatches(newMatches);
     };
 
+    // --- QUICK SCORE UPDATE ---
+    const handleQuickUpdate = (match, playerKey, change) => {
+        if (!isAuthenticated) return;
+
+        let score1 = match.score1 ?? 0;
+        let score2 = match.score2 ?? 0;
+
+        if (playerKey === 'score1') score1 = Math.max(0, score1 + change);
+        if (playerKey === 'score2') score2 = Math.max(0, score2 + change);
+
+        const bestOf = getBestOf(match.bracket);
+        const winThreshold = Math.ceil(bestOf / 2);
+
+        let status = 'live';
+        let winnerId = null;
+
+        if (score1 >= winThreshold) {
+            status = 'finished';
+            winnerId = match.player1.id;
+        } else if (score2 >= winThreshold) {
+            status = 'finished';
+            winnerId = match.player2.id;
+        }
+
+        const newState = updateBracketMatch(matches, match.id, score1, score2, match.microPoints, players, winnerId, status);
+        saveMatches(newState, match.id);
+    };
+
 
     const renderActiveMatch = (match, index) => {
         const cUpper = (match.court || '').toUpperCase();
@@ -518,11 +546,29 @@ const Matches = () => {
                         <PlayerFlag countryCode={match.player1.country} />
                         <span className="active-player-name">{match.player1.full_name}</span>
                     </div>
-                    <div className="active-score-center">
-                        <div className="active-set-score">{match.score1 ?? 0}</div>
-                        <div className="vs-divider">:</div>
-                        <div className="active-set-score">{match.score2 ?? 0}</div>
+
+                    <div className="active-score-center" style={{ gap: '0.5rem' }}>
+                        {isAuthenticated && (
+                            <div className="quick-controls" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score1', 1)}>▲</button>
+                                <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score1', -1)}>▼</button>
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div className="active-set-score">{match.score1 ?? 0}</div>
+                            <div className="vs-divider">:</div>
+                            <div className="active-set-score">{match.score2 ?? 0}</div>
+                        </div>
+
+                        {isAuthenticated && (
+                            <div className="quick-controls" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score2', 1)}>▲</button>
+                                <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score2', -1)}>▼</button>
+                            </div>
+                        )}
                     </div>
+
                     <div className="active-player right">
                         <span className="active-player-name">{match.player2.full_name}</span>
                         <PlayerFlag countryCode={match.player2.country} />
