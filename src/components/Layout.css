@@ -224,10 +224,15 @@
     -webkit-overflow-scrolling: touch;
 }
 
-/* Allow horizontal scroll for brackets and ranking pages */
-.main-content:has(.bracket-scroll-container),
-.main-content:has(.ranking-table-wrapper) {
+/* Allow horizontal scroll ONLY for brackets page. 
+   Ranking has its own internal .ranking-table-wrapper with scroll. */
+.main-content:has(.bracket-scroll-container) {
     overflow-x: auto;
+}
+
+.main-content:has(.ranking-table-wrapper) {
+    overflow-x: hidden;
+    /* Prevent nested scrolls */
 }
 
 .page-container {

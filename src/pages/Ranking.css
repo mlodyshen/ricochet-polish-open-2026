@@ -28,7 +28,8 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    overflow: hidden;
+    overflow: visible;
+    /* Prevent clipping that blocks scroll gestures */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
 }
@@ -230,16 +231,57 @@ td.sticky-player {
 
 @media (max-width: 768px) {
     .ranking-container {
-        padding: 1rem;
+        padding: 0.75rem;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .ranking-table-wrapper {
+        margin: 0 -0.75rem;
+        padding: 0 0.75rem;
+    }
+
+    .ranking-table {
+        min-width: 1200px;
+        /* Ensure table is wider than screen */
+    }
+
+    /* Reduce sticky column widths on mobile */
+    th.sticky-rank,
+    td.sticky-rank {
+        width: 45px;
+        min-width: 45px;
+        max-width: 45px;
+    }
+
+    /* Disable sticky trend on mobile to save space */
+    th.sticky-trend,
+    td.sticky-trend {
+        position: static !important;
+        width: 50px;
+        min-width: 50px;
+        max-width: 50px;
+        z-index: 1 !important;
+    }
+
+    /* Narrower player column on mobile */
+    th.sticky-player,
+    td.sticky-player {
+        left: 45px;
+        /* Adjust left position because trend is no longer sticky */
+        width: 140px;
+        min-width: 140px;
+        max-width: 140px;
+        z-index: 12 !important;
     }
 
     .ranking-table td,
     .ranking-table th {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem;
     }
 
     .ranking-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 }
 
