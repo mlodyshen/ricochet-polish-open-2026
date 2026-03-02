@@ -5,6 +5,7 @@
     min-height: 100vh;
     animation: fadeIn 0.5s ease-out;
     width: 100%;
+    /* Removed overflow-x: hidden to allow nested scrolls */
 }
 
 .ranking-header {

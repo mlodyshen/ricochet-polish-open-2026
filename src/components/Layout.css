@@ -224,8 +224,9 @@
     -webkit-overflow-scrolling: touch;
 }
 
-/* Allow horizontal scroll ONLY for brackets page */
-.main-content:has(.bracket-scroll-container) {
+/* Allow horizontal scroll for brackets and ranking pages */
+.main-content:has(.bracket-scroll-container),
+.main-content:has(.ranking-table-wrapper) {
     overflow-x: auto;
 }
 
