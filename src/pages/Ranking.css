@@ -1,0 +1,255 @@
+.ranking-container {
+    padding: 1.5rem;
+    max-width: 100%;
+    margin: 0;
+    min-height: 100vh;
+    animation: fadeIn 0.5s ease-out;
+    width: 100%;
+}
+
+.ranking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.ranking-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.ranking-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.ranking-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+    min-width: 1600px;
+    /* Force scroll for all columns */
+}
+
+.ranking-table th {
+    padding: 0.75rem 0.5rem;
+    background: #1a1a1a;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.ranking-table th.sticky-col,
+.ranking-table td.sticky-col {
+    position: sticky;
+    background: #111111;
+    /* Dark background to block content behind */
+    z-index: 10;
+    border-right: 2px solid var(--border-color);
+    text-align: left;
+}
+
+.ranking-table td.sticky-col {
+    z-index: 5;
+}
+
+/* Specific fixed positions for sticky columns */
+th.sticky-rank,
+td.sticky-rank {
+    left: 0;
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    z-index: 12 !important;
+}
+
+th.sticky-trend,
+td.sticky-trend {
+    left: 60px;
+    width: 65px;
+    min-width: 65px;
+    max-width: 65px;
+    z-index: 12 !important;
+}
+
+th.sticky-player,
+td.sticky-player {
+    left: 125px;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    z-index: 12 !important;
+}
+
+.ranking-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+/* Sub-header styles */
+.sub-header {
+    background: rgba(255, 255, 255, 0.01) !important;
+    font-size: 0.65rem !important;
+    padding: 0.25rem !important;
+}
+
+.tourney-group {
+    border-bottom: 2px solid var(--accent-primary) !important;
+}
+
+.cell-place {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    width: 40px;
+}
+
+.cell-pts {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 60px;
+}
+
+.points-cell {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-family: 'Inter', monospace;
+    background: #92d050;
+    padding: 0.5rem 0.75rem !important;
+    text-align: center;
+    border-radius: 4px;
+    min-width: 80px;
+}
+
+.rank-top-1 {
+    color: #ffd700;
+}
+
+.rank-top-2 {
+    color: #c0c0c0;
+}
+
+.rank-top-3 {
+    color: #cd7f32;
+}
+
+.player-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.player-country {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.points-cell {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-family: 'Inter', monospace;
+    background: #92d050;
+    /* The green color from the screenshot */
+    padding: 0.5rem 1rem !important;
+    text-align: center;
+    border-radius: 4px;
+    width: 100px;
+}
+
+[data-theme='dark'] .points-cell {
+    color: #000;
+}
+
+.secondary-cell {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: 'Inter', monospace;
+}
+
+.trend-cell {
+    text-align: center;
+    font-weight: 500;
+    width: 60px;
+}
+
+.trend-up {
+    color: #10b981;
+}
+
+.trend-down {
+    color: #ef4444;
+}
+
+.trend-neutral {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+.flag-icon {
+    width: 24px;
+    height: 18px;
+    object-fit: contain;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .ranking-container {
+        padding: 1rem;
+    }
+
+    .ranking-table td,
+    .ranking-table th {
+        padding: 0.75rem 1rem;
+    }
+
+    .ranking-title {
+        font-size: 2rem;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

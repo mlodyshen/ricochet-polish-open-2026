@@ -24,6 +24,7 @@ const NAV_ITEMS = [
     { path: '/standings', key: 'standings', icon: Trophy },
     { path: '/brackets', key: 'brackets', icon: GitBranch },
     { path: '/players', key: 'players', icon: Users },
+    { path: '/ranking', key: 'ranking', icon: Trophy },
     { path: '/organizer', key: 'organizer', icon: UserCog },
     { path: '/settings', key: 'settings', icon: Settings },
 ];
@@ -58,7 +59,7 @@ const Layout = () => {
     // Filter Navigation based on Auth
     const filteredNavItems = NAV_ITEMS.filter(item => {
         // Publicly visible pages (Content)
-        if (['live', 'matches', 'standings', 'brackets', 'players'].includes(item.key)) return true;
+        if (['live', 'matches', 'standings', 'brackets', 'players', 'ranking'].includes(item.key)) return true;
 
         // Admin only pages
         if (['organizer', 'settings'].includes(item.key)) return isAuthenticated;
@@ -71,10 +72,11 @@ const Layout = () => {
 
     // Check local path
     const isBracketsPage = location.pathname === '/brackets';
+    const isRankingPage = location.pathname === '/ranking';
 
     const mainContentStyle = isLiveView
         ? { marginLeft: 0, padding: 0, maxWidth: 'none' }
-        : isBracketsPage
+        : (isBracketsPage || isRankingPage)
             ? { maxWidth: '100%', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '140px' }
             : {};
 

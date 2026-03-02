@@ -8,6 +8,7 @@ import Live from './pages/Live';
 import Players from './pages/Players';
 import Brackets from './pages/Brackets';
 import Matches from './pages/Matches';
+import Ranking from './pages/Ranking';
 
 import Login from './pages/Login';
 
@@ -47,6 +48,7 @@ function App() {
             <Route path="brackets" element={<Brackets />} />
             <Route path="standings" element={<Standings />} />
             <Route path="players" element={<Players />} />
+            <Route path="ranking" element={<Ranking />} />
 
             {/* Protected Admin Routes */}
             <Route element={<ProtectedRoute />}>

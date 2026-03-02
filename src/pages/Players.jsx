@@ -279,7 +279,6 @@ const Players = () => {
     };
 
     const lastScrollPos = useRef(0);
-    const fileInputRef = useRef(null);
 
     const handlePlayerClick = (player) => {
         lastScrollPos.current = window.scrollY;
@@ -294,101 +293,6 @@ const Players = () => {
         }, 0);
     };
 
-    const handleCsvUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const text = e.target.result;
-            // Basic CSV parser
-            // Assuming header on first line
-            // Headers: Surname,Name,Country,Total_Points
-            // We need to robustly split lines and commas.
-
-            // Improved CSV parser:
-            const lines = text.split(/\r?\n/).filter(line => line.trim());
-            if (lines.length < 2) {
-                alert("Plik jest pusty lub brakuje nagłówka.");
-                return;
-            }
-
-            const headerLine = lines[0];
-            const separator = headerLine.includes(';') ? ';' : ',';
-
-            // Map headers and clean them
-            const headers = headerLine.split(separator).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-
-            // Find indices, but handle cases where columns might be shifted
-            const surnameIndex = headers.indexOf('surname');
-            const nameIndex = headers.findIndex(h => h === 'name' || h === 'firstname');
-            const countryIndex = headers.indexOf('country');
-            const eloIndex = headers.findIndex(h => h === 'total_points' || h === 'points' || h === 'elo');
-
-            if (surnameIndex === -1 || nameIndex === -1) {
-                alert(`Nie znaleziono wymaganych kolumn (Surname, Name). Wykryte nagłówki: ${headers.join(', ')}`);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-                return;
-            }
-
-            const newPlayers = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(separator).map(c => c.trim().replace(/^"|"$/g, ''));
-
-                // Extra check: if the row is mostly empty, skip it
-                if (row.filter(cell => cell).length === 0) continue;
-
-                const surname = row[surnameIndex] || "";
-                const name = row[nameIndex] || "";
-                const fullName = `${surname} ${name}`.trim();
-
-                if (!fullName) continue;
-
-                const country = countryIndex !== -1 ? row[countryIndex] || "" : "";
-
-                let elo = 0;
-                if (eloIndex !== -1 && row[eloIndex]) {
-                    // Handle numbers like "1 200" or "200.5" or "3,375"
-                    const cleanElo = row[eloIndex].replace(/[^\d.,]/g, '').replace(',', '.');
-                    elo = Math.round(parseFloat(cleanElo) || 0);
-                }
-
-                newPlayers.push({
-                    full_name: fullName,
-                    country: country,
-                    elo: elo
-                });
-            }
-
-            if (newPlayers.length === 0) {
-                alert("Nie znaleziono żadnych zawodników w pliku (sprawdź czy dane nie są puste).");
-                if (fileInputRef.current) fileInputRef.current.value = "";
-                return;
-            }
-
-            if (!confirm(`Znaleziono ${newPlayers.length} zawodników. Rozpocząć import?`)) {
-                if (fileInputRef.current) fileInputRef.current.value = "";
-                return;
-            }
-
-            try {
-                const result = await bulkUpsertPlayers(newPlayers);
-                if (result.success) {
-                    showToast(`Pomyślnie zaimportowano ${result.count} zawodników.`);
-                } else {
-                    alert("Błąd importu: " + (result.error?.message || result.error));
-                }
-            } catch (err) {
-                console.error("Import error:", err);
-                alert("Wystąpił nieoczekiwany błąd podczas zapisu.");
-            }
-
-            // Reset input
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        };
-        reader.readAsText(file);
-    };
 
     // Close on ESC
     useEffect(() => {
@@ -417,37 +321,10 @@ const Players = () => {
                         />
                     </div>
                     {isAuthenticated && (
-                        <>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                style={{ display: 'none' }}
-                                accept=".csv"
-                                onChange={handleCsvUpload}
-                            />
-                            <button className="btn-secondary" onClick={() => fileInputRef.current?.click()} title="Importuj z pliku CSV">
-                                <Upload size={18} />
-                                <span className="hide-mobile">Importuj zawodników (Turniej)</span>
-                            </button>
-                            <button className="btn-secondary" onClick={() => {
-                                const randomPlayers = Array.from({ length: 32 }, (_, i) => ({
-                                    full_name: `Player ${i + 1}`,
-                                    country: EUROPEAN_COUNTRIES[Math.floor(Math.random() * EUROPEAN_COUNTRIES.length)],
-                                    elo: 1000 + Math.floor(Math.random() * 500) // Random ELO between 1000-1500
-                                }));
-                                // Ensure unique ELOs for fun
-                                randomPlayers.forEach((p, idx) => p.elo += idx);
-
-                                bulkUpsertPlayers(randomPlayers).then(() => showToast('Dodano 32 losowych graczy!'));
-                            }} title="Generuj 32 losowych">
-                                <Plus size={18} />
-                                <span className="hide-mobile">Generuj 32 (Test)</span>
-                            </button>
-                            <button className="btn-primary" onClick={handleAdd}>
-                                <Plus size={18} />
-                                <span className="hide-mobile">{t('players.addPlayer')}</span>
-                            </button>
-                        </>
+                        <button className="btn-primary" onClick={handleAdd}>
+                            <Plus size={18} />
+                            <span className="hide-mobile">{t('players.addPlayer')}</span>
+                        </button>
                     )}
                 </div>
             </div>

@@ -19,6 +19,7 @@ export const Live = () => <PageContainer titleKey="navigation.live" />;
 export const Organizer = () => <PageContainer titleKey="navigation.organizer" />;
 
 export { default as Standings } from './Standings';
+export { default as Ranking } from './Ranking';
 
 import { useState, useEffect } from 'react';
 import { usePlayers } from '../hooks/usePlayers';
