@@ -344,19 +344,23 @@
 
     .bottom-nav {
         display: flex;
-        position: relative;
-        /* Not fixed anymore */
-        bottom: auto;
-        left: auto;
-        right: auto;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
         background-color: #ffffff;
         backdrop-filter: blur(20px);
         border-top: 1px solid var(--border-color);
         padding-bottom: env(safe-area-inset-bottom);
         height: auto;
         min-height: 60px;
-        box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.05);
-        /* Stronger shadow to indicate separation */
+        box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+
+    .main-content {
+        padding-bottom: 80px;
+        /* Room for fixed bottom nav */
     }
 
     /* Dark mode override for bottom nav */
