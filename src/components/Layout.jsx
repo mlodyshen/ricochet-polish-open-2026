@@ -88,8 +88,7 @@ const Layout = () => {
                     <img src="/c.png" alt="Logo" style={{ height: '32px' }} />
                     <div className="brand-text">
                         <span>RICOCHET</span>
-                        <span className="dutch-flag-text">DUTCH</span>
-                        <span>OPEN 2026</span>
+                        <span className="international-text">INTERNATIONAL</span>
                     </div>
                 </div>
                 <div className="header-actions">

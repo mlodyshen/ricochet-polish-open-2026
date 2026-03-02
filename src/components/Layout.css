@@ -384,20 +384,9 @@
 }
 
 /* Dutch Flag: Vermilion Red, White, Cobalt Blue */
-.dutch-flag-text {
-    background: linear-gradient(180deg,
-            #AE1C28 0%,
-            #AE1C28 35%,
-            #FFFFFF 35%,
-            #FFFFFF 65%,
-            #21468B 65%,
-            #21468B 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: inline-block;
-    padding: 0 4px;
-    line-height: 1;
+.international-text {
+    color: var(--accent-pink);
+    font-weight: 800;
 }
 
 /* Override Language Selector for Dark Header */
