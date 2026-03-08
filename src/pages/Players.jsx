@@ -244,7 +244,24 @@ const Players = () => {
             if (eloA !== eloB) {
                 return eloB - eloA; // Descending
             }
-            return (a.full_name || "").localeCompare(b.full_name || "");
+            const nameA = a.full_name || "";
+            const nameB = b.full_name || "";
+
+            if (eloA === 266) {
+                const order266 = ["Daria Kwiatkowska", "Sonja de Ruiter"];
+                const idxA = order266.indexOf(nameA);
+                const idxB = order266.indexOf(nameB);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            }
+
+            if (eloA === 0) {
+                const order0 = ["Sylvia Kiewiet Fokkens", "Jos Rozema", "Jonas Teichert"];
+                const idxA = order0.indexOf(nameA);
+                const idxB = order0.indexOf(nameB);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            }
+
+            return nameA.localeCompare(nameB);
         });
     }, [players, searchTerm]);
 

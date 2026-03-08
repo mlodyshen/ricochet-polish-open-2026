@@ -384,7 +384,26 @@ export const rebuildBracketState = (players, existingMatchesMap = {}) => {
         const eloA = parseInt(a.elo || 0);
         const eloB = parseInt(b.elo || 0);
         if (eloA !== eloB) return eloB - eloA;
-        return (a.full_name || "").localeCompare(b.full_name || "");
+
+        // Exact Tie-breaker logic for matching the official graphic
+        const nameA = a.full_name || "";
+        const nameB = b.full_name || "";
+
+        if (eloA === 266) {
+            const order266 = ["Daria Kwiatkowska", "Sonja de Ruiter"];
+            const idxA = order266.indexOf(nameA);
+            const idxB = order266.indexOf(nameB);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        }
+
+        if (eloA === 0) {
+            const order0 = ["Sylvia Kiewiet Fokkens", "Jos Rozema", "Jonas Teichert"];
+            const idxA = order0.indexOf(nameA);
+            const idxB = order0.indexOf(nameB);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        }
+
+        return nameA.localeCompare(nameB);
     });
     // Fill to 32
     while (seeds.length < 32) seeds.push({ id: `bye-${seeds.length}`, full_name: "BYE", isBye: true });
