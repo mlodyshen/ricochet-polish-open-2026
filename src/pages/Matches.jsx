@@ -382,48 +382,69 @@ const Matches = () => {
 
         const pending = [...pinkQueue, ...cyanQueue];
 
-        return { active, pending, finished, pinkQueue, cyanQueue };
+        return { active, pending, finished, pinkQueue, cyanQueue, pinkActive: leftActive, cyanActive: rightActive };
     }, [matches, players]);
 
 
     // -- MANUAL ORDER LOGIC --
     const handleMoveMatch = (matchId, direction, queueType) => {
+        let activeMatch = queueType === 'pink' ? processedMatches.pinkActive : processedMatches.cyanActive;
         let sourceQueue = queueType === 'pink' ? [...processedMatches.pinkQueue] : [...processedMatches.cyanQueue];
-        const matchIndex = sourceQueue.findIndex(m => m.id === matchId);
 
+        let fullList = [];
+        if (activeMatch) fullList.push(activeMatch);
+        fullList.push(...sourceQueue);
+
+        const matchIndex = fullList.findIndex(m => m.id === matchId);
         if (matchIndex === -1) return;
-        const match = sourceQueue[matchIndex];
+
+        const match = fullList[matchIndex];
 
         if (direction === 'left' || direction === 'right') {
             const targetCourtName = direction === 'left' ? 'Kort Lewy' : 'Kort Prawy';
+            let targetActive = direction === 'left' ? processedMatches.pinkActive : processedMatches.cyanActive;
             let targetQueue = direction === 'left' ? [...processedMatches.pinkQueue] : [...processedMatches.cyanQueue];
 
-            targetQueue.push(match);
-            sourceQueue.splice(matchIndex, 1);
+            let targetList = [];
+            if (targetActive) targetList.push(targetActive);
+            targetList.push(...targetQueue);
+
+            targetList.push(match);
+            fullList.splice(matchIndex, 1);
 
             const allUpdates = [];
-            sourceQueue.forEach((m, idx) => {
+            fullList.forEach((m, idx) => {
                 allUpdates.push({ id: m.id, manualOrder: idx * 100, court: queueType === 'pink' ? 'Kort Lewy' : 'Kort Prawy' });
             });
-            targetQueue.forEach((m, idx) => {
+            targetList.forEach((m, idx) => {
                 allUpdates.push({ id: m.id, manualOrder: idx * 100, court: targetCourtName });
             });
             applyBatchUpdates(allUpdates);
         } else if (direction === 'up' && matchIndex > 0) {
-            const temp = sourceQueue[matchIndex - 1];
-            sourceQueue[matchIndex - 1] = sourceQueue[matchIndex];
-            sourceQueue[matchIndex] = temp;
+            if (matchIndex === 1 && activeMatch && fullList[0].id === activeMatch.id) {
+                const s1 = activeMatch.score1 ?? 0;
+                const s2 = activeMatch.score2 ?? 0;
+                if (s1 > 0 || s2 > 0 || activeMatch.status === 'finished') {
+                    alert('Nie można zająć miejsca na arenie – aktualny mecz już się rozpoczął (wynik > 0:0).');
+                    return;
+                }
+            }
 
-            const allUpdates = sourceQueue.map((m, idx) => ({
+            const temp = fullList[matchIndex - 1];
+            fullList[matchIndex - 1] = fullList[matchIndex];
+            fullList[matchIndex] = temp;
+
+            const allUpdates = fullList.map((m, idx) => ({
                 id: m.id, manualOrder: idx * 100, court: match.court
             }));
             applyBatchUpdates(allUpdates);
-        } else if (direction === 'down' && matchIndex < sourceQueue.length - 1) {
-            const temp = sourceQueue[matchIndex + 1];
-            sourceQueue[matchIndex + 1] = sourceQueue[matchIndex];
-            sourceQueue[matchIndex] = temp;
 
-            const allUpdates = sourceQueue.map((m, idx) => ({
+        } else if (direction === 'down' && matchIndex < fullList.length - 1) {
+            const temp = fullList[matchIndex + 1];
+            fullList[matchIndex + 1] = fullList[matchIndex];
+            fullList[matchIndex] = temp;
+
+            const allUpdates = fullList.map((m, idx) => ({
                 id: m.id, manualOrder: idx * 100, court: match.court
             }));
             applyBatchUpdates(allUpdates);
