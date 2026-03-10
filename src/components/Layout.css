@@ -8,10 +8,10 @@
 
 /* Header */
 .top-header {
-    height: 64px;
+    height: 70px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: 0 1.5rem;
     position: fixed;
     top: 0;
@@ -26,21 +26,11 @@
 }
 
 .header-branding {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 12px;
     height: 100%;
-    pointer-events: none;
-    /* Let clicks pass through if partially overlapping non-interactive areas, although logo might be link later */
-}
-
-/* Ensure Logo and Text are clickable if needed, revert pointer-events if so. Assuming purely decorative for now or wide enough spacing */
-.header-branding>* {
-    pointer-events: auto;
-
 }
 
 .header-title {
@@ -68,31 +58,21 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex: 1;
+    justify-content: flex-end;
 }
 
-/* Sidebar (Desktop) */
-/* Sidebar (Now Top Navigation Bar) */
-.sidebar {
-    position: fixed;
-    top: 74px;
-    /* Below header */
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-    min-width: 600px;
-    max-width: 95vw;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 50px;
-    /* Pillow shape */
-    padding: 0.5rem 0.75rem;
+/* Navigation inside Header */
+.header-nav-list {
     display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.35rem 0.5rem;
     align-items: center;
-    justify-content: center;
-    z-index: 45;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    /* height: 60px; */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nav-list {
@@ -252,8 +232,20 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+    .header-branding {
+        flex: none;
+    }
+    .brand-text {
+        font-size: 1.1rem;
+    }
+    .header-nav-list {
+        display: none; /* Hide desktop nav bar on smaller than 1024 - relies on bottom-nav mostly if used or wait till smaller */
+    }
+}
+
 @media (max-width: 768px) {
-    .sidebar {
+    .header-nav-list {
         display: none;
     }
 

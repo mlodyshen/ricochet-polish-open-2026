@@ -77,8 +77,8 @@ const Layout = () => {
     const mainContentStyle = isLiveView
         ? { marginLeft: 0, padding: 0, maxWidth: 'none' }
         : (isBracketsPage || isRankingPage)
-            ? { maxWidth: '100%', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '140px' }
-            : {};
+            ? { maxWidth: '100%', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '90px' }
+            : { paddingTop: '90px' };
 
     return (
         <div className="app-container">
@@ -91,6 +91,24 @@ const Layout = () => {
                         <span className="international-text">INTERNATIONAL</span>
                     </div>
                 </div>
+                {/* Desktop Navigation (Center) - Hidden in Live View */}
+                {!isLiveView && (
+                    <nav className="header-nav-list">
+                        {filteredNavItems.map((item, index) => (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    `nav-item ${isActive ? 'active accent-pink' : ''}`
+                                }
+                            >
+                                <item.icon size={18} />
+                                <span>{t(`navigation.${item.key}`)}</span>
+                            </NavLink>
+                        ))}
+                    </nav>
+                )}
+
                 <div className="header-actions">
                     <LanguageSelector />
 
@@ -130,29 +148,7 @@ const Layout = () => {
                         </NavLink>
                     )}
                 </div>
-            </header >
-
-            {/* Desktop Sidebar - Hidden in Live View */}
-            {
-                !isLiveView && (
-                    <aside className="sidebar">
-                        <nav className="nav-list">
-                            {filteredNavItems.map((item, index) => (
-                                <NavLink
-                                    key={item.path}
-                                    to={item.path}
-                                    className={({ isActive }) =>
-                                        `nav-item ${isActive ? 'active accent-pink' : ''}`
-                                    }
-                                >
-                                    <item.icon size={20} />
-                                    <span>{t(`navigation.${item.key}`)}</span>
-                                </NavLink>
-                            ))}
-                        </nav>
-                    </aside>
-                )
-            }
+            </header>
 
             {/* Main Content Area - Full Width in Live View, Expanded for Brackets */}
             <main className="main-content" style={mainContentStyle}>
