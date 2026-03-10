@@ -1,222 +1,223 @@
 {
-    "navigation": {
-        "live": "Live",
-        "matches": "Wedstrijden",
-        "standings": "Standen",
-        "brackets": "Schema's",
-        "players": "Spelers",
-        "organizer": "Organisator",
-        "settings": "Instellingen"
+  "navigation": {
+    "live": "Live",
+    "matches": "Wedstrijden",
+    "standings": "Standen",
+    "brackets": "Schema's",
+    "players": "Spelers",
+    "organizer": "Organisator",
+    "settings": "Instellingen"
+  },
+  "common": {
+    "appName": "RICOCHET DUTCH OPEN 2026",
+    "footer": "ricochetdutchopen.com • © 2026 • Gemaakt door Kacper",
+    "confirmDelete": "Weet je zeker dat je deze speler wilt verwijderen?",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "actions": "Acties",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "saved": "Opgeslagen!",
+    "back": "Terug",
+    "vs": "TEGEN",
+    "reset": "Resetten"
+  },
+  "players": {
+    "title": "Spelerslijst",
+    "addPlayer": "Speler Toevoegen",
+    "importPlayers": "Spelers Importeren (Toernooi)",
+    "importSuccess": "{{count}} nieuwe spelers succesvol toegevoegd.",
+    "searchPlaceholder": "Zoeken...",
+    "headers": {
+      "fullName": "Volledige Naam",
+      "photo": "FOTO",
+      "country": "Land",
+      "elo": "PUNTEN"
     },
-    "common": {
-        "appName": "RICOCHET DUTCH OPEN 2026",
-        "footer": "ricochetdutchopen.com • © 2026 • Gemaakt door Kacper",
-        "confirmDelete": "Weet je zeker dat je deze speler wilt verwijderen?",
-        "cancel": "Annuleren",
-        "save": "Opslaan",
-        "actions": "Acties",
-        "edit": "Bewerken",
-        "delete": "Verwijderen",
-        "saved": "Opgeslagen!",
-        "back": "Terug",
-        "vs": "TEGEN",
-        "reset": "Resetten"
+    "empty": {
+      "notFound": "Geen spelers gevonden.",
+      "start": "De database is leeg."
     },
-    "players": {
-        "title": "Spelerslijst",
-        "addPlayer": "Speler Toevoegen",
-        "importPlayers": "Spelers Importeren (Toernooi)",
-        "importSuccess": "{{count}} nieuwe spelers succesvol toegevoegd.",
-        "searchPlaceholder": "Zoeken...",
-        "headers": {
-            "fullName": "Volledige Naam",
-            "photo": "FOTO",
-            "country": "Land",
-            "elo": "PUNTEN"
-        },
-        "empty": {
-            "notFound": "Geen spelers gevonden.",
-            "start": "De database is leeg."
-        },
-        "modal": {
-            "addTitle": "Nieuwe Speler Toevoegen",
-            "editTitle": "Speler Bewerken",
-            "labels": {
-                "fullName": "Volledige Naam *",
-                "photo": "Link naar foto",
-                "country": "Land",
-                "elo": "PUNTEN"
-            },
-            "placeholders": {
-                "fullName": "bijv. Jan de Vries",
-                "country": "Kies of typ...",
-                "elo": "bijv. 1200"
-            },
-            "errors": {
-                "fullNameRequired": "Volledige naam is verplicht"
-            }
-        }
-    },
-    "profile": {
-        "matchesPlayed": "Wedstrijden",
-        "wins": "Gewonnen",
-        "losses": "Verloren",
-        "matchHistory": "Wedstrijdgeschiedenis",
-        "noMatches": "Geen wedstrijden gespeeld."
-    },
-    "pages": {
-        "content_placeholder": "Inhoud voor {{title}} verschijnt hier."
-    },
-    "live": {
-        "title": "LIVE",
-        "waitingMessage": "Toernooi begint — wachten op eerste wedstrijden",
-        "lastUpdate": "Laatste update:",
-        "justNow": "zojuist",
-        "secondsAgo": "s geleden",
-        "refresh": "Vernieuwen",
-        "courtPink": "BAAN LINKS",
-        "courtCyan": "BAAN RECHTS",
-        "noMatch": "Geen wedstrijd op baan",
-        "autoMatchInfo": "Wedstrijd verschijnt automatisch na start in tabblad Wedstrijden",
-        "upcomingMatches": "Aankomende Wedstrijden",
-        "noUpcoming": "Geen geplande wedstrijden",
-        "recentResults": "Recente Uitslagen",
-        "noResults": "Geen gespeelde wedstrijden.",
-        "wb": "Winnaars Schema",
-        "lb": "Verliezers Schema",
-        "gf": "Finale",
-        "round": "Ronde",
-        "liveBadge": "LIVE",
-        "readinessAlert": "Volgende wedstrijd: Sta klaar bij de baan ⏳",
-        "scanForResults": "RESULTATEN MOBIEL",
-        "tickerLabel": "LAATSTE UITSLAGEN",
-        "tickerEmpty": "Geen afgeronde wedstrijden. Wachten op resultaten...",
-        "upcomingHeader": "AANKOMEND",
-        "pinkQueue": "WACHTRIJ LINKER BAAN",
-        "cyanQueue": "WACHTRIJ RECHTER BAAN",
-        "queueLeft": "WACHTRIJ - LINKS",
-        "queueRight": "WACHTRIJ - RECHTS",
-        "bo": "BO{{n}}",
-        "recentHeader": "LAATSTE UITSLAGEN",
-        "recentEmpty": "Geen resultaten.",
-        "courtPinkLabel": "BAAN LINKS",
-        "courtCyanLabel": "BAAN RECHTS",
-        "waitingForMatch": "Wachten op wedstrijd...",
-        "sets": "SETS",
-        "clickHint": "L-Klik / R-Klik (Punten)"
-    },
-    "organizer": {
-        "title": "Toernooibeheer",
-        "description": "Hier kun je nieuwe toernooien aanmaken en het actieve toernooi beheren.",
-        "createTitle": "Nieuw Toernooi Aanmaken",
-        "yourTournaments": "Jouw Toernooien",
-        "noTournaments": "Geen toernooien. Maak de eerste aan!",
-        "active": "ACTIEF",
-        "select": "Selecteer",
-        "selected": "Geselecteerd",
-        "deleteTooltip": "Toernooi verwijderen",
-        "editTooltip": "Bewerken",
-        "switchTooltip": "Overschakelen naar dit toernooi",
-        "editModalTitle": "Toernooi Bewerken",
-        "deleteModalTitle": "Toernooi Verwijderen?",
-        "deleteModalContent": "Weet je zeker dat je dit toernooi wilt verwijderen?",
-        "deleteModalWarning": "Deze actie kan niet ongedaan worden gemaakt.",
-        "form": {
-            "namePlaceholder": "Toernooinaam (bijv. RPO 2027)",
-            "addressPlaceholder": "Adres (optioneel)",
-            "createBtn": "Aanmaken",
-            "cancelBtn": "Annuleren",
-            "saveBtn": "Wijzigingen Opslaan",
-            "deleteBtn": "Verwijderen",
-            "nameLabel": "Toernooinaam",
-            "dateLabel": "Datum en Tijd",
-            "addressLabel": "Adres / Locatie"
-        }
-    },
-    "matches": {
-        "title": "Toernooi (Wedstrijden)",
-        "filters": {
-            "all": "Alles",
-            "pending": "Aankomend",
-            "finished": "Afgerond"
-        },
-        "currentMatch": "Huidige wedstrijd",
-        "nextMatches": "Volgende wedstrijden",
-        "played": "Gespeeld",
-        "allFinished": "Alle wedstrijden afgerond of geen actieve wedstrijden.",
-        "noActiveMatches": "Geen actieve wedstrijden",
-        "generatePrompt": "Genereer een schema op basis van de spelerslijst om het toernooi te starten.",
-        "needPlayers": "Je hebt minimaal 2 spelers nodig!",
-        "generateConfirm": "Weet je zeker dat je een nieuw schema wilt genereren voor {{count}} spelers? Alle huidige resultaten worden verwijderd.",
-        "generateBtn": "Schema Genereren (ELO)",
-        "loginPrompt": "Log in als beheerder om het toernooi te beheren.",
-        "match": "Wedstrijd {{id}}",
-        "liveArena": "Live Arena",
-        "controlMatch": "Wedstrijd Beheren",
-        "editResultTitle": "Uitslag Bewerken",
-        "formatInfo": "Format: Best of {{bo}} ({{n}} gewonnen sets)",
-        "statusLabel": "Wedstrijdstatus",
-        "courtLabel": "Baantoewijzing",
-        "courtLeft": "Baan Links",
-        "courtRight": "Baan Rechts",
-        "noCourt": "-- Geen Baan --",
-        "statusLive": "Bezig (Live)",
-        "statusFinished": "Afgerond (Einduitslag)",
-        "microPoints": "Punten in set",
-        "set": "Set",
-        "queueEmpty": "Wachtrij leeg",
-        "bracketWinners": "WINNAARS",
-        "bracketLosers": "VERLIEZERS",
-        "bracketFinal": "FINALE",
-        "registeredPlayers": "Geregistreerde spelers"
-    },
-    "brackets": {
-        "wb": "Winnaars Schema",
-        "lb": "Verliezers Schema",
-        "finals": "Grote Finale",
-        "round": "Ronde",
-        "clickToEdit": "(Klik om te bewerken)",
-        "finalBadge": "Finale",
-        "generateNew": "Nieuwe Genereren",
-        "resetConfirm": "Dit reset het huidige schema. Doorgaan?",
-        "editScoreTitle": "Score Bewerken",
-        "sourceWinner": "W van {{n}}",
-        "sourceLoser": "V van {{n}}",
-        "headerWB": "HOOFDSCHEMA",
-        "headerLB": "VERLIEZERSSCHEMA",
-        "headerPlacement": "PLAATSINGSWEDSTRIJDEN",
-        "placeRange": "Plaats {{range}}",
-        "placeSingle": "Plaats {{place}}",
-        "scoreP1": "Score S1",
-        "scoreP2": "Score S2"
-    },
-    "standings": {
-        "description": "Klassement wordt bijgewerkt na deelname aan het toernooi."
-    },
-    "select": {
-        "title": "Toernooi Selecteren",
-        "subtitle": "Kies een evenement om te volgen.",
-        "noActive": "Geen actieve toernooien."
-    },
-    "welcome": {
-        "chooseMode": "Kies toegangsmodus",
-        "admin": "Beheerder",
-        "adminDesc": "Volledige toegang. Toernooibeheer, uitslagen bewerken, schema's genereren.",
-        "participant": "Deelnemer",
-        "participantDesc": "Live weergave. Uitslagen, schema's en aankomende wedstrijden bekijken."
-    },
-    "login": {
-        "title": "Beheerder Inloggen",
-        "subtitle": "Log in om het toernooi te beheren",
-        "error": "Ongeldige gebruikersnaam of wachtwoord",
-        "username": "Gebruikersnaam",
-        "usernamePlaceholder": "Typ naam...",
-        "password": "Wachtwoord",
-        "passwordPlaceholder": "Typ wachtwoord...",
-        "signIn": "Inloggen"
-    },
-    "settings": {
-        "localModeTitle": "Lokale Modus Actief",
-        "localModeDesc": "De applicatie werkt offline via browseropslag."
+    "modal": {
+      "addTitle": "Nieuwe Speler Toevoegen",
+      "editTitle": "Speler Bewerken",
+      "labels": {
+        "fullName": "Volledige Naam *",
+        "photo": "Link naar foto",
+        "country": "Land",
+        "elo": "PUNTEN"
+      },
+      "placeholders": {
+        "fullName": "bijv. Jan de Vries",
+        "country": "Kies of typ...",
+        "elo": "bijv. 1200"
+      },
+      "errors": {
+        "fullNameRequired": "Volledige naam is verplicht"
+      }
     }
+  },
+  "profile": {
+    "matchesPlayed": "Wedstrijden",
+    "wins": "Gewonnen",
+    "losses": "Verloren",
+    "matchHistory": "Wedstrijdgeschiedenis",
+    "noMatches": "Geen wedstrijden gespeeld."
+  },
+  "pages": {
+    "content_placeholder": "Inhoud voor {{title}} verschijnt hier."
+  },
+  "live": {
+    "title": "LIVE",
+    "waitingMessage": "Toernooi begint — wachten op eerste wedstrijden",
+    "lastUpdate": "Laatste update:",
+    "justNow": "zojuist",
+    "secondsAgo": "s geleden",
+    "refresh": "Vernieuwen",
+    "courtPink": "BAAN LINKS",
+    "courtCyan": "BAAN RECHTS",
+    "noMatch": "Geen wedstrijd op baan",
+    "autoMatchInfo": "Wedstrijd verschijnt automatisch na start in tabblad Wedstrijden",
+    "upcomingMatches": "Aankomende Wedstrijden",
+    "noUpcoming": "Geen geplande wedstrijden",
+    "recentResults": "Recente Uitslagen",
+    "noResults": "Geen gespeelde wedstrijden.",
+    "wb": "Winnaars Schema",
+    "lb": "Verliezers Schema",
+    "gf": "Finale",
+    "round": "Ronde",
+    "liveBadge": "LIVE",
+    "readinessAlert": "Volgende wedstrijd: Sta klaar bij de baan ⏳",
+    "scanForResults": "RESULTATEN MOBIEL",
+    "tickerLabel": "LAATSTE UITSLAGEN",
+    "tickerEmpty": "Geen afgeronde wedstrijden. Wachten op resultaten...",
+    "upcomingHeader": "AANKOMEND",
+    "pinkQueue": "WACHTRIJ LINKER BAAN",
+    "cyanQueue": "WACHTRIJ RECHTER BAAN",
+    "queueLeft": "WACHTRIJ - LINKS",
+    "queueRight": "WACHTRIJ - RECHTS",
+    "bo": "BO{{n}}",
+    "recentHeader": "LAATSTE UITSLAGEN",
+    "recentEmpty": "Geen resultaten.",
+    "courtPinkLabel": "BAAN LINKS",
+    "courtCyanLabel": "BAAN RECHTS",
+    "waitingForMatch": "Wachten op wedstrijd...",
+    "sets": "SETS",
+    "clickHint": "L-Klik / R-Klik (Punten)"
+  },
+  "organizer": {
+    "title": "Toernooibeheer",
+    "description": "Hier kun je nieuwe toernooien aanmaken en het actieve toernooi beheren.",
+    "createTitle": "Nieuw Toernooi Aanmaken",
+    "yourTournaments": "Jouw Toernooien",
+    "noTournaments": "Geen toernooien. Maak de eerste aan!",
+    "active": "ACTIEF",
+    "select": "Selecteer",
+    "selected": "Geselecteerd",
+    "deleteTooltip": "Toernooi verwijderen",
+    "editTooltip": "Bewerken",
+    "switchTooltip": "Overschakelen naar dit toernooi",
+    "editModalTitle": "Toernooi Bewerken",
+    "deleteModalTitle": "Toernooi Verwijderen?",
+    "deleteModalContent": "Weet je zeker dat je dit toernooi wilt verwijderen?",
+    "deleteModalWarning": "Deze actie kan niet ongedaan worden gemaakt.",
+    "form": {
+      "namePlaceholder": "Toernooinaam (bijv. RPO 2027)",
+      "addressPlaceholder": "Adres (optioneel)",
+      "createBtn": "Aanmaken",
+      "cancelBtn": "Annuleren",
+      "saveBtn": "Wijzigingen Opslaan",
+      "deleteBtn": "Verwijderen",
+      "nameLabel": "Toernooinaam",
+      "dateLabel": "Datum en Tijd",
+      "addressLabel": "Adres / Locatie"
+    }
+  },
+  "matches": {
+    "title": "Toernooi (Wedstrijden)",
+    "filters": {
+      "all": "Alles",
+      "pending": "Aankomend",
+      "finished": "Afgerond"
+    },
+    "currentMatch": "Huidige wedstrijd",
+    "nextMatches": "Volgende wedstrijden",
+    "played": "Gespeeld",
+    "allFinished": "Alle wedstrijden afgerond of geen actieve wedstrijden.",
+    "noActiveMatches": "Geen actieve wedstrijden",
+    "generatePrompt": "Genereer een schema op basis van de spelerslijst om het toernooi te starten.",
+    "needPlayers": "Je hebt minimaal 2 spelers nodig!",
+    "generateConfirm": "Weet je zeker dat je een nieuw schema wilt genereren voor {{count}} spelers? Alle huidige resultaten worden verwijderd.",
+    "generateBtn": "Schema Genereren (ELO)",
+    "loginPrompt": "Log in als beheerder om het toernooi te beheren.",
+    "match": "Wedstrijd {{id}}",
+    "liveArena": "Live Arena",
+    "controlMatch": "Wedstrijd Beheren",
+    "editResultTitle": "Uitslag Bewerken",
+    "formatInfo": "Format: Best of {{bo}} ({{n}} gewonnen sets)",
+    "statusLabel": "Wedstrijdstatus",
+    "courtLabel": "Baantoewijzing",
+    "courtLeft": "Baan Links",
+    "courtRight": "Baan Rechts",
+    "noCourt": "-- Geen Baan --",
+    "statusLive": "Bezig (Live)",
+    "statusFinished": "Afgerond (Einduitslag)",
+    "microPoints": "Punten in set",
+    "set": "Set",
+    "queueEmpty": "Wachtrij leeg",
+    "bracketWinners": "WINNAARS",
+    "bracketLosers": "VERLIEZERS",
+    "bracketFinal": "FINALE",
+    "registeredPlayers": "Geregistreerde spelers",
+    "arenaOccupiedAlert": "Kan de arena niet betreden – de huidige wedstrijd is al begonnen (score > 0:0)."
+  },
+  "brackets": {
+    "wb": "Winnaars Schema",
+    "lb": "Verliezers Schema",
+    "finals": "Grote Finale",
+    "round": "Ronde",
+    "clickToEdit": "(Klik om te bewerken)",
+    "finalBadge": "Finale",
+    "generateNew": "Nieuwe Genereren",
+    "resetConfirm": "Dit reset het huidige schema. Doorgaan?",
+    "editScoreTitle": "Score Bewerken",
+    "sourceWinner": "W van {{n}}",
+    "sourceLoser": "V van {{n}}",
+    "headerWB": "HOOFDSCHEMA",
+    "headerLB": "VERLIEZERSSCHEMA",
+    "headerPlacement": "PLAATSINGSWEDSTRIJDEN",
+    "placeRange": "Plaats {{range}}",
+    "placeSingle": "Plaats {{place}}",
+    "scoreP1": "Score S1",
+    "scoreP2": "Score S2"
+  },
+  "standings": {
+    "description": "Klassement wordt bijgewerkt na deelname aan het toernooi."
+  },
+  "select": {
+    "title": "Toernooi Selecteren",
+    "subtitle": "Kies een evenement om te volgen.",
+    "noActive": "Geen actieve toernooien."
+  },
+  "welcome": {
+    "chooseMode": "Kies toegangsmodus",
+    "admin": "Beheerder",
+    "adminDesc": "Volledige toegang. Toernooibeheer, uitslagen bewerken, schema's genereren.",
+    "participant": "Deelnemer",
+    "participantDesc": "Live weergave. Uitslagen, schema's en aankomende wedstrijden bekijken."
+  },
+  "login": {
+    "title": "Beheerder Inloggen",
+    "subtitle": "Log in om het toernooi te beheren",
+    "error": "Ongeldige gebruikersnaam of wachtwoord",
+    "username": "Gebruikersnaam",
+    "usernamePlaceholder": "Typ naam...",
+    "password": "Wachtwoord",
+    "passwordPlaceholder": "Typ wachtwoord...",
+    "signIn": "Inloggen"
+  },
+  "settings": {
+    "localModeTitle": "Lokale Modus Actief",
+    "localModeDesc": "De applicatie werkt offline via browseropslag."
+  }
 }

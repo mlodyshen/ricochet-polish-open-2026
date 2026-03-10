@@ -447,7 +447,7 @@ const Matches = () => {
                 const s1 = activeMatch.score1 ?? 0;
                 const s2 = activeMatch.score2 ?? 0;
                 if (s1 > 0 || s2 > 0 || activeMatch.status === 'finished') {
-                    alert('Nie można zająć miejsca na arenie – aktualny mecz już się rozpoczął (wynik > 0:0).');
+                    alert(t('matches.arenaOccupiedAlert'));
                     return;
                 }
             }
