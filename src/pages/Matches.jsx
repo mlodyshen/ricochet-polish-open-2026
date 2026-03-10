@@ -4,31 +4,11 @@ import { useTournamentMatches } from '../hooks/useTournamentMatches';
 import { useTournament } from '../contexts/TournamentContext';
 import { updateBracketMatch, clearBracketMatch, generateDoubleEliminationBracket } from '../utils/bracketLogic';
 import { getBestOf, getMatchStatus, compareMatchIds } from '../utils/matchUtils';
-import { Edit2, Trophy, Clock, Activity, CheckCircle, Save, X, Trash2, GripVertical } from 'lucide-react';
+import { Edit2, Trophy, Clock, Activity, CheckCircle, Save, X, Trash2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import './Matches.css';
 import { usePlayers } from '../hooks/usePlayers';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { getCountryCode } from '../constants/countries';
-
-// --- DND KIT IMPORTS ---
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragOverlay,
-    defaultDropAnimationSideEffects,
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 const formatName = (p) => {
     if (!p) return 'TBD';
@@ -56,26 +36,9 @@ const PlayerFlag = ({ countryCode }) => {
     );
 };
 
-// --- SORTABLE ITEM COMPONENT ---
-const SortableMatchRow = ({ match, index, queueType, isAuthenticated, onEdit }) => {
+// --- MATCH ROW WITH ARROWS COMPONENT ---
+const QueueMatchRow = ({ match, index, queueType, isAuthenticated, onEdit, onMove }) => {
     const { t } = useTranslation();
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: match.id, data: { match, queueType } });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.3 : 1,
-        touchAction: 'none', // Prevent scrolling while dragging on touch
-        position: 'relative',
-        zIndex: isDragging ? 999 : 1,
-    };
 
     const isWB = match.bracket === 'wb';
     const isGF = match.bracket === 'gf';
@@ -91,7 +54,7 @@ const SortableMatchRow = ({ match, index, queueType, isAuthenticated, onEdit }) 
         else colorType = index % 2 === 0 ? 'pink' : 'cyan';
     }
 
-    const rowClass = `match-list-row ${isAuthenticated ? 'has-controls' : ''} ${colorType} ${isDragging ? 'dragging' : ''}`;
+    const rowClass = `match-list-row ${isAuthenticated ? 'has-controls' : ''} ${colorType}`;
     const matchIdShort = match.id.split('-m')[1] || match.id;
 
     let courtLabel = match.court;
@@ -99,7 +62,7 @@ const SortableMatchRow = ({ match, index, queueType, isAuthenticated, onEdit }) 
     if (match.court === 'Kort Prawy') courtLabel = t('live.courtCyan');
 
     return (
-        <div ref={setNodeRef} style={style} className={rowClass}>
+        <div className={rowClass}>
             <div className="row-meta-badge">
                 <span className={`bracket-pill ${bracketClass}`}>{bracketLabel}</span>
                 <span style={{ opacity: 0.5, margin: '0 4px' }}>•</span>
@@ -109,11 +72,16 @@ const SortableMatchRow = ({ match, index, queueType, isAuthenticated, onEdit }) 
                 {match.court && <span className="court-label"> • {courtLabel}</span>}
             </div>
 
-            {/* Column 1: Controls (Grip) */}
+            {/* Column 1: Controls (Arrows) */}
             <div className="row-controls">
                 {isAuthenticated && (
-                    <div {...attributes} {...listeners} style={{ cursor: 'grab', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <GripVertical size={20} style={{ opacity: 0.6 }} />
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <button onClick={() => onMove(match.id, 'up', queueType)} className="action-btn" style={{ padding: '2px', height: 'auto', minHeight: 'auto' }} title="Move Up"><ArrowUp size={14} /></button>
+                            <button onClick={() => onMove(match.id, 'down', queueType)} className="action-btn" style={{ padding: '2px', height: 'auto', minHeight: 'auto' }} title="Move Down"><ArrowDown size={14} /></button>
+                        </div>
+                        {queueType === 'pink' && <button onClick={() => onMove(match.id, 'right', queueType)} className="action-btn" style={{ padding: '4px', height: 'auto', minHeight: 'auto' }} title="Move to Right Court"><ArrowRight size={16} /></button>}
+                        {queueType === 'cyan' && <button onClick={() => onMove(match.id, 'left', queueType)} className="action-btn" style={{ padding: '4px', height: 'auto', minHeight: 'auto' }} title="Move to Left Court"><ArrowLeft size={16} /></button>}
                     </div>
                 )}
             </div>
@@ -144,24 +112,6 @@ const SortableMatchRow = ({ match, index, queueType, isAuthenticated, onEdit }) 
                         <Edit2 size={16} />
                     </button>
                 )}
-            </div>
-        </div>
-    );
-};
-
-// --- DRAG OVERLAY ITEM (Visual Clone) ---
-const DragOverlayItem = ({ match }) => {
-    // Simplified version for the drag preview
-    const { t } = useTranslation();
-    if (!match) return null;
-    return (
-        <div className={`match-list-row dragging-clone`} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--accent-primary)', opacity: 0.9 }}>
-            <div className="player p1">
-                <span className="name">{formatName(match.player1)}</span>
-            </div>
-            <div className="match-center-info">VS</div>
-            <div className="player p2">
-                <span className="name">{formatName(match.player2)}</span>
             </div>
         </div>
     );
@@ -333,7 +283,6 @@ const Matches = () => {
     const [filter, setFilter] = useState('all');
     const [editingMatch, setEditingMatch] = useState(null);
     const { isAuthenticated } = useAuth();
-    const [activeDragId, setActiveDragId] = useState(null);
 
     const lastScrollPos = useRef(0);
 
@@ -437,84 +386,48 @@ const Matches = () => {
     }, [matches, players]);
 
 
-    // -- DND LOGIC --
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-    );
+    // -- MANUAL ORDER LOGIC --
+    const handleMoveMatch = (matchId, direction, queueType) => {
+        let sourceQueue = queueType === 'pink' ? [...processedMatches.pinkQueue] : [...processedMatches.cyanQueue];
+        const matchIndex = sourceQueue.findIndex(m => m.id === matchId);
 
-    const handleDragStart = (event) => {
-        setActiveDragId(event.active.id);
-    };
+        if (matchIndex === -1) return;
+        const match = sourceQueue[matchIndex];
 
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
-        setActiveDragId(null);
+        if (direction === 'left' || direction === 'right') {
+            const targetCourtName = direction === 'left' ? 'Kort Lewy' : 'Kort Prawy';
+            let targetQueue = direction === 'left' ? [...processedMatches.pinkQueue] : [...processedMatches.cyanQueue];
 
-        if (!over) return;
-        if (active.id === over.id) return;
+            targetQueue.push(match);
+            sourceQueue.splice(matchIndex, 1);
 
-        // Find which lists (queues) the items belong to
-        const isPinkSource = processedMatches.pinkQueue.find(m => m.id === active.id);
-        const isCyanSource = processedMatches.cyanQueue.find(m => m.id === active.id);
-
-        // Target Queue Detection
-        const isPinkTarget = processedMatches.pinkQueue.find(m => m.id === over.id) || (over.id === 'PinkQueueContainer');
-        const isCyanTarget = processedMatches.cyanQueue.find(m => m.id === over.id) || (over.id === 'CyanQueueContainer');
-
-        let sourceQueue = isPinkSource ? processedMatches.pinkQueue : (isCyanSource ? processedMatches.cyanQueue : null);
-        let targetQueue = null;
-        let targetCourtName = '';
-
-        if (isPinkTarget || (over.id === 'PinkQueueContainer')) {
-            targetQueue = processedMatches.pinkQueue;
-            targetCourtName = 'Kort Lewy';
-        } else if (isCyanTarget || (over.id === 'CyanQueueContainer')) {
-            targetQueue = processedMatches.cyanQueue;
-            targetCourtName = 'Kort Prawy';
-        }
-
-        if (!sourceQueue || !targetQueue) return;
-
-        const sourceIds = sourceQueue.map(m => m.id);
-        const targetIds = targetQueue.map(m => m.id);
-        let newSourceIds = [...sourceIds];
-        let newTargetIds = [...targetIds];
-
-        if (sourceQueue === targetQueue) {
-            // Same list reordering
-            const oldIndex = sourceIds.indexOf(active.id);
-            const newIndex = targetIds.indexOf(over.id);
-            newSourceIds = arrayMove(newSourceIds, oldIndex, newIndex);
-            updateMatchesOrder(newSourceIds, targetCourtName);
-        } else {
-            // Moving between lists
-            const oldIndex = sourceIds.indexOf(active.id);
-            let newIndex = targetIds.indexOf(over.id);
-            if (newIndex === -1) newIndex = targetIds.length;
-
-            newSourceIds.splice(oldIndex, 1);
-            newTargetIds.splice(newIndex, 0, active.id);
-
-            const updates = [];
-            newSourceIds.forEach((mid, idx) => {
-                updates.push({ id: mid, manualOrder: idx * 100, court: isPinkSource ? 'Kort Lewy' : 'Kort Prawy' });
+            const allUpdates = [];
+            sourceQueue.forEach((m, idx) => {
+                allUpdates.push({ id: m.id, manualOrder: idx * 100, court: queueType === 'pink' ? 'Kort Lewy' : 'Kort Prawy' });
             });
-            newTargetIds.forEach((mid, idx) => {
-                updates.push({ id: mid, manualOrder: idx * 100, court: targetCourtName });
+            targetQueue.forEach((m, idx) => {
+                allUpdates.push({ id: m.id, manualOrder: idx * 100, court: targetCourtName });
             });
+            applyBatchUpdates(allUpdates);
+        } else if (direction === 'up' && matchIndex > 0) {
+            const temp = sourceQueue[matchIndex - 1];
+            sourceQueue[matchIndex - 1] = sourceQueue[matchIndex];
+            sourceQueue[matchIndex] = temp;
 
-            applyBatchUpdates(updates);
+            const allUpdates = sourceQueue.map((m, idx) => ({
+                id: m.id, manualOrder: idx * 100, court: match.court
+            }));
+            applyBatchUpdates(allUpdates);
+        } else if (direction === 'down' && matchIndex < sourceQueue.length - 1) {
+            const temp = sourceQueue[matchIndex + 1];
+            sourceQueue[matchIndex + 1] = sourceQueue[matchIndex];
+            sourceQueue[matchIndex] = temp;
+
+            const allUpdates = sourceQueue.map((m, idx) => ({
+                id: m.id, manualOrder: idx * 100, court: match.court
+            }));
+            applyBatchUpdates(allUpdates);
         }
-    };
-
-    const updateMatchesOrder = (sortedIds, courtName) => {
-        const updates = sortedIds.map((id, index) => ({
-            id,
-            manualOrder: index * 100,
-            court: courtName
-        }));
-        applyBatchUpdates(updates);
     };
 
     const applyBatchUpdates = (updatesArr) => {
@@ -733,60 +646,39 @@ const Matches = () => {
             )}
 
             {(processedMatches.pending.length > 0) && (filter === 'all' || filter === 'pending') && (
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                >
-                    <section>
-                        <div className="section-header">
-                            <Clock size={20} /> {t('matches.nextMatches')}
-                        </div>
+                <section>
+                    <div className="section-header">
+                        <Clock size={20} /> {t('matches.nextMatches')}
+                    </div>
 
-                        <div className="queue-columns">
-                            {/* LEFT COLUMN */}
-                            <div className="queue-column">
-                                <h3 style={{ color: 'var(--accent-pink)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-pink)' }}>
-                                    {t('live.courtPink')}
-                                </h3>
-                                <SortableContext
-                                    id="PinkQueueContainer"
-                                    items={processedMatches.pinkQueue.map(m => m.id)}
-                                    strategy={verticalListSortingStrategy}
-                                >
-                                    {processedMatches.pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
-                                    {processedMatches.pinkQueue.map((m, idx) => (
-                                        <SortableMatchRow key={m.id} match={m} index={idx} queueType="pink" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} />
-                                    ))}
-                                </SortableContext>
-                            </div>
-
-                            {/* RIGHT COLUMN */}
-                            <div className="queue-column">
-                                <h3 style={{ color: '#21468B', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid #21468B' }}>
-                                    {t('live.courtCyan')}
-                                </h3>
-                                <SortableContext
-                                    id="CyanQueueContainer"
-                                    items={processedMatches.cyanQueue.map(m => m.id)}
-                                    strategy={verticalListSortingStrategy}
-                                >
-                                    {processedMatches.cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
-                                    {processedMatches.cyanQueue.map((m, idx) => (
-                                        <SortableMatchRow key={m.id} match={m} index={idx} queueType="cyan" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} />
-                                    ))}
-                                </SortableContext>
+                    <div className="queue-columns">
+                        {/* LEFT COLUMN */}
+                        <div className="queue-column">
+                            <h3 style={{ color: 'var(--accent-pink)', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid var(--accent-pink)' }}>
+                                {t('live.courtPink')}
+                            </h3>
+                            <div>
+                                {processedMatches.pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
+                                {processedMatches.pinkQueue.map((m, idx) => (
+                                    <QueueMatchRow key={m.id} match={m} index={idx} queueType="pink" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} onMove={handleMoveMatch} />
+                                ))}
                             </div>
                         </div>
 
-                        <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }) }}>
-                            {activeDragId ? (
-                                <DragOverlayItem match={matches.find(m => m.id === activeDragId)} />
-                            ) : null}
-                        </DragOverlay>
-                    </section>
-                </DndContext>
+                        {/* RIGHT COLUMN */}
+                        <div className="queue-column">
+                            <h3 style={{ color: '#21468B', fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', paddingLeft: '0.5rem', borderLeft: '3px solid #21468B' }}>
+                                {t('live.courtCyan')}
+                            </h3>
+                            <div>
+                                {processedMatches.cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
+                                {processedMatches.cyanQueue.map((m, idx) => (
+                                    <QueueMatchRow key={m.id} match={m} index={idx} queueType="cyan" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} onMove={handleMoveMatch} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
             )}
 
             {(processedMatches.finished.length > 0) && (filter === 'all' || filter === 'finished') && (
