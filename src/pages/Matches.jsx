@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTournamentMatches } from '../hooks/useTournamentMatches';
 import { useTournament } from '../contexts/TournamentContext';
 import { updateBracketMatch, clearBracketMatch, generateDoubleEliminationBracket } from '../utils/bracketLogic';
-import { getBestOf, getMatchStatus, compareMatchIds } from '../utils/matchUtils';
+import { getBestOf, getMatchStatus, compareMatchIds, calculateEstimatedTimes } from '../utils/matchUtils';
 import { Edit2, Trophy, Clock, Activity, CheckCircle, Save, X, Trash2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import './Matches.css';
 import { usePlayers } from '../hooks/usePlayers';
@@ -37,7 +37,7 @@ const PlayerFlag = ({ countryCode }) => {
 };
 
 // --- MATCH ROW WITH ARROWS COMPONENT ---
-const QueueMatchRow = ({ match, index, queueType, isAuthenticated, onEdit, onMove }) => {
+const QueueMatchRow = ({ match, index, queueType, isAuthenticated, onEdit, onMove, computedTime }) => {
     const { t } = useTranslation();
 
     const isWB = match.bracket === 'wb';
@@ -70,6 +70,7 @@ const QueueMatchRow = ({ match, index, queueType, isAuthenticated, onEdit, onMov
                 <span style={{ opacity: 0.5, margin: '0 4px' }}>•</span>
                 <span>#{matchIdShort}</span>
                 {match.court && <span className="court-label"> • {courtLabel}</span>}
+                {computedTime && <span className="court-label" style={{ marginLeft: '6px', opacity: 0.9 }}><Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px', marginTop: '-2px' }} />{computedTime}</span>}
             </div>
 
             {/* Column 1: Controls (Arrows) */}
@@ -380,9 +381,30 @@ const Matches = () => {
         const pinkQueue = leftActive ? leftCandidates.filter(m => m.id !== leftActive.id) : leftCandidates;
         const cyanQueue = rightActive ? rightCandidates.filter(m => m.id !== rightActive.id) : rightCandidates;
 
+        const pinkFinished = finished.filter(m => {
+            const cUpper = (m.court || '').toUpperCase();
+            return cUpper.includes('LEWY') || cUpper.includes('LEFT') || cUpper.includes('RÓŻOWY') || cUpper.includes('PINK') || m.court === 'pink';
+        }).reverse();
+
+        const cyanFinished = finished.filter(m => {
+            const cUpper = (m.court || '').toUpperCase();
+            return cUpper.includes('PRAWY') || cUpper.includes('RIGHT') || cUpper.includes('TURKUSOWY') || cUpper.includes('CYAN') || m.court === 'cyan';
+        }).reverse();
+
+        const pinkFull = [...pinkFinished];
+        if (leftActive) pinkFull.push(leftActive);
+        pinkFull.push(...pinkQueue);
+
+        const cyanFull = [...cyanFinished];
+        if (rightActive) cyanFull.push(rightActive);
+        cyanFull.push(...cyanQueue);
+
+        const pinkTimes = calculateEstimatedTimes(pinkFull);
+        const cyanTimes = calculateEstimatedTimes(cyanFull);
+
         const pending = [...pinkQueue, ...cyanQueue];
 
-        return { active, pending, finished, pinkQueue, cyanQueue, pinkActive: leftActive, cyanActive: rightActive };
+        return { active, pending, finished, pinkQueue, cyanQueue, pinkActive: leftActive, cyanActive: rightActive, pinkTimes, cyanTimes };
     }, [matches, players]);
 
 
@@ -681,7 +703,7 @@ const Matches = () => {
                             <div>
                                 {processedMatches.pinkQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
                                 {processedMatches.pinkQueue.map((m, idx) => (
-                                    <QueueMatchRow key={m.id} match={m} index={idx} queueType="pink" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} onMove={handleMoveMatch} />
+                                    <QueueMatchRow key={m.id} match={m} index={idx} queueType="pink" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} onMove={handleMoveMatch} computedTime={processedMatches.pinkTimes[m.id]} />
                                 ))}
                             </div>
                         </div>
@@ -694,7 +716,7 @@ const Matches = () => {
                             <div>
                                 {processedMatches.cyanQueue.length === 0 && <div className="empty-state-text" style={{ padding: '1rem', fontSize: '0.8rem' }}>{t('matches.queueEmpty')}</div>}
                                 {processedMatches.cyanQueue.map((m, idx) => (
-                                    <QueueMatchRow key={m.id} match={m} index={idx} queueType="cyan" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} onMove={handleMoveMatch} />
+                                    <QueueMatchRow key={m.id} match={m} index={idx} queueType="cyan" isAuthenticated={isAuthenticated} onEdit={handleEditOpen} onMove={handleMoveMatch} computedTime={processedMatches.cyanTimes[m.id]} />
                                 ))}
                             </div>
                         </div>

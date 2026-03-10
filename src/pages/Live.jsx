@@ -8,7 +8,7 @@ import { useTournamentMatches } from '../hooks/useTournamentMatches';
 import { usePlayers } from '../hooks/usePlayers';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useTournament } from '../contexts/TournamentContext';
-import { getBestOf, compareMatchIds, getMatchStatus } from '../utils/matchUtils';
+import { getBestOf, compareMatchIds, getMatchStatus, calculateEstimatedTimes } from '../utils/matchUtils';
 import { updateBracketMatch } from '../utils/bracketLogic';
 import { getCountryCode } from '../constants/countries';
 import './Live.css';
@@ -110,8 +110,8 @@ const Live = () => {
     const formatTime = (date) => date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     // --- QUEUE LOGIC ---
-    const { pinkQueue, cyanQueue, pinkRecent, cyanRecent } = useMemo(() => {
-        if (!matches || !matches.length) return { pinkQueue: [], cyanQueue: [], pinkRecent: [], cyanRecent: [] };
+    const { pinkQueue, cyanQueue, pinkRecent, cyanRecent, pinkTimes, cyanTimes } = useMemo(() => {
+        if (!matches || !matches.length) return { pinkQueue: [], cyanQueue: [], pinkRecent: [], cyanRecent: [], pinkTimes: {}, cyanTimes: {} };
 
         const enriched = matches.map(m => ({
             ...m,
@@ -148,8 +148,8 @@ const Live = () => {
         const finished = enriched.filter(m => getMatchStatus({ ...m, winner_id: m.winnerId }) === 'finished')
             .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0)); // Newest first
 
-        const pinkRecent = [];
-        const cyanRecent = [];
+        const pinkAllFinished = [];
+        const cyanAllFinished = [];
 
         // Distribute Active & Pending
         active.forEach((m) => {
@@ -178,11 +178,26 @@ const Live = () => {
             }
             // If no court assigned for finished match, maybe skip or assign default? 
             // Let's assign based on ID parity if unknown, or just skip to avoid clutter
-            if (court === 'courtPink') pinkRecent.push(m);
-            else if (court === 'courtCyan') cyanRecent.push(m);
+            if (court === 'courtPink') pinkAllFinished.push(m);
+            else if (court === 'courtCyan') cyanAllFinished.push(m);
         });
 
-        return { pinkQueue: pink, cyanQueue: cyan, pinkRecent: pinkRecent.slice(0, 1), cyanRecent: cyanRecent.slice(0, 1) };
+        const pinkFull = [...pinkAllFinished].reverse();
+        pinkFull.push(...pink);
+        const pinkTimes = calculateEstimatedTimes(pinkFull);
+
+        const cyanFull = [...cyanAllFinished].reverse();
+        cyanFull.push(...cyan);
+        const cyanTimes = calculateEstimatedTimes(cyanFull);
+
+        return {
+            pinkQueue: pink,
+            cyanQueue: cyan,
+            pinkRecent: pinkAllFinished.slice(0, 1),
+            cyanRecent: cyanAllFinished.slice(0, 1),
+            pinkTimes,
+            cyanTimes
+        };
     }, [matches, players]);
 
     const getCourtState = (queue, recent) => {
@@ -300,7 +315,7 @@ const Live = () => {
         );
     };
 
-    const renderUpcomingList = (queue) => {
+    const renderUpcomingList = (queue, times) => {
         if (!queue || queue.length === 0) return <div className="upcoming-item empty">{t('live.noUpcoming')}</div>;
         return queue.map(m => {
             const bestOf = getBestOf(m.bracket);
@@ -311,6 +326,7 @@ const Live = () => {
                 <div key={m.id} className="upcoming-row-new">
                     <div className="upcoming-round-badge">
                         {(m.bracket || '').replace('bracket', '').trim()} R{m.round}
+                        {times && times[m.id] && <span style={{ marginLeft: '6px', opacity: 0.8 }}><Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px', marginTop: '-2px' }} />{times[m.id]}</span>}
                     </div>
                     <div className="u-player left">
                         <div className="u-name-group">
@@ -397,7 +413,7 @@ const Live = () => {
                     </div>
                     <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem' }}>
                         <div className="panel-header" style={{ color: 'var(--accent-pink)' }}>{t('live.queueLeft')}</div>
-                        {renderUpcomingList(pinkState.upcoming)}
+                        {renderUpcomingList(pinkState.upcoming, pinkTimes)}
                     </div>
 
                     {/* RECENT MATCHES - TV MODE ONLY */}
@@ -421,7 +437,7 @@ const Live = () => {
                     </div>
                     <div className="upcoming-panel glass-panel" style={{ marginTop: '1rem' }}>
                         <div className="panel-header" style={{ color: '#21468B' }}>{t('live.queueRight')}</div>
-                        {renderUpcomingList(cyanState.upcoming)}
+                        {renderUpcomingList(cyanState.upcoming, cyanTimes)}
                     </div>
 
                     {/* RECENT MATCHES - TV MODE ONLY */}

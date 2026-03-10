@@ -99,3 +99,29 @@ export const compareMatchIds = (idA, idB) => {
     // 5. Compare Match Number
     return A.number - B.number;
 };
+
+// Calculate estimated times for a queue of matches
+export const calculateEstimatedTimes = (matchesList) => {
+    let currentMinutes = 8 * 60 + 30; // 08:30 start time
+    let breakApplied = false;
+    const matchTimes = {};
+
+    matchesList.forEach(match => {
+        if (!match || !match.id) return;
+
+        // "mecz ktory wypada o 10:00 przesun o 5 min do przodu" -> apply a 5 min shift at or after 10:00 (600 mins) once
+        if (currentMinutes >= 600 && !breakApplied) {
+            currentMinutes += 5;
+            breakApplied = true;
+        }
+
+        const h = Math.floor(currentMinutes / 60);
+        const m = currentMinutes % 60;
+        const timeStr = `${h}:${m.toString().padStart(2, '0')}`;
+        matchTimes[match.id] = timeStr;
+
+        currentMinutes += 39; // each match takes ~39 minutes
+    });
+
+    return matchTimes;
+};
