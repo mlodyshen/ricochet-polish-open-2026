@@ -120,7 +120,7 @@ export const calculateEstimatedTimes = (matchesList) => {
         const timeStr = `${h}:${m.toString().padStart(2, '0')}`;
         matchTimes[match.id] = timeStr;
 
-        currentMinutes += 39; // each match takes ~39 minutes
+        currentMinutes += 30; // each match takes ~30 minutes
     });
 
     return matchTimes;
