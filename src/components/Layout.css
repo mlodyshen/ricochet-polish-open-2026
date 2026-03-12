@@ -94,11 +94,24 @@
     color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.9rem;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease, color 0.2s ease;
     text-decoration: none;
     border: 1px solid transparent;
     position: relative;
     white-space: nowrap;
+}
+
+/* Light Mode: Make inactive nav items red */
+[data-theme='light'] .nav-item {
+    color: rgba(220, 38, 38, 0.7); /* Reddish but not as bright as active */
+}
+
+[data-theme='light'] .nav-item svg {
+    color: rgba(220, 38, 38, 0.7);
+}
+
+[data-theme='light'] .nav-item:hover {
+    color: #dc2626;
 }
 
 .nav-item:hover {
