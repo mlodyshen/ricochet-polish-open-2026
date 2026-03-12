@@ -102,7 +102,7 @@ export const compareMatchIds = (idA, idB) => {
 
 // Calculate estimated times for a queue of matches
 export const calculateEstimatedTimes = (matchesList) => {
-    let currentMinutes = 8 * 60 + 30; // 08:30 start time
+    let currentMinutes = 9 * 60; // 09:00 start time
     let breakApplied = false;
     const matchTimes = {};
 
