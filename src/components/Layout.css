@@ -123,9 +123,10 @@
 
 /* Dynamic Alternating Active Colors (overrides default) and Gradient Backgrounds */
 .nav-item.active.accent-pink {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.25), rgba(220, 38, 38, 0.05));
-    color: var(--accent-pink);
-    border: 1px solid rgba(220, 38, 38, 0.3);
+    background: #dc2626;
+    color: white;
+    border: 1px solid #dc2626;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .nav-item.active.accent-cyan {
