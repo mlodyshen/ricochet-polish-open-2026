@@ -85,13 +85,9 @@
     align-items: center;
 }
 
+/* Improved Visibility for Nav Items on Dark Header */
 .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 24px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.7);
     font-weight: 500;
     font-size: 0.9rem;
     transition: all 0.2s ease, color 0.2s ease;
@@ -99,25 +95,28 @@
     border: 1px solid transparent;
     position: relative;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 24px;
 }
 
-/* Light Mode: Make inactive nav items red */
-[data-theme='light'] .nav-item {
-    color: rgba(220, 38, 38, 0.7); /* Reddish but not as bright as active */
-}
-
-[data-theme='light'] .nav-item svg {
-    color: rgba(220, 38, 38, 0.7);
-}
-
-[data-theme='light'] .nav-item:hover {
-    color: #dc2626;
+.nav-item svg {
+    color: rgba(255, 255, 255, 0.7);
+    width: 18px;
+    height: 18px;
+    transition: color 0.2s ease;
 }
 
 .nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
+}
+
+.nav-item:hover svg {
+    color: white;
 }
 
 /* Default Active (fallback) */
