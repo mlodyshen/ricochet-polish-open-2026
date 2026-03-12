@@ -29,15 +29,16 @@ const PlayerFlag = ({ countryCode }) => {
     );
 };
 
-const formatName = (p) => {
-    if (!p) return 'TBD';
+const formatName = (p, t) => {
+    if (!p || !p.id) return '-';
     if (p.full_name) return p.full_name;
     if (p.firstName && p.lastName) return `${p.firstName} ${p.lastName}`;
-    return 'Unknown Player';
+    return '-';
 };
 
 const splitNameForDisplay = (fullName) => {
-    if (!fullName) return { first: '', last: 'TBD' };
+    if (!fullName) return { first: '', last: '-' };
+    if (fullName === '-') return { first: '', last: fullName };
     const parts = fullName.trim().split(/\s+/);
     if (parts.length < 2) return { first: '', last: fullName };
     const last = parts.pop();
@@ -115,8 +116,8 @@ const Live = () => {
 
         const enriched = matches.map(m => ({
             ...m,
-            player1: players.find(p => p.id === m.player1Id) || { full_name: 'TBD', id: null },
-            player2: players.find(p => p.id === m.player2Id) || { full_name: 'TBD', id: null }
+            player1: players.find(p => p.id === m.player1Id) || { full_name: '', id: null },
+            player2: players.find(p => p.id === m.player2Id) || { full_name: '', id: null }
         }));
 
         const active = enriched.filter(m => {
@@ -125,7 +126,7 @@ const Live = () => {
             const p1Ready = m.player1 && m.player1.id;
             const p2Ready = m.player2 && m.player2.id;
             const isBye = m.player1?.isBye || m.player2?.isBye;
-            return !m.winnerId && p1Ready && p2Ready && !isBye && ['live', 'pending'].includes(s);
+            return !m.winnerId && (p1Ready || p2Ready) && !isBye && ['live', 'pending', 'scheduled'].includes(s);
         }).sort((a, b) => {
             const statusA = getMatchStatus({ ...a, winner_id: a.winnerId }).toLowerCase();
             const statusB = getMatchStatus({ ...b, winner_id: b.winnerId }).toLowerCase();
@@ -263,18 +264,18 @@ const Live = () => {
         const bestOf = getBestOf(match.bracket);
         const isStillPlaying = !match.winnerId;
         const currentSet = (match.microPoints || []).slice(-1)[0] || { a: 0, b: 0 };
-        const p1Name = splitNameForDisplay(formatName(match.player1));
-        const p2Name = splitNameForDisplay(formatName(match.player2));
+        const p1Name = splitNameForDisplay(formatName(match.player1, t));
+        const p2Name = splitNameForDisplay(formatName(match.player2, t));
 
         return (
             <div className="broadcast-card">
                 <div className="broadcast-content">
                     {/* PLAYER 1 (Left) */}
                     <div className="broadcast-player left"
-                        onClick={() => handleUpdate(match, 'point', 'player1', 1)}
-                        onContextMenu={(e) => { e.preventDefault(); handleUpdate(match, 'point', 'player1', -1); }}>
-                        <div className="player-first">{p1Name.first}</div>
-                        <div className="player-last">{p1Name.last}</div>
+                        onClick={() => match.player1.id && match.player2.id && handleUpdate(match, 'point', 'player1', 1)}
+                        onContextMenu={(e) => { e.preventDefault(); match.player1.id && match.player2.id && handleUpdate(match, 'point', 'player1', -1); }}>
+                        <div className={`player-first ${!match.player1.id ? 'tbd-player' : ''}`}>{p1Name.first}</div>
+                        <div className={`player-last ${!match.player1.id ? 'tbd-player' : ''}`}>{p1Name.last}</div>
                         <div className="player-flag-row">
                             <PlayerFlag countryCode={match.player1.country} /> <span style={{ marginLeft: '6px' }}>{match.player1.country}</span>
                         </div>
@@ -302,10 +303,10 @@ const Live = () => {
 
                     {/* PLAYER 2 (Right) */}
                     <div className="broadcast-player right"
-                        onClick={() => handleUpdate(match, 'point', 'player2', 1)}
-                        onContextMenu={(e) => { e.preventDefault(); handleUpdate(match, 'point', 'player2', -1); }}>
-                        <div className="player-first">{p2Name.first}</div>
-                        <div className="player-last">{p2Name.last}</div>
+                        onClick={() => match.player1.id && match.player2.id && handleUpdate(match, 'point', 'player2', 1)}
+                        onContextMenu={(e) => { e.preventDefault(); match.player1.id && match.player2.id && handleUpdate(match, 'point', 'player2', -1); }}>
+                        <div className={`player-first ${!match.player2.id ? 'tbd-player' : ''}`}>{p2Name.first}</div>
+                        <div className={`player-last ${!match.player2.id ? 'tbd-player' : ''}`}>{p2Name.last}</div>
                         <div className="player-flag-row" style={{ justifyContent: 'flex-end' }}>
                             <span style={{ marginRight: '6px' }}>{match.player2.country}</span> <PlayerFlag countryCode={match.player2.country} />
                         </div>
@@ -319,8 +320,8 @@ const Live = () => {
         if (!queue || queue.length === 0) return <div className="upcoming-item empty">{t('live.noUpcoming')}</div>;
         return queue.map(m => {
             const bestOf = getBestOf(m.bracket);
-            const p1 = splitNameForDisplay(formatName(m.player1));
-            const p2 = splitNameForDisplay(formatName(m.player2));
+            const p1 = splitNameForDisplay(formatName(m.player1, t));
+            const p2 = splitNameForDisplay(formatName(m.player2, t));
 
             return (
                 <div key={m.id} className="upcoming-row-new">
@@ -329,7 +330,7 @@ const Live = () => {
                         {times && times[m.id] && <span style={{ marginLeft: '6px', opacity: 0.8 }}><Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px', marginTop: '-2px' }} />{times[m.id]}</span>}
                     </div>
                     <div className="u-player left">
-                        <div className="u-name-group">
+                        <div className={`u-name-group ${!m.player1.id ? 'tbd-player' : ''}`}>
                             <span className="u-first">{p1.first}</span>
                             <span className="u-last">{p1.last}</span>
                         </div>
@@ -341,7 +342,7 @@ const Live = () => {
                     </div>
                     <div className="u-player right">
                         <PlayerFlag countryCode={m.player2.country} />
-                        <div className="u-name-group">
+                        <div className={`u-name-group ${!m.player2.id ? 'tbd-player' : ''}`}>
                             <span className="u-first">{p2.first}</span>
                             <span className="u-last">{p2.last}</span>
                         </div>
@@ -355,8 +356,8 @@ const Live = () => {
         if (!queue || queue.length === 0) return <div className="upcoming-item empty">{t('live.noResults')}</div>;
         return queue.map(m => {
             const bestOf = getBestOf(m.bracket);
-            const p1 = splitNameForDisplay(formatName(m.player1));
-            const p2 = splitNameForDisplay(formatName(m.player2));
+            const p1 = splitNameForDisplay(formatName(m.player1, t));
+            const p2 = splitNameForDisplay(formatName(m.player2, t));
 
             return (
                 <div key={m.id} className="upcoming-row-new">
@@ -364,7 +365,7 @@ const Live = () => {
                         {(m.bracket || '').replace('bracket', '').trim()} R{m.round}
                     </div>
                     <div className="u-player left">
-                        <div className="u-name-group">
+                        <div className={`u-name-group ${!m.player1.id ? 'tbd-player' : ''}`}>
                             <span className="u-first">{p1.first}</span>
                             <span className="u-last">{p1.last}</span>
                         </div>
@@ -377,7 +378,7 @@ const Live = () => {
                     </div>
                     <div className="u-player right">
                         <PlayerFlag countryCode={m.player2.country} />
-                        <div className="u-name-group">
+                        <div className={`u-name-group ${!m.player2.id ? 'tbd-player' : ''}`}>
                             <span className="u-first">{p2.first}</span>
                             <span className="u-last">{p2.last}</span>
                         </div>

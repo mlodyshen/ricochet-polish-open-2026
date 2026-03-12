@@ -682,3 +682,8 @@
         padding: 0 4px;
     }
 }
+
+.tbd-player {
+    opacity: 0.5;
+    font-weight: 300;
+}

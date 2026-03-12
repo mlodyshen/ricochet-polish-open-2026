@@ -10,12 +10,12 @@ import { usePlayers } from '../hooks/usePlayers';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { getCountryCode } from '../constants/countries';
 
-const formatName = (p) => {
-    if (!p) return 'TBD';
+const formatName = (p, t) => {
+    if (!p || !p.id) return '-';
     if (p.full_name) return p.full_name;
     if (p.fullName) return p.fullName;
     if (p.firstName && p.lastName) return `${p.firstName} ${p.lastName}`;
-    return 'Unknown Player';
+    return '-';
 };
 
 const PlayerFlag = ({ countryCode }) => {
@@ -88,7 +88,7 @@ const QueueMatchRow = ({ match, index, queueType, isAuthenticated, onEdit, onMov
             </div>
 
             <div className="player p1">
-                <span className="name">{formatName(match.player1)}</span>
+                <span className={`name ${!match.player1.id ? 'tbd-player' : ''}`}>{formatName(match.player1, t)}</span>
                 <PlayerFlag countryCode={match.player1.country} />
             </div>
 
@@ -104,11 +104,11 @@ const QueueMatchRow = ({ match, index, queueType, isAuthenticated, onEdit, onMov
 
             <div className="player p2">
                 <PlayerFlag countryCode={match.player2.country} />
-                <span className="name">{formatName(match.player2)}</span>
+                <span className={`name ${!match.player2.id ? 'tbd-player' : ''}`}>{formatName(match.player2, t)}</span>
             </div>
 
             <div className="row-action">
-                {isAuthenticated && (
+                {isAuthenticated && match.player1.id && match.player2.id && (
                     <button className="action-btn" onClick={() => onEdit(match)} title="Edit">
                         <Edit2 size={16} />
                     </button>
@@ -326,12 +326,12 @@ const Matches = () => {
             const p2 = players.find(p => p.id === m.player2Id);
             return {
                 ...m,
-                player1: p1 || { full_name: 'TBD', id: null, isBye: false },
-                player2: p2 || { full_name: 'TBD', id: null, isBye: false },
+                player1: p1 || { full_name: '', id: null, isBye: false },
+                player2: p2 || { full_name: '', id: null, isBye: false },
                 status: getMatchStatus({ ...m, winner_id: m.winnerId, player1: p1 || { id: null }, player2: p2 || { id: null } }),
-                canEdit: (p1 && p2 && !p1.isBye && !p2.isBye)
+                canEdit: (p1 && p2 && p1.id && p2.id && !p1.isBye && !p2.isBye)
             };
-        }).filter(m => m.player1Id && m.player2Id && !m.player1.isBye && !m.player2.isBye);
+        }).filter(m => (m.player1Id || m.player2Id) && !m.player1.isBye && !m.player2.isBye);
 
         // Separate finished from the rest
         const finished = enriched.filter(m => m.status === 'finished').sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
@@ -532,11 +532,11 @@ const Matches = () => {
                 <div className="active-score-board">
                     <div className="active-player left">
                         <PlayerFlag countryCode={match.player1.country} />
-                        <span className="active-player-name">{match.player1.full_name}</span>
+                        <span className={`active-player-name ${!match.player1.id ? 'tbd-player' : ''}`}>{formatName(match.player1, t)}</span>
                     </div>
 
                     <div className="active-score-center" style={{ gap: '0.5rem' }}>
-                        {isAuthenticated && (
+                        {isAuthenticated && match.player1.id && match.player2.id && (
                             <div className="quick-controls" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score1', 1)}>▲</button>
                                 <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score1', -1)}>▼</button>
@@ -549,7 +549,7 @@ const Matches = () => {
                             <div className="active-set-score">{match.score2 ?? 0}</div>
                         </div>
 
-                        {isAuthenticated && (
+                        {isAuthenticated && match.player1.id && match.player2.id && (
                             <div className="quick-controls" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score2', 1)}>▲</button>
                                 <button className="quick-btn" onClick={() => handleQuickUpdate(match, 'score2', -1)}>▼</button>
@@ -558,14 +558,14 @@ const Matches = () => {
                     </div>
 
                     <div className="active-player right">
-                        <span className="active-player-name">{match.player2.full_name}</span>
+                        <span className={`active-player-name ${!match.player2.id ? 'tbd-player' : ''}`}>{formatName(match.player2, t)}</span>
                         <PlayerFlag countryCode={match.player2.country} />
                     </div>
                 </div>
                 <div style={{ textAlign: 'center', fontSize: '0.8rem', opacity: 0.6 }}>
                     {(match.bracket || '').toUpperCase()} {t('brackets.round')} {match.round} • {t('matches.match', { id: match.id.split('-m')[1] })}
                 </div>
-                {isAuthenticated && (
+                {isAuthenticated && match.player1.id && match.player2.id && (
                     <div className="active-actions">
                         <button className="edit-btn" onClick={() => handleEditOpen(match)} style={{ borderColor: accentColor, color: accentColor }}>
                             <Edit2 size={16} style={{ marginRight: '6px' }} /> {t('matches.controlMatch')}
@@ -592,7 +592,7 @@ const Matches = () => {
 
                 {/* Column 2: Player 1 */}
                 <div className="player p1">
-                    <span className="name">{formatName(match.player1)}</span>
+                    <span className={`name ${!match.player1.id ? 'tbd-player' : ''}`}>{formatName(match.player1, t)}</span>
                     <PlayerFlag countryCode={match.player1.country} />
                 </div>
 
@@ -604,7 +604,7 @@ const Matches = () => {
                 {/* Column 4: Player 2 */}
                 <div className="player p2">
                     <PlayerFlag countryCode={match.player2.country} />
-                    <span className="name">{formatName(match.player2)}</span>
+                    <span className={`name ${!match.player2.id ? 'tbd-player' : ''}`}>{formatName(match.player2, t)}</span>
                 </div>
 
                 {/* Column 5: Action */}
