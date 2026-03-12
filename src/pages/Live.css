@@ -475,8 +475,8 @@
     font-weight: 800;
     text-transform: uppercase;
     color: white;
-    background: var(--text-secondary);
-    /* Neutral default */
+    background: #dc2626;
+    /* Red for better visibility */
     padding: 2px 8px;
     border-bottom-right-radius: 8px;
     border-top-left-radius: 9px;
@@ -488,11 +488,11 @@
 
 /* Specific Badge Colors based on context */
 .court-column:first-child .upcoming-row-new:hover .upcoming-round-badge {
-    background: var(--accent-pink);
+    background: #b91c1c;
 }
 
 .court-column:last-child .upcoming-row-new:hover .upcoming-round-badge {
-    background: #21468B;
+    background: #b91c1c;
 }
 
 .u-player {

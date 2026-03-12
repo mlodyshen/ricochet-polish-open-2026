@@ -325,15 +325,15 @@
     left: 0;
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.08);
+    background: #dc2626;
     border-bottom-right-radius: 8px;
-    border-right: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid rgba(255,255,256,0.1);
+    border-bottom: 1px solid rgba(255,255,256,0.1);
     padding: 2px 8px;
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-secondary);
+    color: white;
     gap: 4px;
 }
 
