@@ -24,14 +24,53 @@
     letter-spacing: -0.02em;
 }
 
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.search-input {
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.search-input:focus {
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+[data-theme='dark'] .search-input {
+    background: var(--bg-secondary);
+}
+
 .ranking-card {
-    background: var(--card-bg);
+    background: white;
     border: 1px solid var(--border-color);
     border-radius: 16px;
     overflow: visible;
-    /* Prevent clipping that blocks scroll gestures */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .ranking-card {
+    background: var(--bg-primary);
     backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .ranking-table-wrapper {
@@ -50,26 +89,35 @@
 
 .ranking-table th {
     padding: 0.75rem 0.5rem;
-    background: #1a1a1a;
-    color: var(--text-secondary);
-    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 700;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 2px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
     text-align: center;
     white-space: nowrap;
+}
+
+[data-theme='dark'] .ranking-table th {
+    background: #1a1a1a;
+    color: var(--text-secondary);
 }
 
 .ranking-table th.sticky-col,
 .ranking-table td.sticky-col {
     position: sticky;
-    background: #111111;
-    /* Dark background to block content behind */
+    background: white; /* Solid for light mode */
     z-index: 10;
     border-right: 2px solid var(--border-color);
     text-align: left;
+}
+
+[data-theme='dark'] .ranking-table th.sticky-col,
+[data-theme='dark'] .ranking-table td.sticky-col {
+    background: #111111;
 }
 
 .ranking-table td.sticky-col {
@@ -107,15 +155,25 @@ td.sticky-player {
 .ranking-table td {
     padding: 0.75rem;
     border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid var(--border-color);
     vertical-align: middle;
+}
+
+[data-theme='dark'] .ranking-table td {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Sub-header styles */
 .sub-header {
-    background: rgba(255, 255, 255, 0.01) !important;
+    background: var(--bg-secondary) !important;
+    opacity: 0.8;
     font-size: 0.65rem !important;
     padding: 0.25rem !important;
+}
+
+[data-theme='dark'] .sub-header {
+    background: rgba(255, 255, 255, 0.01) !important;
+    opacity: 1;
 }
 
 .tourney-group {
@@ -136,25 +194,41 @@ td.sticky-player {
 }
 
 .points-cell {
-    font-weight: 700;
-    color: #1a1a1a;
+    font-weight: 800;
+    color: #000;
     font-family: 'Inter', monospace;
     background: #92d050;
-    padding: 0.5rem 0.75rem !important;
+    padding: 0.5rem 1rem !important;
     text-align: center;
     border-radius: 4px;
-    min-width: 80px;
+    min-width: 100px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .rank-top-1 {
-    color: #ffd700;
+    color: #b8860b; /* Darker gold for light mode */
+    font-weight: 800;
 }
 
 .rank-top-2 {
-    color: #c0c0c0;
+    color: #707070; /* Darker silver for light mode */
+    font-weight: 800;
 }
 
 .rank-top-3 {
+    color: #8b4513; /* Darker bronze for light mode */
+    font-weight: 800;
+}
+
+[data-theme='dark'] .rank-top-1 {
+    color: #ffd700;
+}
+
+[data-theme='dark'] .rank-top-2 {
+    color: #c0c0c0;
+}
+
+[data-theme='dark'] .rank-top-3 {
     color: #cd7f32;
 }
 
@@ -179,21 +253,7 @@ td.sticky-player {
     color: var(--text-secondary);
 }
 
-.points-cell {
-    font-weight: 700;
-    color: #1a1a1a;
-    font-family: 'Inter', monospace;
-    background: #92d050;
-    /* The green color from the screenshot */
-    padding: 0.5rem 1rem !important;
-    text-align: center;
-    border-radius: 4px;
-    width: 100px;
-}
-
-[data-theme='dark'] .points-cell {
-    color: #000;
-}
+/* Merged into above */
 
 .secondary-cell {
     color: var(--text-secondary);
